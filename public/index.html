@@ -27,7 +27,6 @@
       <a href="#" id="navSearch" onclick="showSearch()">Search</a>
       <a href="#" id="navNearby" onclick="showNearby()">🎾 Players Near You</a>
       <a href="#" id="navFeed" onclick="showActivityFeed()">📰 Feed</a>
-      <a href="#" id="navAI" onclick="showAICoach()">🤖 AI Coach</a>
       <div id="authBtn" onclick="handleAuthClick()" style="display:flex;align-items:center;gap:8px;cursor:pointer;background:#f0f0f0;border-radius:50px;padding:6px 14px 6px 6px;transition:all 0.2s" onmouseover="this.style.background='#e6f9ee'" onmouseout="this.style.background=window._currentUser?'#e6f9ee':'#f0f0f0'">
         <div id="authAvatar" style="width:28px;height:28px;border-radius:50%;background:#1a6b3c;display:flex;align-items:center;justify-content:center;font-size:12px;color:#fff;font-weight:700;overflow:hidden">
           <span id="authAvatarText">?</span>
@@ -466,94 +465,6 @@
   <!-- ═══════════════════════════════
        AI COACH PAGE
   ═══════════════════════════════ -->
-  <div id="aiCoachPage" style="display:none;max-width:720px;margin:40px auto;padding:0 24px 60px;position:relative;z-index:1">
-
-    <!-- Tab bar -->
-    <div style="display:flex;gap:0;background:var(--slam-surface);border-radius:16px;padding:6px;margin-bottom:24px;box-shadow:var(--shadow-sm);overflow-x:auto;scrollbar-width:none">
-      <button onclick="showAITab('coach')" id="tabCoach" class="ai-tab active">🎾 Coach Chat</button>
-      <button onclick="showAITab('match')" id="tabMatch" class="ai-tab">📊 Match Analyser</button>
-      <button onclick="showAITab('partner')" id="tabPartner" class="ai-tab">👥 Partner Matcher</button>
-      <button onclick="showAITab('training')" id="tabTraining" class="ai-tab">📋 Training Plan</button>
-      <button onclick="showAITab('court')" id="tabCourt" class="ai-tab">🗺️ Court Recommender</button>
-    </div>
-
-    <!-- COACH CHAT -->
-    <div id="aiPanelCoach">
-      <div style="background:var(--slam-surface);border-radius:20px;overflow:hidden;box-shadow:var(--shadow-md);border:1px solid var(--slam-border)">
-        <div style="background:linear-gradient(135deg,var(--slam-nav),var(--slam-primary));padding:20px 24px;display:flex;align-items:center;gap:14px">
-          <div style="width:48px;height:48px;border-radius:50%;background:rgba(255,255,255,0.2);display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0">🤖</div>
-          <div><div style="font-family:Syne,sans-serif;font-size:18px;font-weight:800;color:#fff">AI Tennis Coach</div><div style="font-size:12px;color:rgba(255,255,255,0.7)">Powered by Gemini · Ask me anything about tennis</div></div>
-        </div>
-        <div id="coachMessages" style="height:380px;overflow-y:auto;padding:20px;display:flex;flex-direction:column;gap:12px;background:var(--slam-bg)">
-          <div class="ai-msg ai-msg-bot">Hi! I am your AI tennis coach powered by Gemini. Ask me anything — technique, tactics, training, equipment, rules or how to improve your game. 🎾</div>
-        </div>
-        <div style="padding:14px 16px;border-top:1px solid var(--slam-border);display:flex;gap:10px;background:var(--slam-surface)">
-          <input type="text" id="coachInput" placeholder="Ask your coach... e.g. How do I improve my serve?" style="flex:1;border:1.5px solid var(--slam-border);border-radius:10px;padding:10px 14px;font-size:14px;font-family:Inter,sans-serif;outline:none;background:var(--slam-bg);color:var(--slam-text-1)" onkeydown="if(event.key==='Enter')sendCoachMessage()" onfocus="this.style.borderColor='var(--slam-primary)'" onblur="this.style.borderColor='var(--slam-border)'"/>
-          <button onclick="sendCoachMessage()" style="background:var(--slam-primary);color:#fff;border:none;border-radius:10px;padding:10px 20px;font-size:13px;font-weight:700;font-family:Inter,sans-serif;cursor:pointer;flex-shrink:0;transition:all .2s" onmouseover="this.style.filter='brightness(1.1)'" onmouseout="this.style.filter=''">Send</button>
-        </div>
-      </div>
-      <!-- Quick prompts -->
-      <div style="margin-top:14px;display:flex;flex-wrap:wrap;gap:8px">
-        <button onclick="quickPrompt('How do I improve my serve?')" class="ai-quick-btn">💪 Improve serve</button>
-        <button onclick="quickPrompt('What drills should I do to get better at volleys?')" class="ai-quick-btn">🎯 Volley drills</button>
-        <button onclick="quickPrompt('How do I deal with a heavy topspin player?')" class="ai-quick-btn">🔄 Beat topspin</button>
-        <button onclick="quickPrompt('What is the best warm up routine before a match?')" class="ai-quick-btn">🏃 Warm up routine</button>
-        <button onclick="quickPrompt('How do I improve my mental game in tennis?')" class="ai-quick-btn">🧠 Mental game</button>
-      </div>
-    </div>
-
-    <!-- MATCH ANALYSER -->
-    <div id="aiPanelMatch" style="display:none">
-      <div style="background:var(--slam-surface);border-radius:20px;padding:24px;box-shadow:var(--shadow-md);border:1px solid var(--slam-border)">
-        <div style="font-family:Syne,sans-serif;font-size:18px;font-weight:800;color:var(--slam-text-1);margin-bottom:6px">📊 AI Match Analyser</div>
-        <div style="font-size:13px;color:var(--slam-text-3);margin-bottom:20px">Describe your match and get a professional coaching breakdown</div>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px">
-          <div><label style="font-size:12px;font-weight:600;color:var(--slam-text-2);display:block;margin-bottom:6px">Score</label><input type="text" id="matchScore" placeholder="e.g. Lost 6-3, 6-4" style="width:100%;border:1.5px solid var(--slam-border);border-radius:10px;padding:10px 14px;font-size:13px;font-family:Inter,sans-serif;outline:none;background:var(--slam-bg);color:var(--slam-text-1);box-sizing:border-box" onfocus="this.style.borderColor='var(--slam-primary)'" onblur="this.style.borderColor='var(--slam-border)'"/></div>
-          <div><label style="font-size:12px;font-weight:600;color:var(--slam-text-2);display:block;margin-bottom:6px">Your skill level</label><select id="matchSkill" style="width:100%;border:1.5px solid var(--slam-border);border-radius:10px;padding:10px 14px;font-size:13px;font-family:Inter,sans-serif;outline:none;background:var(--slam-bg);color:var(--slam-text-1);box-sizing:border-box"><option>Beginner</option><option>Intermediate</option><option selected>Advanced</option></select></div>
-        </div>
-        <div style="margin-bottom:12px"><label style="font-size:12px;font-weight:600;color:var(--slam-text-2);display:block;margin-bottom:6px">What happened in the match?</label><textarea id="matchDesc" placeholder="e.g. I kept missing forehands under pressure, my serve was inconsistent, struggled with their heavy topspin to my backhand..." style="width:100%;border:1.5px solid var(--slam-border);border-radius:10px;padding:10px 14px;font-size:13px;font-family:Inter,sans-serif;outline:none;background:var(--slam-bg);color:var(--slam-text-1);resize:none;height:100px;box-sizing:border-box" onfocus="this.style.borderColor='var(--slam-primary)'" onblur="this.style.borderColor='var(--slam-border)'"></textarea></div>
-        <button onclick="analyseMatch()" style="width:100%;background:var(--slam-primary);color:#fff;border:none;border-radius:10px;padding:13px;font-size:14px;font-weight:700;font-family:Inter,sans-serif;cursor:pointer;transition:all .2s" onmouseover="this.style.filter='brightness(1.1)'" onmouseout="this.style.filter=''">🔍 Analyse My Match</button>
-        <div id="matchResult" style="margin-top:16px"></div>
-      </div>
-    </div>
-
-    <!-- PARTNER MATCHER -->
-    <div id="aiPanelPartner" style="display:none">
-      <div style="background:var(--slam-surface);border-radius:20px;padding:24px;box-shadow:var(--shadow-md);border:1px solid var(--slam-border)">
-        <div style="font-family:Syne,sans-serif;font-size:18px;font-weight:800;color:var(--slam-text-1);margin-bottom:6px">👥 AI Partner Matcher</div>
-        <div style="font-size:13px;color:var(--slam-text-3);margin-bottom:20px">AI analyses all players and finds your perfect hitting partner</div>
-        <button onclick="findAIPartner()" id="partnerBtn" style="width:100%;background:var(--slam-primary);color:#fff;border:none;border-radius:10px;padding:13px;font-size:14px;font-weight:700;font-family:Inter,sans-serif;cursor:pointer;transition:all .2s;margin-bottom:16px" onmouseover="this.style.filter='brightness(1.1)'" onmouseout="this.style.filter=''">🎾 Find My Perfect Partner</button>
-        <div id="partnerResult"></div>
-      </div>
-    </div>
-
-    <!-- TRAINING PLAN -->
-    <div id="aiPanelTraining" style="display:none">
-      <div style="background:var(--slam-surface);border-radius:20px;padding:24px;box-shadow:var(--shadow-md);border:1px solid var(--slam-border)">
-        <div style="font-family:Syne,sans-serif;font-size:18px;font-weight:800;color:var(--slam-text-1);margin-bottom:6px">📋 AI Training Plan</div>
-        <div style="font-size:13px;color:var(--slam-text-3);margin-bottom:20px">Get a personalised weekly training plan based on your level</div>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px">
-          <div><label style="font-size:12px;font-weight:600;color:var(--slam-text-2);display:block;margin-bottom:6px">Days per week</label><select id="trainingDays" style="width:100%;border:1.5px solid var(--slam-border);border-radius:10px;padding:10px 14px;font-size:13px;font-family:Inter,sans-serif;outline:none;background:var(--slam-bg);color:var(--slam-text-1);box-sizing:border-box"><option>2</option><option>3</option><option selected>4</option><option>5</option><option>6</option></select></div>
-          <div><label style="font-size:12px;font-weight:600;color:var(--slam-text-2);display:block;margin-bottom:6px">Goal</label><select id="trainingGoal" style="width:100%;border:1.5px solid var(--slam-border);border-radius:10px;padding:10px 14px;font-size:13px;font-family:Inter,sans-serif;outline:none;background:var(--slam-bg);color:var(--slam-text-1);box-sizing:border-box"><option>Improve overall game</option><option>Win more matches</option><option>Improve fitness</option><option>Master serve</option><option>Better consistency</option></select></div>
-        </div>
-        <div style="margin-bottom:12px"><label style="font-size:12px;font-weight:600;color:var(--slam-text-2);display:block;margin-bottom:6px">Biggest weakness</label><input type="text" id="trainingWeakness" placeholder="e.g. backhand, serve, net game, fitness..." style="width:100%;border:1.5px solid var(--slam-border);border-radius:10px;padding:10px 14px;font-size:13px;font-family:Inter,sans-serif;outline:none;background:var(--slam-bg);color:var(--slam-text-1);box-sizing:border-box" onfocus="this.style.borderColor='var(--slam-primary)'" onblur="this.style.borderColor='var(--slam-border)'"/></div>
-        <button onclick="generateTrainingPlan()" style="width:100%;background:var(--slam-primary);color:#fff;border:none;border-radius:10px;padding:13px;font-size:14px;font-weight:700;font-family:Inter,sans-serif;cursor:pointer;transition:all .2s" onmouseover="this.style.filter='brightness(1.1)'" onmouseout="this.style.filter=''">📋 Generate My Training Plan</button>
-        <div id="trainingResult" style="margin-top:16px"></div>
-      </div>
-    </div>
-
-    <!-- COURT RECOMMENDER -->
-    <div id="aiPanelCourt" style="display:none">
-      <div style="background:var(--slam-surface);border-radius:20px;padding:24px;box-shadow:var(--shadow-md);border:1px solid var(--slam-border)">
-        <div style="font-family:Syne,sans-serif;font-size:18px;font-weight:800;color:var(--slam-text-1);margin-bottom:6px">🗺️ AI Court Recommender</div>
-        <div style="font-size:13px;color:var(--slam-text-3);margin-bottom:20px">Tell AI what you want and it picks the best court from your search results</div>
-        <div style="margin-bottom:12px"><label style="font-size:12px;font-weight:600;color:var(--slam-text-2);display:block;margin-bottom:6px">What are you looking for?</label><textarea id="courtRequest" placeholder="e.g. quiet court for a beginner in the morning, good lighting for evening play, high rated court with parking..." style="width:100%;border:1.5px solid var(--slam-border);border-radius:10px;padding:10px 14px;font-size:13px;font-family:Inter,sans-serif;outline:none;background:var(--slam-bg);color:var(--slam-text-1);resize:none;height:90px;box-sizing:border-box" onfocus="this.style.borderColor='var(--slam-primary)'" onblur="this.style.borderColor='var(--slam-border)'"></textarea></div>
-        <button onclick="recommendCourt()" style="width:100%;background:var(--slam-primary);color:#fff;border:none;border-radius:10px;padding:13px;font-size:14px;font-weight:700;font-family:Inter,sans-serif;cursor:pointer;transition:all .2s" onmouseover="this.style.filter='brightness(1.1)'" onmouseout="this.style.filter=''">🔍 Find Best Court for Me</button>
-        <div id="courtRecommendResult" style="margin-top:16px"></div>
-      </div>
-    </div>
-
-  </div>
 
   <!-- SIGN IN MODAL -->
   <div id="signInModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.65);backdrop-filter:blur(10px);z-index:9000;justify-content:center;align-items:center;padding:20px">
@@ -1461,175 +1372,6 @@
       }, function(err){ console.log('Session listener error:', err); });
     };
 
-        // ══════════════════════════════════════════════
-    //  AI COACH — GEMINI POWERED
-    // ══════════════════════════════════════════════
-    function nl2br(str) { return str.split('\n').join('<br>'); }
-    var coachHistory = [];
-
-    async function callGemini(prompt, systemPrompt, extraMessages) {
-      var msgs = extraMessages || [];
-      try {
-        var res = await fetch('/api/ai', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            prompt: prompt,
-            systemPrompt: systemPrompt || null,
-            messages: msgs
-          })
-        });
-        var data = await res.json();
-        return data.text || 'Sorry, I could not generate a response. Please try again.';
-      } catch(e) {
-        return 'Sorry, I could not generate a response. Please try again.';
-      }
-    }
-
-    window.showAICoach = function() {
-      if (!window._currentUser) { handleAuthClick(); return; }
-      hideAllPages();
-      document.getElementById('aiCoachPage').style.display = 'block';
-      var na=document.getElementById('navAI');if(na)na.style.color='var(--slam-primary)';
-      document.getElementById('navFeed').style.color='rgba(255,255,255,0.72)';
-    };
-
-    window.showAITab = function(tab) {
-      ['coach','match','partner','training','court'].forEach(function(t){
-        var panel = document.getElementById('aiPanel'+t.charAt(0).toUpperCase()+t.slice(1));
-        var btn = document.getElementById('tab'+t.charAt(0).toUpperCase()+t.slice(1));
-        if (panel) panel.style.display = t===tab ? 'block' : 'none';
-        if (btn) { btn.classList.toggle('active', t===tab); }
-      });
-    };
-
-    // ── Coach Chat ──
-    window.sendCoachMessage = async function() {
-      var input = document.getElementById('coachInput');
-      var msg = input ? input.value.trim() : '';
-      if (!msg) return;
-      input.value = '';
-      var container = document.getElementById('coachMessages');
-      // Add user message
-      container.innerHTML += '<div class="ai-msg ai-msg-user">' + msg + '</div>';
-      container.innerHTML += '<div class="ai-msg ai-msg-bot ai-thinking"><span>Thinking</span><span class="ai-dots">...</span></div>';
-      container.scrollTop = container.scrollHeight;
-      try {
-        var userProfile = '';
-        if (window._currentUser) {
-          var profSnap = await window._fbGetDoc(window._fbDoc(window._db,'profiles',window._currentUser.uid));
-          if (profSnap.exists()) { var p=profSnap.data(); userProfile = ' The player has skill level: '+(p.skill||'unknown')+(p.utr?' and UTR '+p.utr:'')+'.'; }
-        }
-        var systemPrompt = 'You are an expert tennis coach with 20+ years of experience coaching players from beginner to professional level. You give specific, actionable advice. Keep responses concise and practical — under 150 words unless asked for more detail.' + userProfile;
-        var reply = await callGemini(msg, systemPrompt);
-        coachHistory.push({role:'user',parts:[{text:msg}]});
-        coachHistory.push({role:'model',parts:[{text:reply}]});
-        if (coachHistory.length > 20) coachHistory = coachHistory.slice(-20);
-        // Remove thinking bubble, add reply
-        var thinking = container.querySelector('.ai-thinking');
-        if (thinking) thinking.remove();
-        container.innerHTML += '<div class="ai-msg ai-msg-bot">' + nl2br(reply) + '</div>';
-        container.scrollTop = container.scrollHeight;
-      } catch(e) {
-        var thinking = container.querySelector('.ai-thinking');
-        if (thinking) thinking.remove();
-        container.innerHTML += '<div class="ai-msg ai-msg-bot">Sorry, something went wrong. Please try again.</div>';
-      }
-    };
-
-    window.quickPrompt = function(msg) {
-      var input = document.getElementById('coachInput');
-      if (input) { input.value = msg; sendCoachMessage(); }
-    };
-
-    // ── Match Analyser ──
-    window.analyseMatch = async function() {
-      var score = document.getElementById('matchScore').value.trim();
-      var desc = document.getElementById('matchDesc').value.trim();
-      var skill = document.getElementById('matchSkill').value;
-      if (!desc) { alert('Please describe what happened in the match.'); return; }
-      var result = document.getElementById('matchResult');
-      result.innerHTML = '<div class="ai-loading-box">🔍 Analysing your match...</div>';
-      try {
-        var prompt = 'I am a '+skill+' tennis player. Match result: '+score+'. What happened: '+desc+'. Give me: 1) Key problems identified, 2) Why they happened, 3) Specific drills to fix each issue, 4) Mental/tactical tips. Format with clear sections and emojis. Be specific and actionable.';
-        var reply = await callGemini(prompt);
-        result.innerHTML = '<div style="background:var(--slam-surface);border:1px solid var(--slam-border);border-radius:14px;padding:16px 18px"><div style="font-family:Syne,sans-serif;font-size:14px;font-weight:700;color:var(--slam-text-1);margin-bottom:12px">📊 Match Analysis</div><div style="font-size:13px;color:var(--slam-text-2);line-height:1.8">' + nl2br(reply) + '</div></div>';
-      } catch(e) { result.innerHTML = '<div class="ai-error">Could not analyse. Please try again.</div>'; }
-    };
-
-    // ── Partner Matcher ──
-    window.findAIPartner = async function() {
-      if (!window._currentUser || !window._db) { handleAuthClick(); return; }
-      var btn = document.getElementById('partnerBtn');
-      var result = document.getElementById('partnerResult');
-      if (btn) { btn.textContent = '🔍 Finding your match...'; btn.disabled = true; }
-      result.innerHTML = '<div class="ai-loading-box">🤖 AI is analysing all players...</div>';
-      try {
-        // Get current user profile
-        var mySnap = await window._fbGetDoc(window._fbDoc(window._db,'profiles',window._currentUser.uid));
-        var me = mySnap.exists() ? mySnap.data() : {};
-        // Get all profiles
-        var allSnap = await window._fbGetDocs(window._fbCollection(window._db,'profiles'));
-        var players = [];
-        allSnap.forEach(function(d){
-          if (d.id !== window._currentUser.uid) {
-            var p = d.data();
-            if (p.name) players.push({ name:p.name, skill:p.skill||'Unknown', utr:p.utr||'', bio:p.bio||'' });
-          }
-        });
-        if (players.length === 0) { result.innerHTML = '<div class="ai-error">No other players found yet. Invite friends to join!</div>'; if(btn){btn.textContent='🎾 Find My Perfect Partner';btn.disabled=false;} return; }
-        var playersText = players.slice(0,20).map(function(p,i){ return (i+1)+'. '+p.name+' ('+p.skill+(p.utr?' UTR '+p.utr:'')+')'; }).join(', ');
-
-        var prompt = 'I am looking for a tennis hitting partner. My profile: Skill level: '+(me.skill||'Intermediate')+(me.utr?', UTR '+me.utr:'')+(me.bio?', Bio: '+me.bio:'')+'. Available players: '+playersText+'. Recommend the TOP 3 best matches and explain why each would be a great partner. Format with player name, match score out of 10, and 2-sentence explanation.';
-
-
-
-        var reply = await callGemini(prompt);
-        result.innerHTML = '<div style="background:var(--slam-surface);border:1px solid var(--slam-border);border-radius:14px;padding:16px 18px"><div style="font-family:Syne,sans-serif;font-size:14px;font-weight:700;color:var(--slam-text-1);margin-bottom:12px">🎾 Your Top Partner Matches</div><div style="font-size:13px;color:var(--slam-text-2);line-height:1.8">' + nl2br(reply) + '</div></div>';
-        if(btn){btn.textContent='🎾 Find My Perfect Partner';btn.disabled=false;}
-      } catch(e) { result.innerHTML = '<div class="ai-error">Could not find matches. Please try again.</div>'; if(btn){btn.textContent='🎾 Find My Perfect Partner';btn.disabled=false;} }
-    };
-
-    // ── Training Plan ──
-    window.generateTrainingPlan = async function() {
-      var days = document.getElementById('trainingDays').value;
-      var goal = document.getElementById('trainingGoal').value;
-      var weakness = document.getElementById('trainingWeakness').value.trim();
-      var result = document.getElementById('trainingResult');
-      result.innerHTML = '<div class="ai-loading-box">📋 Building your personalised plan...</div>';
-      try {
-        var userSkill = '';
-        if (window._currentUser && window._db) {
-          var snap = await window._fbGetDoc(window._fbDoc(window._db,'profiles',window._currentUser.uid));
-          if (snap.exists()) { var p=snap.data(); userSkill = p.skill||'Intermediate'; }
-        }
-        var prompt = 'Create a detailed '+days+'-day per week tennis training plan for a '+userSkill+' player. Goal: '+goal+'.'+(weakness?' Biggest weakness to address: '+weakness+'.':'')+' Include: specific drills with duration, physical conditioning, mental training. Format as a clear weekly schedule with Day 1, Day 2, etc. Be specific with drill names and times. Make it realistic and progressive.';
-        var reply = await callGemini(prompt);
-        result.innerHTML = '<div style="background:var(--slam-surface);border:1px solid var(--slam-border);border-radius:14px;padding:16px 18px"><div style="font-family:Syne,sans-serif;font-size:14px;font-weight:700;color:var(--slam-text-1);margin-bottom:12px">📋 Your '+days+'-Day Training Plan</div><div style="font-size:13px;color:var(--slam-text-2);line-height:1.8">' + nl2br(reply) + '</div></div>';
-      } catch(e) { result.innerHTML = '<div class="ai-error">Could not generate plan. Please try again.</div>'; }
-    };
-
-    // ── Court Recommender ──
-    window.recommendCourt = async function() {
-      var request = document.getElementById('courtRequest').value.trim();
-      if (!request) { alert('Please describe what you are looking for.'); return; }
-      var result = document.getElementById('courtRecommendResult');
-      result.innerHTML = '<div class="ai-loading-box">🗺️ Finding your perfect court...</div>';
-      try {
-        var courts = allCourts.slice(0,20).map(function(c,i){ return (i+1)+'. '+c.name+' - Rating:'+(c.rating||'N/A')+'/5'; }).join(', ');
-
-
-
-
-        var prompt = 'A tennis player is looking for: "'+request+'". Available courts: '+courts+'. Recommend the BEST court and explain why it matches their needs. Also mention 1 runner-up. Keep under 80 words. Be specific.';
-
-
-
-        var reply = await callGemini(prompt);
-        result.innerHTML = '<div style="background:var(--slam-surface);border:1px solid var(--slam-border);border-radius:14px;padding:16px 18px"><div style="font-family:Syne,sans-serif;font-size:14px;font-weight:700;color:var(--slam-text-1);margin-bottom:12px">🎯 AI Recommendation</div><div style="font-size:13px;color:var(--slam-text-2);line-height:1.8">' + nl2br(reply) + '</div></div>';
-      } catch(e) { result.innerHTML = '<div class="ai-error">Could not recommend. Please try again.</div>'; }
-    };
-
         window.signOutUser = function() { window._signOut(window._auth).then(function() { showSearch(); }); };
 
     // ── PROFILE PHOTO UPLOADS ──
@@ -1750,8 +1492,7 @@
       hideAllPages();
       document.getElementById('myProfilePage').style.display = 'block';
       document.getElementById('navSearch').style.color = 'rgba(255,255,255,0.72)';
-      var nf=document.getElementById('navFeed');if(nf)nf.style.color='rgba(255,255,255,0.72)';
-      var na=document.getElementById('navAI');if(na)na.style.color='rgba(255,255,255,0.72)';
+      var nf=document.getElementById('navFeed');if(nf)nf.style.color='rgba(255,255,255,0.72)';if(na)na.style.color='rgba(255,255,255,0.72)';
       var user = window._currentUser;
       document.getElementById('mpName').textContent = user.displayName || 'No name';
       document.getElementById('mpEmail').textContent = user.email || '';
