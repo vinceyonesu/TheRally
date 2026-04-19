@@ -1245,3 +1245,23 @@ body::before {
   0%   { transform: scale(0); opacity: 0.3; }
   100% { transform: scale(4); opacity: 0; }
 }
+
+/* ══════════════════════════════
+   NOTIFICATIONS
+══════════════════════════════ */
+#notifPanel { animation: fadeUp .25s var(--ease-out) both; }
+#notifBell:hover { opacity: 0.85; }
+
+/* ══════════════════════════════
+   SESSION CHAT
+══════════════════════════════ */
+[id^="chat_"] {
+  border-top: 1px solid var(--slam-border);
+  padding-top: 10px;
+  margin-top: 4px;
+  max-height: 280px;
+  overflow-y: auto;
+}
+[id^="chat_"] input:focus {
+  border-color: var(--slam-primary) !important;
+}
