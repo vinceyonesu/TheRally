@@ -27,14 +27,6 @@
       <a href="#" id="navSearch" onclick="showSearch()">Search</a>
       <a href="#" id="navNearby" onclick="showNearby()">🎾 Players Near You</a>
       <a href="#" id="navFeed" onclick="showActivityFeed()">📰 Feed</a>
-      <div id="notifBell" onclick="showNotifications()" style="position:relative;cursor:pointer;display:flex;align-items:center;padding:4px 8px;border-radius:20px;transition:background .2s" onmouseover="this.style.background='rgba(255,255,255,0.1)'" onmouseout="this.style.background='transparent'">
-        <span style="font-size:16px">🔔</span>
-        <span id="notifBadge" style="display:none;position:absolute;top:-2px;right:2px;background:#ef4444;color:#fff;font-size:9px;font-weight:700;padding:1px 4px;border-radius:999px;min-width:14px;text-align:center">0</span>
-      </div>
-      <div id="notifBell" onclick="toggleNotifPanel()" style="position:relative;cursor:pointer;display:flex;align-items:center;padding:4px 8px;border-radius:999px;transition:background .2s" onmouseover="this.style.background='rgba(255,255,255,0.1)'" onmouseout="this.style.background='transparent'">
-        <span style="font-size:18px">🔔</span>
-        <span id="notifDot" style="display:none;position:absolute;top:2px;right:4px;width:8px;height:8px;border-radius:50%;background:#ef4444;border:2px solid var(--slam-nav)"></span>
-      </div>
       <div id="authBtn" onclick="handleAuthClick()" style="display:flex;align-items:center;gap:8px;cursor:pointer;background:#f0f0f0;border-radius:50px;padding:6px 14px 6px 6px;transition:all 0.2s" onmouseover="this.style.background='#e6f9ee'" onmouseout="this.style.background=window._currentUser?'#e6f9ee':'#f0f0f0'">
         <div id="authAvatar" style="width:28px;height:28px;border-radius:50%;background:#1a6b3c;display:flex;align-items:center;justify-content:center;font-size:12px;color:#fff;font-weight:700;overflow:hidden">
           <span id="authAvatarText">?</span>
@@ -468,15 +460,6 @@
 
 
   <!-- NOTIFICATION PANEL -->
-  <div id="notifPanel" style="display:none;position:fixed;top:56px;right:16px;width:320px;max-height:420px;background:#ffffff;border-radius:16px;box-shadow:0 8px 40px rgba(0,0,0,0.18);z-index:8000;overflow:hidden;border:1px solid #e8e8e8">
-    <div style="padding:14px 18px 10px;border-bottom:1px solid #f0f0f0;display:flex;align-items:center;justify-content:space-between">
-      <span style="font-family:Syne,sans-serif;font-size:15px;font-weight:700;color:#1a1a1a">Notifications</span>
-      <button onclick="markAllNotifsRead()" style="font-size:12px;color:#1a6b3c;font-weight:600;background:none;border:none;cursor:pointer;font-family:Inter,sans-serif">Mark all read</button>
-    </div>
-    <div id="notifList" style="overflow-y:auto;max-height:360px;padding:8px 0">
-      <div style="text-align:center;padding:32px 20px;color:#aaa;font-size:13px">No notifications yet</div>
-    </div>
-  </div>
 
   <!-- SIGN IN MODAL -->
   <div id="signInModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.65);backdrop-filter:blur(10px);z-index:9000;justify-content:center;align-items:center;padding:20px">
@@ -518,20 +501,6 @@
           <span onclick="toggleAuthMode()" style="color:var(--slam-primary,#1a5c32);font-weight:700;cursor:pointer;margin-left:4px" id="authToggleLink">Sign up</span>
         </div>
       </div>
-    </div>
-  </div>
-
-  <!-- NOTIFICATIONS PANEL -->
-  <div id="notifPanel" style="display:none;position:fixed;top:56px;right:12px;width:320px;max-height:420px;background:#fff;border-radius:16px;box-shadow:0 8px 40px rgba(0,0,0,0.18);z-index:8000;overflow:hidden;border:1px solid #ebebeb">
-    <div style="padding:14px 18px 10px;border-bottom:1px solid #f0f0f0;display:flex;align-items:center;justify-content:space-between">
-      <div style="font-family:Syne,sans-serif;font-size:14px;font-weight:700;color:#1a1a1a">Notifications</div>
-      <div style="display:flex;gap:10px;align-items:center">
-        <span onclick="markAllNotifsRead()" style="font-size:11px;color:#1a6b3c;cursor:pointer;font-weight:600">Mark all read</span>
-        <span onclick="closeNotifPanel()" style="font-size:18px;cursor:pointer;color:#aaa;line-height:1">×</span>
-      </div>
-    </div>
-    <div id="notifList" style="overflow-y:auto;max-height:360px;padding:8px 0">
-      <div style="text-align:center;padding:32px 20px;color:#aaa;font-size:13px">No notifications yet</div>
     </div>
   </div>
 
@@ -1434,154 +1403,17 @@
 
 
 
-    // ══════════════════════════════════════════════
-    //  NOTIFICATIONS
-    // ══════════════════════════════════════════════
-    window._unreadCount = 0;
 
-    window.showNotifications = async function() {
-      var panel = document.getElementById('notifPanel');
-      if (!panel) return;
-      if (panel.style.display === 'block') { closeNotifPanel(); return; }
-      panel.style.display = 'block';
-      if (window._currentUser && window._db) await loadNotifications();
-    };
-    window.closeNotifPanel = function() {
-      var p = document.getElementById('notifPanel'); if (p) p.style.display = 'none';
-    };
-    async function loadNotifications() {
-      var list = document.getElementById('notifList'); if (!list) return;
-      list.innerHTML = '<div style="text-align:center;padding:20px;color:#aaa;font-size:13px">Loading...</div>';
-      try {
-        var q = window._fbQuery(window._fbCollection(window._db,'notifications'),
-          window._fbWhere('toUid','==',window._currentUser.uid),
-          window._fbOrderBy('createdAt','desc'));
-        var snap = await window._fbGetDocs(q);
-        if (snap.empty) { list.innerHTML = '<div style="text-align:center;padding:32px;color:#aaa;font-size:13px">No notifications yet</div>'; return; }
-        var html = ''; var unread = 0;
-        snap.forEach(function(d) {
-          var n = Object.assign({id:d.id}, d.data());
-          if (!n.read) unread++;
-          var timeAgo = n.createdAt ? getTimeAgo(n.createdAt.toDate()) : '';
-          var icon = n.type==='follow'?'👤':n.type==='join'?'🎾':'💬';
-          var bg = n.type==='follow'?'#e6f9ee':n.type==='join'?'#e8f4ff':'#fff8e1';
-          html += '<div onclick="markNotifRead(\'' + n.id + '\', this)" style="padding:12px 18px;border-bottom:1px solid #f5f5f5;cursor:pointer;background:' + (n.read?'#fff':'#f0f9f4') + '">'
-            + '<div style="display:flex;gap:10px;align-items:flex-start">'
-            + '<div style="width:32px;height:32px;border-radius:50%;background:' + bg + ';display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0">' + icon + '</div>'
-            + '<div style="flex:1"><div style="font-size:13px;color:#1a1a1a;line-height:1.4">' + (n.text||'') + '</div>'
-            + '<div style="font-size:11px;color:#aaa;margin-top:2px">' + timeAgo + '</div></div>'
-            + (!n.read?'<div style="width:7px;height:7px;border-radius:50%;background:#1a6b3c;margin-top:4px"></div>':'')
-            + '</div></div>';
-        });
-        list.innerHTML = html;
-        updateNotifBadge(unread);
-      } catch(e) { list.innerHTML = '<div style="text-align:center;padding:20px;color:#aaa;font-size:13px">Could not load</div>'; }
-    }
-    window.markNotifRead = async function(id, el) {
-      try { await window._fbUpdateDoc(window._fbDoc(window._db,'notifications',id),{read:true});
-        if (el) el.style.background='#fff';
-        if (window._unreadCount > 0) updateNotifBadge(window._unreadCount - 1);
-      } catch(e) {}
-    };
-    window.markAllNotifsRead = async function() {
-      if (!window._currentUser || !window._db) return;
-      try {
-        var q = window._fbQuery(window._fbCollection(window._db,'notifications'),
-          window._fbWhere('toUid','==',window._currentUser.uid), window._fbWhere('read','==',false));
-        var snap = await window._fbGetDocs(q);
-        var updates = []; snap.forEach(function(d){ updates.push(window._fbUpdateDoc(window._fbDoc(window._db,'notifications',d.id),{read:true})); });
-        await Promise.all(updates); updateNotifBadge(0); await loadNotifications();
-      } catch(e) {}
-    };
-    function updateNotifBadge(count) {
-      window._unreadCount = count;
-      var badge = document.getElementById('notifBadge');
-      if (!badge) return;
-      if (count > 0) { badge.style.display = 'block'; badge.textContent = count > 9 ? '9+' : String(count); }
-      else { badge.style.display = 'none'; }
-    }
-    window.sendNotification = async function(toUid, type, text) {
-      if (!window._db || !toUid || !window._currentUser || toUid === window._currentUser.uid) return;
-      try { await window._fbAddDoc(window._fbCollection(window._db,'notifications'), {
-        toUid: toUid, type: type, text: text,
-        fromUid: window._currentUser.uid, fromName: window._currentUser.displayName || 'Someone',
-        read: false, createdAt: window._fbTimestamp.now()
-      }); } catch(e) {}
-    };
-    function getTimeAgo(date) {
-      var s = Math.floor((new Date() - date) / 1000);
-      if (s < 60) return 'just now';
-      if (s < 3600) return Math.floor(s/60) + 'm ago';
-      if (s < 86400) return Math.floor(s/3600) + 'h ago';
-      return Math.floor(s/86400) + 'd ago';
-    }
-    document.addEventListener('click', function(e) {
-      var panel = document.getElementById('notifPanel');
-      var bell = document.getElementById('notifBell');
-      if (panel && panel.style.display==='block' && !panel.contains(e.target) && bell && !bell.contains(e.target)) closeNotifPanel();
-    });
-    function startNotifPolling() {
-      if (!window._currentUser || !window._db) return;
-      setInterval(async function() {
-        if (!window._currentUser || !window._db) return;
-        try {
-          var q = window._fbQuery(window._fbCollection(window._db,'notifications'),
-            window._fbWhere('toUid','==',window._currentUser.uid), window._fbWhere('read','==',false));
-          var snap = await window._fbGetDocs(q); updateNotifBadge(snap.size);
-        } catch(e) {}
-      }, 30000);
-    }
 
-    // ══════════════════════════════════════════════
-    //  SESSION CHAT
-    // ══════════════════════════════════════════════
-    window.toggleSessionChat = async function(sessionId, btn) {
-      var chatDiv = document.getElementById('chat_' + sessionId);
-      if (!chatDiv) return;
-      if (chatDiv.style.display === 'block') { chatDiv.style.display = 'none'; btn.textContent = '💬 Chat'; return; }
-      chatDiv.style.display = 'block'; btn.textContent = '💬 Hide chat';
-      await loadSessionChat(sessionId);
-    };
-    async function loadSessionChat(sessionId) {
-      var chatDiv = document.getElementById('chat_' + sessionId);
-      if (!chatDiv || !window._db) return;
-      chatDiv.innerHTML = '<div style="font-size:12px;color:#aaa;padding:8px 0">Loading...</div>';
-      try {
-        var q = window._fbQuery(window._fbCollection(window._db,'sessionChats'),
-          window._fbWhere('sessionId','==',sessionId), window._fbOrderBy('createdAt','asc'));
-        var snap = await window._fbGetDocs(q);
-        var msgs = []; snap.forEach(function(d){ msgs.push(Object.assign({id:d.id},d.data())); });
-        var html = msgs.length===0 ? '<div style="font-size:12px;color:#aaa;padding:4px 0">No messages yet.</div>' : '';
-        msgs.forEach(function(m) {
-          var isMe = window._currentUser && m.uid === window._currentUser.uid;
-          html += '<div style="display:flex;align-items:flex-start;gap:8px;margin-bottom:8px' + (isMe?';flex-direction:row-reverse':'') + '">'
-            + '<div style="width:24px;height:24px;border-radius:50%;background:var(--slam-primary);display:flex;align-items:center;justify-content:center;font-size:10px;color:#fff;font-weight:700;flex-shrink:0">' + (m.name?m.name[0].toUpperCase():'?') + '</div>'
-            + '<div style="max-width:75%"><div style="background:' + (isMe?'var(--slam-primary)':'#f0f0f0') + ';color:' + (isMe?'#fff':'#1a1a1a') + ';padding:7px 11px;border-radius:' + (isMe?'12px 4px 12px 12px':'4px 12px 12px 12px') + ';font-size:12px;line-height:1.4">' + m.text + '</div>'
-            + '<div style="font-size:10px;color:#aaa;margin-top:2px;text-align:' + (isMe?'right':'left') + '">' + m.name + '</div></div></div>';
-        });
-        var signedIn = !!window._currentUser;
-        html += '<div style="display:flex;gap:6px;margin-top:8px">'
-          + '<input id="chatInput_' + sessionId + '" type="text" placeholder="' + (signedIn?'Type a message...':'Sign in to chat') + '" ' + (!signedIn?'disabled':'') + ' style="flex:1;border:1.5px solid #e0e0e0;border-radius:8px;padding:7px 10px;font-size:12px;font-family:Inter,sans-serif;outline:none" onkeydown="if(event.key===\'Enter\')sendChatMsg(\''+sessionId+'\')" />'
-          + (signedIn ? '<button onclick="sendChatMsg(\''+sessionId+'\')" style="background:var(--slam-primary);color:#fff;border:none;border-radius:8px;padding:7px 12px;font-size:12px;cursor:pointer;font-weight:600">Send</button>' : '')
-          + '</div>';
-        chatDiv.innerHTML = html;
-        chatDiv.scrollTop = chatDiv.scrollHeight;
-      } catch(e) { chatDiv.innerHTML = '<div style="font-size:12px;color:#aaa">Could not load chat.</div>'; }
-    }
-    window.sendChatMsg = async function(sessionId) {
-      if (!window._currentUser) { handleAuthClick(); return; }
-      var input = document.getElementById('chatInput_' + sessionId);
-      if (!input || !input.value.trim()) return;
-      var text = input.value.trim(); input.value = '';
-      try {
-        await window._fbAddDoc(window._fbCollection(window._db,'sessionChats'), {
-          sessionId: sessionId, uid: window._currentUser.uid,
-          name: window._currentUser.displayName || 'Player',
-          text: text, createdAt: window._fbTimestamp.now()
-        });
-        await loadSessionChat(sessionId);
-      } catch(e) {}
-    };
+
+
+
+
+
+
+
+
+
 
         // ── PROFILE PHOTO UPLOADS ──
     window.uploadMyProfilePhoto = async function(input) {
@@ -1912,7 +1744,6 @@
           list.innerHTML += '<div style="background:#ffffff;border:1px solid #ebebeb;border-radius:16px;padding:16px 18px;margin-bottom:12px;transition:box-shadow 0.2s" onmouseover="this.style.boxShadow=\'0 4px 20px rgba(0,0,0,0.08)\'" onmouseout="this.style.boxShadow=\'none\'"><div style="display:flex;align-items:flex-start;gap:12px">' + avatarHtml + '<div style="flex:1;min-width:0"><div style="display:flex;align-items:center;flex-wrap:wrap;gap:4px;margin-bottom:4px"><span style="font-size:14px;font-weight:700;color:#1a1a1a;cursor:pointer;text-decoration:underline" onclick="viewProfile(\'' + s.uid + '\')">' + s.name + '</span>' + verifiedBadge + '</div><div style="font-size:12px;color:#888;margin-bottom:6px"><span style="background:' + (isToday ? '#e6f9ee' : '#f0f0f0') + ';color:' + (isToday ? '#1a6b3c' : '#555') + ';font-weight:600;padding:2px 8px;border-radius:999px;font-size:11px">' + (isToday ? 'Today' : dateStr) + '</span> at <strong>' + timeStr + '</strong>' + distanceBadge + '</div><div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px"><span style="background:#f0f0f0;color:#555;font-size:11px;font-weight:500;padding:3px 10px;border-radius:999px">' + s.type + '</span><span style="background:#f0f0f0;color:#555;font-size:11px;font-weight:500;padding:3px 10px;border-radius:999px">' + s.skill + '</span>' + (s.courtName ? '<span style="background:#e6f9ee;color:#1a6b3c;font-size:11px;font-weight:500;padding:3px 10px;border-radius:999px">📍 ' + s.courtName + '</span>' : '') + '</div>' + (s.gallery && s.gallery.length > 0 ? '<div style="display:flex;gap:6px;margin-bottom:8px">' + s.gallery.map(function(url) { return '<img src="' + url + '" style="width:60px;height:60px;border-radius:8px;object-fit:cover;border:1px solid #e8e8e8;cursor:pointer" onclick="showPhotoModal(\'' + url + '\')">'; }).join('') + '</div>' : '') + (socialLinks ? '<div style="margin-bottom:8px">' + socialLinks + '</div>' : '') + '<div style="display:flex;align-items:center;justify-content:space-between"><div style="display:flex;align-items:center;gap:4px">' + playerAvatars + '<span style="font-size:11px;color:#888;margin-left:10px">' + playersCount + ' player' + (playersCount !== 1 ? 's' : '') + ' going</span></div>' + (isOwner ? '<div style="display:flex;gap:6px"><span style="font-size:11px;color:#1a6b3c;font-weight:600;align-self:center">Your session</span><button onclick="deleteSession(\'' + s.id + '\', null)" style="background:#fdecea;color:#c0392b;border:1px solid #f5c6c6;border-radius:8px;padding:4px 10px;font-size:11px;font-weight:600;font-family:\'Plus Jakarta Sans\',sans-serif;cursor:pointer">Cancel</button></div>' : '<button onclick="joinSessionFromNearby(\'' + s.id + '\')" style="background:#e6f9ee;color:#1a6b3c;border:1px solid #1a6b3c;border-radius:8px;padding:5px 14px;font-size:12px;font-weight:600;font-family:\'Plus Jakarta Sans\',sans-serif;cursor:pointer">I\'m In!</button>') + '</div>'
             + (s.note ? '<div style="margin-top:8px;padding:8px 12px;background:rgba(0,0,0,0.03);border-radius:8px;font-size:12px;color:#555;border-left:3px solid #1a6b3c">' + s.note + '</div>' : '')
             + (s.courtLat ? '<a href="https://www.google.com/maps/dir/?api=1&destination=' + s.courtLat + ',' + s.courtLng + '" target="_blank" style="margin-top:8px;display:flex;align-items:center;justify-content:center;gap:6px;font-size:12px;font-weight:600;color:#1a6b3c;text-decoration:none;background:#e6f9ee;padding:9px;border-radius:8px;border:1px solid #1a6b3c">📍 Get Directions to Court</a>' : '')
-            + '<div style="margin-top:8px"><button onclick="toggleSessionChat(\'' + s.id + '\', this)" style="background:none;border:none;font-size:12px;color:#888;cursor:pointer;padding:4px 0;font-family:Inter,sans-serif">💬 Chat</button><div id="chat_' + s.id + '" style="display:none;margin-top:8px"></div></div>'
             + '</div></div></div>';
         }
       } catch (err) { console.log('Error loading nearby sessions:', err); list.innerHTML = '<div style="text-align:center;padding:40px;color:#888;font-size:14px">Could not load sessions. Try again.</div>'; }
@@ -2032,87 +1863,26 @@
       } catch (err) { console.log('Follow button error:', err); }
     }
     // ══ NOTIFICATIONS ══
-    var notifPanelOpen = false;
 
-    window.toggleNotifPanel = function() {
-      var panel = document.getElementById('notifPanel');
-      if (!panel) return;
-      notifPanelOpen = !notifPanelOpen;
-      panel.style.display = notifPanelOpen ? 'block' : 'none';
-      if (notifPanelOpen) { loadNotifications(); markAllNotifsRead(); }
-    };
 
-    document.addEventListener('click', function(e) {
-      if (!notifPanelOpen) return;
-      if (!e.target.closest('#notifPanel') && !e.target.closest('#notifBell')) {
-        var panel = document.getElementById('notifPanel');
-        if (panel) panel.style.display = 'none';
-        notifPanelOpen = false;
-      }
-    });
 
-    async function writeNotification(toUid, type, fromName, extra) {
-      if (!window._db || !toUid || !window._currentUser || toUid === window._currentUser.uid) return;
-      try {
-        await window._fbAddDoc(window._fbCollection(window._db, 'notifications'), {
-          toUid: toUid, type: type,
-          fromName: fromName || window._currentUser.displayName || 'Someone',
-          fromUid: window._currentUser.uid,
-          extra: extra || '',
-          createdAt: window._fbTimestamp.now(),
-          read: false
-        });
-      } catch(e) {}
-    }
 
-    async function loadNotifications() {
-      if (!window._currentUser || !window._db) return;
-      var list = document.getElementById('notifList');
-      if (!list) return;
-      try {
-        var q = window._fbQuery(
-          window._fbCollection(window._db, 'notifications'),
-          window._fbWhere('toUid', '==', window._currentUser.uid),
-          window._fbOrderBy('createdAt', 'desc'));
-        var snap = await window._fbGetDocs(q);
-        if (snap.empty) { list.innerHTML = '<div style="text-align:center;padding:32px 20px;color:#aaa;font-size:13px">No notifications yet</div>'; return; }
-        var html = '';
-        snap.forEach(function(d) {
-          var n = d.data();
-          var icon = n.type === 'follow' ? '👤' : n.type === 'join' ? '🎾' : n.type === 'comment' ? '💬' : '🔔';
-          var msg = n.type === 'follow' ? n.fromName + ' started following you'
-            : n.type === 'join' ? n.fromName + ' joined your session' + (n.extra ? ' at ' + n.extra : '')
-            : n.type === 'comment' ? n.fromName + ' commented: ' + n.extra
-            : n.fromName + ' ' + (n.extra || 'sent you a notification');
-          var ts = n.createdAt ? new Date(n.createdAt.seconds * 1000) : new Date();
-          var time = ts.toLocaleDateString('en-US', {month:'short',day:'numeric'}) + ' ' + ts.toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'});
-          html += '<div style="padding:12px 18px;border-bottom:1px solid #f5f5f5;background:' + (n.read ? '#fff' : '#f0faf5') + ';cursor:pointer" onclick="viewProfile(\'' + n.fromUid + '\');closeNotifPanel()">'
-            + '<div style="display:flex;align-items:flex-start;gap:10px">'
-            + '<div style="width:34px;height:34px;border-radius:50%;background:var(--slam-primary);display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0">' + icon + '</div>'
-            + '<div style="flex:1"><div style="font-size:13px;color:#1a1a1a;font-weight:' + (n.read ? '400' : '600') + ';line-height:1.4">' + msg + '</div>'
-            + '<div style="font-size:11px;color:#aaa;margin-top:3px">' + time + '</div></div></div></div>';
-        });
-        list.innerHTML = html;
-        var unread = snap.docs.filter(function(d){ return !d.data().read; }).length;
-        var dot = document.getElementById('notifDot');
-        if (dot) dot.style.display = unread > 0 ? 'block' : 'none';
-      } catch(e) { console.log('Notif error:', e); }
-    }
 
-    window.markAllNotifsRead = async function() {
-      if (!window._currentUser || !window._db) return;
-      try {
-        var q = window._fbQuery(window._fbCollection(window._db, 'notifications'),
-          window._fbWhere('toUid', '==', window._currentUser.uid),
-          window._fbWhere('read', '==', false));
-        var snap = await window._fbGetDocs(q);
-        await Promise.all(snap.docs.map(function(d){
-          return window._fbUpdateDoc(window._fbDoc(window._db,'notifications',d.id),{read:true});
-        }));
-        var dot = document.getElementById('notifDot');
-        if (dot) dot.style.display = 'none';
-      } catch(e) {}
-    };
+ 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
     async function checkUnreadNotifs() {
       if (!window._currentUser || !window._db) return;
@@ -2133,8 +1903,7 @@
         var followRef = window._fbDoc(window._db, 'follows', followId);
         var followSnap = await window._fbGetDoc(followRef);
         if (followSnap.exists()) { await window._fbDeleteDoc(followRef); }
-        else { await window._fbSetDoc(followRef, { followerId: window._currentUser.uid, followerName: window._currentUser.displayName || '', followerPhoto: window._currentUser.photoURL || '', followingId: uid, createdAt: window._fbTimestamp.now() });
-        sendNotification(uid, 'follow', (window._currentUser.displayName || 'Someone') + ' started following you'); writeNotification(uid, 'follow', window._currentUser.displayName); }
+        else { await window._fbSetDoc(followRef, { followerId: window._currentUser.uid, followerName: window._currentUser.displayName || '', followerPhoto: window._currentUser.photoURL || '', followingId: uid, createdAt: window._fbTimestamp.now() }); writeNotification(uid, 'follow', window._currentUser.displayName); }
         await loadFollowCounts(uid);
         await renderFollowButton(uid);
       } catch (err) { console.log('Toggle follow error:', err); alert('Could not follow. Try again.'); }
@@ -2207,7 +1976,6 @@
       document.getElementById('messagingPage').style.display = 'block';
       loadConversations();
       // ↓ ADD THESE LINES ↓
-      window._unreadCount = 0;
       updateMsgBadge(0);
       var navMsg = document.getElementById('navMessages');
       if (navMsg) navMsg.style.color = '#1a6b3c';
@@ -2222,7 +1990,6 @@
         window._fbOrderBy('createdAt', 'desc')
       );
       var isFirstLoad = true;
-      window._unreadCount = window._unreadCount || 0;
       window._globalMsgUnsubscribe = window._fbOnSnapshot(q, async function(snapshot) {
         if (isFirstLoad) { isFirstLoad = false; return; }
         snapshot.docChanges().forEach(async function(change) {
@@ -2240,8 +2007,6 @@
               showBrowserNotification(senderName, senderPhoto, msg.text);
               // Badge count
               if (!isOnMessaging) {
-                window._unreadCount = (window._unreadCount || 0) + 1;
-                updateMsgBadge(window._unreadCount);
               }
             } catch(err) { console.log('Notification error:', err); }
           }
