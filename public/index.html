@@ -528,7 +528,7 @@
       <div style="display:flex;gap:10px;align-items:flex-end">
         <textarea id="coachInput" placeholder="Ask your coach..." rows="2" style="flex:1;border:none;outline:none;font-size:14px;font-family:Inter,sans-serif;color:var(--slam-text-1);background:transparent;resize:none;line-height:1.5" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendCoachMessage();}"></textarea>
         <div style="display:flex;gap:8px;flex-shrink:0">
-          <button id="voiceBtn" onclick="toggleVoiceInput()" style="width:40px;height:40px;border-radius:50%;border:none;background:var(--slam-bg);cursor:pointer;font-size:18px;display:flex;align-items:center;justify-content:center">🎙️</button>
+          <button id="voiceBtn" onclick="toggleVoiceInput()" style="width:40px;height:40px;border-radius:50%;border:none;background:var(--slam-bg);cursor:pointer;font-size:18px;display:flex;align-items:center;justify-content:center">mic</button>
           <button onclick="sendCoachMessage()" style="width:40px;height:40px;border-radius:50%;border:none;background:var(--slam-primary);color:#fff;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center">➤</button>
         </div>
       </div>
@@ -1515,13 +1515,13 @@
       recognition.interimResults = false;
       var btn = document.getElementById('voiceBtn');
       var status = document.getElementById('aiVoiceStatus');
-      recognition.onstart = function(){ isListening=true; if(btn)btn.textContent='⏹'; if(status)status.textContent='🔴 Listening...'; };
+      recognition.onstart = function(){ isListening=true; if(btn)btn.textContent='stop'; if(status)status.textContent='🔴 Listening...'; };
       recognition.onresult = function(e){ var t=e.results[0][0].transcript; var inp=document.getElementById('coachInput'); if(inp)inp.value=t; };
       recognition.onend = function(){
-        isListening=false; if(btn)btn.textContent='🎙️'; if(status)status.textContent='';
+        isListening=false; if(btn)btn.textContent='mic'; if(status)status.textContent='';
         var inp=document.getElementById('coachInput'); if(inp&&inp.value.trim()) sendCoachMessage();
       };
-      recognition.onerror = function(){ isListening=false; if(btn)btn.textContent='🎙️'; if(status)status.textContent=''; };
+      recognition.onerror = function(){ isListening=false; if(btn)btn.textContent='mic'; if(status)status.textContent=''; };
       recognition.start();
     };
 
