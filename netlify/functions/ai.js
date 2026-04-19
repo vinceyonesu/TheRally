@@ -13,57 +13,49 @@ exports.handler = async function(event) {
   try {
     const { prompt, systemPrompt, messages } = JSON.parse(event.body);
 
-    // Build messages - merge system prompt into first user message
-    let msgs = [];
+    // Build Gemini contents array
+    const contents = [];
     if (messages && messages.length > 0) {
-      messages.forEach(m => msgs.push({ role: m.role, content: m.content }));
-    }
-    // Add current message with system context prepended
-    const fullPrompt = systemPrompt
-      ? systemPrompt + '\n\nUser: ' + prompt
-      : prompt;
-    msgs.push({ role: 'user', content: fullPrompt });
-
-    const models = [
-      'meta-llama/llama-3.3-8b-instruct:free',
-      'mistralai/mistral-7b-instruct:free',
-      'deepseek/deepseek-r1:free',
-      'qwen/qwen-2.5-7b-instruct:free'
-    ];
-
-    for (const model of models) {
-      const body = JSON.stringify({ model, messages: msgs, max_tokens: 400 });
-
-      const result = await new Promise((resolve, reject) => {
-        const req = https.request({
-          hostname: 'openrouter.ai',
-          path: '/api/v1/chat/completions',
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': 'Bearer ' + process.env.OPENROUTER_KEY,
-            'HTTP-Referer': 'https://therally.netlify.app',
-            'X-Title': 'TheRally',
-            'Content-Length': Buffer.byteLength(body)
-          }
-        }, (res) => {
-          let data = '';
-          res.on('data', c => data += c);
-          res.on('end', () => resolve(data));
+      messages.forEach(m => {
+        contents.push({
+          role: m.role === 'assistant' ? 'model' : 'user',
+          parts: [{ text: m.content }]
         });
-        req.on('error', reject);
-        req.write(body);
-        req.end();
       });
-
-      const data = JSON.parse(result);
-      const text = data.choices && data.choices[0] && data.choices[0].message
-        ? data.choices[0].message.content : null;
-
-      if (text) return { statusCode: 200, headers, body: JSON.stringify({ text }) };
     }
+    const fullPrompt = systemPrompt ? systemPrompt + '\n\n' + prompt : prompt;
+    contents.push({ role: 'user', parts: [{ text: fullPrompt }] });
 
-    return { statusCode: 200, headers, body: JSON.stringify({ text: 'I am having trouble connecting right now. Please try again in a moment.' }) };
+    const body = JSON.stringify({
+      contents: contents,
+      generationConfig: { maxOutputTokens: 400, temperature: 0.7 }
+    });
+
+    const result = await new Promise((resolve, reject) => {
+      const req = https.request({
+        hostname: 'generativelanguage.googleapis.com',
+        path: '/v1beta/models/gemini-2.0-flash-lite:generateContent?key=' + process.env.GEMINI_KEY,
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Content-Length': Buffer.byteLength(body)
+        }
+      }, (res) => {
+        let data = '';
+        res.on('data', c => data += c);
+        res.on('end', () => resolve(data));
+      });
+      req.on('error', reject);
+      req.write(body);
+      req.end();
+    });
+
+    const data = JSON.parse(result);
+    const text = data.candidates && data.candidates[0] && data.candidates[0].content
+      ? data.candidates[0].content.parts[0].text
+      : (data.error ? data.error.message : null);
+
+    return { statusCode: 200, headers, body: JSON.stringify({ text }) };
   } catch (err) {
     return { statusCode: 500, headers, body: JSON.stringify({ error: err.message }) };
   }

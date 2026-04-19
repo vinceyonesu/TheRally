@@ -1442,9 +1442,6 @@
     var isListening = false;
     var recognition = null;
 
-    // Your OpenRouter key - safe on free tier (browser-side)
-    var _OR_KEY = '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';
-
     window.showAICoach = function() {
       if (!window._currentUser) { handleAuthClick(); return; }
       hideAllPages();
@@ -1495,8 +1492,7 @@
       var div = document.createElement('div');
       div.className = 'ai-msg ' + (type === 'user' ? 'ai-msg-user' : 'ai-msg-bot');
       if (type === 'bot thinking') div.classList.add('ai-thinking');
-      div.innerHTML = text.replace(/
-/g,'<br>');
+      div.innerHTML = text.split('\n').join('<br>');
       container.appendChild(div);
       container.scrollTop = container.scrollHeight;
       return div;
