@@ -1360,7 +1360,7 @@
       }, function(err){ console.log('Session listener error:', err); });
     };
 
-        window.nearbyCheckIn = async function(placeId, btn) {
+    window.nearbyCheckIn = async function(placeId, btn) {
       if (!window._currentUser) { handleAuthClick(); return; }
       btn.textContent = '...'; btn.disabled = true;
       try {
@@ -1375,8 +1375,6 @@
         if (!snap.empty) {
           var dels = []; snap.forEach(function(d){ dels.push(window._fbDeleteDoc(window._fbDoc(window._db,'checkins',d.id))); });
           await Promise.all(dels);
-          btn.textContent = '+ Check In at this court';
-          btn.style.background = 'var(--slam-primary)'; btn.style.color = '#fff'; btn.style.border = 'none';
         } else {
           var prof = await window._fbGetDoc(window._fbDoc(window._db,'profiles',uid));
           var pp = prof.exists() ? prof.data() : {};
@@ -1386,11 +1384,10 @@
             photo: pp.photo || window._currentUser.photoURL || '',
             checkedInAt: window._fbTimestamp.now()
           });
-          btn.textContent = '✓ Checked In at this court';
-          btn.style.background = '#e6f9ee'; btn.style.color = '#1a6b3c'; btn.style.border = '1.5px solid #1a6b3c';
         }
         btn.disabled = false;
-        window._nearbyCheckedInUids = await getCheckedInUids(placeId);
+        // Reload the whole nearby list so avatars + button update correctly
+        await loadNearbySessions();
       } catch(e) { console.log('Check-in error:', e); btn.disabled = false; }
     };
 
@@ -1569,6 +1566,7 @@
       loadNearbySessions();
     };
     window.loadNearbySessions = async function() {
+      window._courtCheckins = {}; // Reset check-in cache
       var list = document.getElementById('nearbySessionsList');
       if (!list || !window._db) { list.innerHTML = '<div style="text-align:center;padding:40px;color:#888;font-size:14px">Connecting to database...</div>'; return; }
       list.innerHTML = '<div style="text-align:center;padding:40px"><div style="font-size:32px;margin-bottom:12px">⏳</div><div style="font-size:14px;color:#888">Loading sessions...</div></div>';
@@ -1578,8 +1576,6 @@
         var skillFilter = document.getElementById('nearbySkillFilter').value;
         var typeFilter = document.getElementById('nearbyTypeFilter').value;
         var q = window._fbQuery(window._fbCollection(window._db, 'sessions'), window._fbWhere('date', '>=', today), window._fbOrderBy('date', 'asc'));
-        // Pre-load check-in UIDs per court for session cards
-        window._nearbyCheckedInUids = [];
         var snapshot = await window._fbGetDocs(q);
         if (snapshot.empty) { list.innerHTML = '<div style="text-align:center;padding:60px 20px"><div style="font-size:48px;margin-bottom:16px">🎾</div><div style="font-size:16px;font-weight:600;color:#1a1a1a;margin-bottom:8px">No sessions yet</div><div style="font-size:14px;color:#888">Be the first to post a session!</div></div>'; return; }
         var sessions = [];
@@ -1593,13 +1589,28 @@
         });
         if (sessions.length === 0) { list.innerHTML = '<div style="text-align:center;padding:60px 20px"><div style="font-size:48px;margin-bottom:16px">🎾</div><div style="font-size:16px;font-weight:600;color:#1a1a1a;margin-bottom:8px">No matching sessions</div><div style="font-size:14px;color:#888">Try changing the filters above</div></div>'; return; }
         list.innerHTML = '';
+        // Pre-load check-in status for current user before rendering
+        window._courtCheckins = {};
+        if (window._currentUser) {
+          try {
+            var ciCutoff2 = new Date(Date.now() - 2*60*60*1000);
+            var uniquePlaceIds = [...new Set(sessions.map(function(s){ return s.placeId; }).filter(Boolean))];
+            var myCheckinsSnap = await window._fbGetDocs(window._fbQuery(
+              window._fbCollection(window._db,'checkins'),
+              window._fbWhere('uid','==',window._currentUser.uid),
+              window._fbWhere('checkedInAt','>=',window._fbTimestamp.fromDate(ciCutoff2))
+            ));
+            myCheckinsSnap.forEach(function(d){ window._courtCheckins[d.data().placeId] = true; });
+          } catch(e) {}
+        }
         sessions.forEach(function(s) {
           var dateStr = new Date(s.date + 'T00:00:00').toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
           var timeStr = new Date('2000-01-01T' + s.time).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
           var isToday = s.date === today;
           var playersCount = s.players ? s.players.length : 1;
           var isOwner = window._currentUser && window._currentUser.uid === s.uid;
-          var isCheckedIn2 = window._nearbyCheckedInUids && window._nearbyCheckedInUids.indexOf(s.uid) > -1;
+          // Use pre-loaded check-in status (loaded before forEach)
+          var isCheckedIn2 = window._currentUser && s.placeId && window._courtCheckins && window._courtCheckins[s.placeId] ? true : false;
           var checkBadge2 = isCheckedIn2 ? '<div style="position:absolute;bottom:-2px;right:-2px;width:16px;height:16px;border-radius:50%;background:#22c55e;border:2px solid #fff;display:flex;align-items:center;justify-content:center"><svg width="8" height="8" viewBox="0 0 10 8" fill="none"><path d="M1 4l2.5 2.5L9 1" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>' : '';
           var avatarHtml = '<div style="position:relative;flex-shrink:0;display:inline-block">' + (s.photo ? '<img src="' + s.photo + '" style="width:44px;height:44px;border-radius:50%;object-fit:cover;border:2px solid #e8e8e8"/>' : '<div style="width:44px;height:44px;border-radius:50%;background:#1a6b3c;display:flex;align-items:center;justify-content:center;font-size:16px;color:#fff;font-weight:700">' + (s.name ? s.name[0].toUpperCase() : '?') + '</div>') + checkBadge2 + '</div>';
           var verifiedBadge = s.phoneVerified ? '<span style="background:#e6f9ee;color:#1a6b3c;font-size:10px;font-weight:600;padding:2px 8px;border-radius:999px;margin-left:6px">✅ Verified</span>' : '';
