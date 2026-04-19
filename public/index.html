@@ -1915,17 +1915,30 @@
       var dayName = days[dt.getDay()];
       var hourStr = court.hours.find(function(h) { return h && h.indexOf(dayName) === 0; });
       if (!hourStr) return null;
+      // Handle "Closed" days
+      if (/closed/i.test(hourStr) && !/\d/.test(hourStr.split(":")[1]||"")) return "Court is closed on " + dayName + "s";
       var match = hourStr.match(/(\d+):(\d+)\s*([AP]M)[^\d]*(\d+):(\d+)\s*([AP]M)/i);
       if (!match) return null;
+      // Parse open time
+      var oh = parseInt(match[1]), om = parseInt(match[2]);
+      if (match[3].toUpperCase() === "PM" && oh !== 12) oh += 12;
+      if (match[3].toUpperCase() === "AM" && oh === 12) oh = 0;
+      // Parse close time
       var ch = parseInt(match[4]), cm = parseInt(match[5]);
       if (match[6].toUpperCase() === "PM" && ch !== 12) ch += 12;
       if (match[6].toUpperCase() === "AM" && ch === 12) ch = 0;
       var sh = dt.getHours(), sm = dt.getMinutes();
+      var openStr  = match[1] + ":" + match[2] + " " + match[3].toUpperCase();
       var closeStr = match[4] + ":" + match[5] + " " + match[6].toUpperCase();
-      if (sh > ch || (sh === ch && sm >= cm)) return "Court may be closed at this time (closes " + closeStr + ")";
-      if (sh === ch - 1 && sm >= 30) return "Session starts close to closing time (" + closeStr + ")";
+      // Before opening
+      var sessionMins = sh * 60 + sm;
+      var openMins    = oh * 60 + om;
+      var closeMins   = ch * 60 + cm;
+      if (sessionMins < openMins) return "Court is still closed at this time (opens " + openStr + ")";
+      if (sessionMins >= closeMins) return "Court is closed at this time (closes " + closeStr + ")";
+      if (sessionMins >= closeMins - 60) return "Session starts close to closing time (" + closeStr + ")";
       return null;
-    };;
+    };
 
         window.signOutUser = async function() {
       try {
