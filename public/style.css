@@ -1265,3 +1265,117 @@ body::before {
 [id^="chat_"] input:focus {
   border-color: var(--slam-primary) !important;
 }
+/* ══════════════════════════════
+   DARK MODE
+══════════════════════════════ */
+html.dark-mode {
+  --slam-bg-page:    #0f1117;
+  --slam-surface:    #1a1d27;
+  --slam-surface-2:  #22263a;
+  --slam-bg:         #1a1d27;
+  --slam-border:     rgba(255,255,255,0.1);
+  --slam-text-1:     #f0f0f0;
+  --slam-text-2:     #a0a0b0;
+  --slam-text-3:     #6a6a80;
+  --slam-badge-open-bg: rgba(255,255,255,0.08);
+  --shadow-sm:       0 2px 8px rgba(0,0,0,0.4);
+  --shadow-md:       0 4px 20px rgba(0,0,0,0.5);
+}
+
+html.dark-mode body {
+  background: var(--slam-bg-page);
+  color: var(--slam-text-1);
+}
+
+/* Nav stays themed (uses slam-nav var) */
+html.dark-mode .court-card {
+  background: var(--slam-surface) !important;
+  border-color: var(--slam-border) !important;
+}
+html.dark-mode .court-card .court-name {
+  color: var(--slam-text-1) !important;
+}
+html.dark-mode .court-card .court-address,
+html.dark-mode .court-card .court-meta {
+  color: var(--slam-text-2) !important;
+}
+
+/* Modal dark */
+html.dark-mode .modal-content,
+html.dark-mode #courtModal > div {
+  background: var(--slam-surface) !important;
+  color: var(--slam-text-1) !important;
+}
+html.dark-mode .modal-content h2,
+html.dark-mode #courtModal h2 {
+  color: var(--slam-text-1) !important;
+}
+
+/* Session cards */
+html.dark-mode .session-card {
+  background: var(--slam-surface) !important;
+  border-color: var(--slam-border) !important;
+}
+html.dark-mode .session-name,
+html.dark-mode .session-details {
+  color: var(--slam-text-1) !important;
+}
+
+/* Nearby sessions */
+html.dark-mode [style*="background:#ffffff"] {
+  background: var(--slam-surface) !important;
+}
+html.dark-mode [style*="background:#f0f0f0"] {
+  background: var(--slam-surface-2) !important;
+}
+html.dark-mode [style*="color:#1a1a1a"],
+html.dark-mode [style*="color:#333"] {
+  color: var(--slam-text-1) !important;
+}
+html.dark-mode [style*="color:#888"],
+html.dark-mode [style*="color:#555"] {
+  color: var(--slam-text-2) !important;
+}
+html.dark-mode [style*="border:1px solid #ebebeb"],
+html.dark-mode [style*="border:1.5px solid #e0e0e0"] {
+  border-color: var(--slam-border) !important;
+}
+
+/* Profile pages */
+html.dark-mode #myProfilePage > div:last-child,
+html.dark-mode #viewProfilePage > div:last-child {
+  background: var(--slam-surface) !important;
+  color: var(--slam-text-1) !important;
+}
+
+/* Inputs */
+html.dark-mode input,
+html.dark-mode textarea,
+html.dark-mode select {
+  background: var(--slam-surface-2) !important;
+  color: var(--slam-text-1) !important;
+  border-color: var(--slam-border) !important;
+}
+html.dark-mode input::placeholder,
+html.dark-mode textarea::placeholder {
+  color: var(--slam-text-3) !important;
+}
+
+/* Sign in modal */
+html.dark-mode #signInModal > div > div:last-child {
+  background: var(--slam-surface) !important;
+}
+
+/* Saved courts, feed, nearby page */
+html.dark-mode #savedSection,
+html.dark-mode #nearbyPage,
+html.dark-mode #feedPage,
+html.dark-mode #myProfilePage,
+html.dark-mode #viewProfilePage {
+  color: var(--slam-text-1);
+}
+
+/* Smooth transition */
+html, body, .court-card, .session-card, input, textarea, select {
+  transition: background-color 0.25s ease, color 0.25s ease, border-color 0.25s ease;
+}
