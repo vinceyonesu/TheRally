@@ -786,6 +786,9 @@
           if (place.nationalPhoneNumber) html += '<p style="margin-top:10px;font-size:13px;color:#555">Phone: ' + place.nationalPhoneNumber + '</p>';
           if (place.websiteURI) html += '<p style="margin-top:4px;font-size:13px"><a href="' + place.websiteURI + '" target="_blank" style="color:#1a6b3c">Visit website</a></p>';
           hoursDiv.innerHTML = html;
+          if (currentModalId && courtDataStore[currentModalId] && place.regularOpeningHours && place.regularOpeningHours.weekdayDescriptions) {
+            courtDataStore[currentModalId].hours = place.regularOpeningHours.weekdayDescriptions;
+          }
           if (place.reviews && place.reviews.length > 0) {
             var reviewsHtml = '';
             place.reviews.forEach(function(review) {
@@ -1904,25 +1907,25 @@
 
     // COURT HOURS WARNING
     window.checkCourtHoursWarning = function(court, time) {
-      if (!court||!court.hours||!time) return null;
-      var days=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
-      var dateVal=document.getElementById('sessionDate')?document.getElementById('sessionDate').value:null;
+      if (!court || !court.hours || !Array.isArray(court.hours) || !time) return null;
+      var days = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
+      var dateVal = document.getElementById("sessionDate") ? document.getElementById("sessionDate").value : null;
       if (!dateVal) return null;
-      var dt=new Date(dateVal+'T'+time);
-      var hourStr=court.hours.find(function(h){return h.startsWith(days[dt.getDay()]);});
+      var dt = new Date(dateVal + "T" + time);
+      var dayName = days[dt.getDay()];
+      var hourStr = court.hours.find(function(h) { return h && h.indexOf(dayName) === 0; });
       if (!hourStr) return null;
-      var match=hourStr.match(/(\d+:\d+\s*[AP]M)\s*[-\u2013]\s*(\d+:\d+\s*[AP]M)/i);
+      var match = hourStr.match(/(\d+):(\d+)\s*([AP]M)[^\d]*(\d+):(\d+)\s*([AP]M)/i);
       if (!match) return null;
-      var cp=match[2].trim().match(/(\d+):(\d+)\s*([AP]M)/i);
-      if (!cp) return null;
-      var ch=parseInt(cp[1]),cm=parseInt(cp[2]);
-      if (cp[3].toUpperCase()==='PM'&&ch!==12) ch+=12;
-      if (cp[3].toUpperCase()==='AM'&&ch===12) ch=0;
-      var sh=dt.getHours(),sm=dt.getMinutes();
-      if (sh>ch||(sh===ch&&sm>=cm)) return 'Court may be closed at this time (closes '+match[2].trim()+')';
-      if (sh===ch-1) return 'Session starts close to closing time ('+match[2].trim()+')';
+      var ch = parseInt(match[4]), cm = parseInt(match[5]);
+      if (match[6].toUpperCase() === "PM" && ch !== 12) ch += 12;
+      if (match[6].toUpperCase() === "AM" && ch === 12) ch = 0;
+      var sh = dt.getHours(), sm = dt.getMinutes();
+      var closeStr = match[4] + ":" + match[5] + " " + match[6].toUpperCase();
+      if (sh > ch || (sh === ch && sm >= cm)) return "Court may be closed at this time (closes " + closeStr + ")";
+      if (sh === ch - 1 && sm >= 30) return "Session starts close to closing time (" + closeStr + ")";
       return null;
-    };
+    };;
 
         window.signOutUser = async function() {
       try {
