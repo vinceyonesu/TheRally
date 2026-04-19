@@ -1279,14 +1279,12 @@
         + '</div></div>';
       try {
         var prompt = 'You are a tennis expert. Court: "' + courtData.name + '", Location: "' + courtData.address + '", Rating: ' + (courtData.rating||'N/A') + '/5 (' + (courtData.reviews||0) + ' reviews). Write 2-3 sentences: court quality, best time to visit, who it suits. Max 55 words. Be specific.';
-        console.log('Calling /api/ai...');
-var res = await fetch('/api/ai', {
+        var res = await fetch('/api/ai', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ prompt: prompt })
         });
         var data = await res.json();
-        console.log('Response:', data);
         var summary = data.text || null;
         if (summary) {
           section.innerHTML = '<div style="background:linear-gradient(135deg,var(--slam-surface-2),var(--slam-bg));border:1px solid var(--slam-border);border-radius:14px;padding:16px 18px;margin-bottom:16px">'
@@ -1480,14 +1478,15 @@ var res = await fetch('/api/ai', {
         var messages = [];
         coachHistory.forEach(function(m) { messages.push(m); });
         messages.push({ role: 'user', content: msg });
-        console.log('Calling /api/ai...');
-var res = await fetch('/api/ai', {
+        var res = await fetch('/api/ai', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ prompt: msg, systemPrompt: systemPrompt, messages: coachHistory })
         });
-        var data = await res.json();
-        console.log('Response:', data);
+        console.log('AI response status:', res.status);
+        var rawText = await res.text();
+        console.log('AI raw response:', rawText);
+        var data = JSON.parse(rawText);
         var reply = data.text || 'Sorry, I could not generate a response. Please try again.';
         coachHistory.push({ role: 'user', content: msg });
         coachHistory.push({ role: 'assistant', content: reply });
@@ -1497,7 +1496,8 @@ var res = await fetch('/api/ai', {
         if (isSpeaking) speakText(reply);
       } catch(e) {
         removeThinking();
-        appendCoachMsg('Sorry, something went wrong. Please try again.', 'bot');
+        console.error('AI Coach error:', e);
+        appendCoachMsg('Error: ' + e.message, 'bot');
       }
     };
 
