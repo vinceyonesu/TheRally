@@ -1,0 +1,8 @@
+{
+  "name": "courtside",
+  "version": "1.0.0",
+  "description": "CourtSide Tennis App",
+  "engines": {
+    "node": ">=18"
+  }
+}
