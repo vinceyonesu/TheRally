@@ -1843,7 +1843,16 @@
     };
 
     // ── MY PROFILE ──
-    window.showMyProfile = async function() {
+    window.signOutUser = async function() {
+      try {
+        await window._signOut(window._auth);
+        window._currentUser = null;
+        showSearch();
+        location.reload();
+      } catch(e) { console.log('Sign out error:', e); alert('Could not sign out. Try again.'); }
+    };
+
+        window.showMyProfile = async function() {
       if (!window._currentUser) { handleAuthClick(); return; }
       hideAllPages();
       document.getElementById('myProfilePage').style.display = 'block';
