@@ -511,46 +511,35 @@
 
   <!-- AI COACH PAGE -->
   <div id="aiCoachPage" style="display:none;max-width:680px;margin:40px auto;padding:0 24px 60px;position:relative;z-index:1">
-
-    <!-- Header -->
-    <div style="background:linear-gradient(135deg,var(--slam-nav),var(--slam-primary));border-radius:20px;padding:24px;margin-bottom:20px;position:relative;overflow:hidden">
-      <div style="position:absolute;inset:0;opacity:0.08;background:repeating-linear-gradient(45deg,transparent,transparent 10px,rgba(255,255,255,0.3) 10px,rgba(255,255,255,0.3) 11px)"></div>
-      <div style="position:relative;z-index:1;display:flex;align-items:center;gap:16px">
-        <div style="width:56px;height:56px;border-radius:50%;background:rgba(255,255,255,0.15);display:flex;align-items:center;justify-content:center;font-size:28px;flex-shrink:0">🤖</div>
+    <div style="background:linear-gradient(135deg,var(--slam-nav),var(--slam-primary));border-radius:20px;padding:24px;margin-bottom:20px">
+      <div style="display:flex;align-items:center;gap:16px">
+        <div style="width:52px;height:52px;border-radius:50%;background:rgba(255,255,255,0.15);display:flex;align-items:center;justify-content:center;font-size:26px;flex-shrink:0">🤖</div>
         <div>
-          <div style="font-family:Syne,sans-serif;font-size:20px;font-weight:800;color:#fff;letter-spacing:-0.3px">AI Tennis Coach</div>
-          <div style="font-size:13px;color:rgba(255,255,255,0.7);margin-top:2px">Powered by AI · Ask anything about tennis</div>
+          <div style="font-family:Syne,sans-serif;font-size:20px;font-weight:800;color:#fff">AI Tennis Coach</div>
+          <div style="font-size:13px;color:rgba(255,255,255,0.7);margin-top:2px">Ask anything · tap 🎙️ to speak</div>
         </div>
         <div id="aiVoiceStatus" style="margin-left:auto;font-size:11px;color:rgba(255,255,255,0.6)"></div>
       </div>
     </div>
-
-    <!-- Chat messages -->
-    <div id="coachMessages" style="background:var(--slam-surface);border-radius:16px;border:1px solid var(--slam-border);min-height:400px;max-height:500px;overflow-y:auto;padding:20px;display:flex;flex-direction:column;gap:12px;margin-bottom:16px;scroll-behavior:smooth">
-      <div class="ai-msg ai-msg-bot">Hi! I am your AI tennis coach. Ask me anything about technique, tactics, training, equipment or how to improve your game. You can also tap the mic to speak! 🎾</div>
+    <div id="coachMessages" style="background:var(--slam-surface);border-radius:16px;border:1px solid var(--slam-border);min-height:380px;max-height:480px;overflow-y:auto;padding:20px;display:flex;flex-direction:column;gap:12px;margin-bottom:14px;scroll-behavior:smooth">
+      <div class="ai-msg ai-msg-bot">Hi! I am your AI tennis coach. Ask me anything — technique, tactics, training or equipment. Tap 🎙️ to speak! 🎾</div>
     </div>
-
-    <!-- Input area -->
-    <div style="background:var(--slam-surface);border-radius:16px;border:1px solid var(--slam-border);padding:12px 14px">
+    <div style="background:var(--slam-surface);border-radius:14px;border:1px solid var(--slam-border);padding:12px 14px">
       <div style="display:flex;gap:10px;align-items:flex-end">
-        <textarea id="coachInput" placeholder="Ask your coach... e.g. How do I improve my serve?" rows="2" style="flex:1;border:none;outline:none;font-size:14px;font-family:Inter,sans-serif;color:var(--slam-text-1);background:transparent;resize:none;line-height:1.5" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendCoachMessage();}"></textarea>
+        <textarea id="coachInput" placeholder="Ask your coach..." rows="2" style="flex:1;border:none;outline:none;font-size:14px;font-family:Inter,sans-serif;color:var(--slam-text-1);background:transparent;resize:none;line-height:1.5" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendCoachMessage();}"></textarea>
         <div style="display:flex;gap:8px;flex-shrink:0">
-          <button id="voiceBtn" onclick="toggleVoiceInput()" title="Speak your question" style="width:40px;height:40px;border-radius:50%;border:none;background:var(--slam-bg);cursor:pointer;font-size:18px;display:flex;align-items:center;justify-content:center;transition:all .2s;flex-shrink:0">🎙️</button>
-          <button onclick="sendCoachMessage()" style="width:40px;height:40px;border-radius:50%;border:none;background:var(--slam-primary);color:#fff;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;transition:all .2s;flex-shrink:0">➤</button>
+          <button id="voiceBtn" onclick="toggleVoiceInput()" style="width:40px;height:40px;border-radius:50%;border:none;background:var(--slam-bg);cursor:pointer;font-size:18px;display:flex;align-items:center;justify-content:center">🎙️</button>
+          <button onclick="sendCoachMessage()" style="width:40px;height:40px;border-radius:50%;border:none;background:var(--slam-primary);color:#fff;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center">➤</button>
         </div>
       </div>
     </div>
-
-    <!-- Quick prompts -->
     <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:12px">
-      <button onclick="quickCoachPrompt(this)" style="background:var(--slam-surface);border:1.5px solid var(--slam-border);border-radius:999px;padding:7px 14px;font-size:12px;font-weight:600;font-family:Inter,sans-serif;cursor:pointer;color:var(--slam-text-2);transition:all .2s">💪 Improve my serve</button>
-      <button onclick="quickCoachPrompt(this)" style="background:var(--slam-surface);border:1.5px solid var(--slam-border);border-radius:999px;padding:7px 14px;font-size:12px;font-weight:600;font-family:Inter,sans-serif;cursor:pointer;color:var(--slam-text-2);transition:all .2s">🎯 Volley technique</button>
-      <button onclick="quickCoachPrompt(this)" style="background:var(--slam-surface);border:1.5px solid var(--slam-border);border-radius:999px;padding:7px 14px;font-size:12px;font-weight:600;font-family:Inter,sans-serif;cursor:pointer;color:var(--slam-text-2);transition:all .2s">🔄 Beat topspin players</button>
-      <button onclick="quickCoachPrompt(this)" style="background:var(--slam-surface);border:1.5px solid var(--slam-border);border-radius:999px;padding:7px 14px;font-size:12px;font-weight:600;font-family:Inter,sans-serif;cursor:pointer;color:var(--slam-text-2);transition:all .2s">🧠 Mental game tips</button>
-      <button onclick="quickCoachPrompt(this)" style="background:var(--slam-surface);border:1.5px solid var(--slam-border);border-radius:999px;padding:7px 14px;font-size:12px;font-weight:600;font-family:Inter,sans-serif;cursor:pointer;color:var(--slam-text-2);transition:all .2s">🏃 Warm up routine</button>
-      <button onclick="quickCoachPrompt(this)" style="background:var(--slam-surface);border:1.5px solid var(--slam-border);border-radius:999px;padding:7px 14px;font-size:12px;font-weight:600;font-family:Inter,sans-serif;cursor:pointer;color:var(--slam-text-2);transition:all .2s">📋 Weekly training plan</button>
+      <button onclick="quickCoachPrompt(this)" style="background:var(--slam-surface);border:1.5px solid var(--slam-border);border-radius:999px;padding:7px 14px;font-size:12px;font-weight:600;font-family:Inter,sans-serif;cursor:pointer;color:var(--slam-text-2)">💪 Improve my serve</button>
+      <button onclick="quickCoachPrompt(this)" style="background:var(--slam-surface);border:1.5px solid var(--slam-border);border-radius:999px;padding:7px 14px;font-size:12px;font-weight:600;font-family:Inter,sans-serif;cursor:pointer;color:var(--slam-text-2)">🎯 Volley technique</button>
+      <button onclick="quickCoachPrompt(this)" style="background:var(--slam-surface);border:1.5px solid var(--slam-border);border-radius:999px;padding:7px 14px;font-size:12px;font-weight:600;font-family:Inter,sans-serif;cursor:pointer;color:var(--slam-text-2)">🔄 Beat topspin players</button>
+      <button onclick="quickCoachPrompt(this)" style="background:var(--slam-surface);border:1.5px solid var(--slam-border);border-radius:999px;padding:7px 14px;font-size:12px;font-weight:600;font-family:Inter,sans-serif;cursor:pointer;color:var(--slam-text-2)">🧠 Mental game tips</button>
+      <button onclick="quickCoachPrompt(this)" style="background:var(--slam-surface);border:1.5px solid var(--slam-border);border-radius:999px;padding:7px 14px;font-size:12px;font-weight:600;font-family:Inter,sans-serif;cursor:pointer;color:var(--slam-text-2)">📋 Weekly training plan</button>
     </div>
-
   </div>
 
   <!-- MAP -->
@@ -1448,23 +1437,20 @@
       } catch(e) { console.log('Check-in error:', e); btn.textContent = checkedIn ? '✓ Checked In at this court' : '+ Check In at this court'; btn.disabled = false; }
     };
 
-    // ══════════════════════════════════════════════
-    //  AI COACH
-    // ══════════════════════════════════════════════
+    // ══ AI COACH ══
     var coachHistory = [];
     var isListening = false;
-    var isSpeaking = false;
     var recognition = null;
+
+    // Your OpenRouter key - safe on free tier (browser-side)
+    var _OR_KEY = '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';
 
     window.showAICoach = function() {
       if (!window._currentUser) { handleAuthClick(); return; }
       hideAllPages();
       document.getElementById('aiCoachPage').style.display = 'block';
-      var na = document.getElementById('navAI');
-      if (na) na.style.color = 'var(--slam-primary)';
+      var na=document.getElementById('navAI');if(na)na.style.color='var(--slam-primary)';
     };
-
-    window.showAITab = window.showAICoach;
 
     window.sendCoachMessage = async function() {
       var input = document.getElementById('coachInput');
@@ -1472,140 +1458,75 @@
       if (!msg) return;
       input.value = '';
       appendCoachMsg(msg, 'user');
-      appendCoachMsg('...', 'bot thinking');
+      var thinkEl = appendCoachMsg('Thinking...', 'bot thinking');
       try {
-        var systemPrompt = 'You are an expert tennis coach with 20+ years experience. Give specific, actionable advice. Keep responses concise — under 120 words unless asked for more.';
-        var messages = [];
-        coachHistory.forEach(function(m) { messages.push(m); });
-        messages.push({ role: 'user', content: msg });
-        var res = await fetch('/api/ai', {
+        var systemCtx = 'You are an expert tennis coach. Give specific, actionable advice under 100 words.';
+        var msgs = [];
+        coachHistory.slice(-10).forEach(function(m){ msgs.push({role:m.role,content:m.content}); });
+        msgs.push({role:'user', content: systemCtx + ' ' + msg});
+        var res = await fetch('https://openrouter.ai/api/v1/chat/completions', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ prompt: msg, systemPrompt: systemPrompt, messages: coachHistory })
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + _OR_KEY,
+            'HTTP-Referer': 'https://therally.netlify.app',
+            'X-Title': 'TheRally'
+          },
+          body: JSON.stringify({model:'meta-llama/llama-3.3-8b-instruct:free', messages:msgs, max_tokens:300})
         });
-        console.log('AI response status:', res.status);
-        var rawText = await res.text();
-        console.log('AI raw response:', rawText);
-        var data = JSON.parse(rawText);
-        var reply = data.text || 'Sorry, I could not generate a response. Please try again.';
-        coachHistory.push({ role: 'user', content: msg });
-        coachHistory.push({ role: 'assistant', content: reply });
-        if (coachHistory.length > 20) coachHistory = coachHistory.slice(-20);
-        removeThinking();
+        var data = await res.json();
+        var reply = data.choices && data.choices[0] && data.choices[0].message
+          ? data.choices[0].message.content : null;
+        if (!reply && data.error) reply = 'Error: ' + data.error.message;
+        if (!reply) reply = 'Sorry, could not get a response. Please try again.';
+        coachHistory.push({role:'user',content:msg});
+        coachHistory.push({role:'assistant',content:reply});
+        thinkEl.remove();
         appendCoachMsg(reply, 'bot');
-        if (isSpeaking) speakText(reply);
       } catch(e) {
-        removeThinking();
-        console.error('AI Coach error:', e);
-        appendCoachMsg('Error: ' + e.message, 'bot');
+        thinkEl.remove();
+        appendCoachMsg('Connection error: ' + e.message, 'bot');
       }
     };
 
     function appendCoachMsg(text, type) {
       var container = document.getElementById('coachMessages');
-      if (!container) return;
+      if (!container) return null;
       var div = document.createElement('div');
-      div.className = 'ai-msg ' + (type === 'user' ? 'ai-msg-user' : 'ai-msg-bot') + (type === 'bot thinking' ? ' ai-thinking' : '');
-      div.innerHTML = text.replace(/\n/g, '<br>');
+      div.className = 'ai-msg ' + (type === 'user' ? 'ai-msg-user' : 'ai-msg-bot');
+      if (type === 'bot thinking') div.classList.add('ai-thinking');
+      div.innerHTML = text.replace(/
+/g,'<br>');
       container.appendChild(div);
       container.scrollTop = container.scrollHeight;
-    }
-
-    function removeThinking() {
-      var t = document.querySelector('.ai-thinking');
-      if (t) t.remove();
+      return div;
     }
 
     window.quickCoachPrompt = function(btn) {
       var input = document.getElementById('coachInput');
-      if (input) {
-        input.value = btn.textContent.replace(/^[^ ]+ /, '');
-        sendCoachMessage();
-      }
+      if (input) { input.value = btn.textContent.slice(3); sendCoachMessage(); }
     };
 
-    // ── VOICE INPUT (Speech Recognition) ──
     window.toggleVoiceInput = function() {
       if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
-        alert('Voice input is not supported in this browser. Try Chrome or Safari.');
-        return;
+        alert('Voice not supported. Use Chrome or Safari.'); return;
       }
-      if (isListening) {
-        stopListening();
-      } else {
-        startListening();
-      }
-    };
-
-    function startListening() {
-      var SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-      recognition = new SpeechRecognition();
-      recognition.continuous = false;
-      recognition.interimResults = true;
+      if (isListening) { if(recognition) recognition.stop(); return; }
+      var SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+      recognition = new SR();
       recognition.lang = 'en-US';
-
-      var voiceBtn = document.getElementById('voiceBtn');
-      var statusEl = document.getElementById('aiVoiceStatus');
-
-      recognition.onstart = function() {
-        isListening = true;
-        if (voiceBtn) { voiceBtn.style.background = '#ef4444'; voiceBtn.textContent = '⏹'; }
-        if (statusEl) statusEl.textContent = '🔴 Listening...';
+      recognition.continuous = false;
+      recognition.interimResults = false;
+      var btn = document.getElementById('voiceBtn');
+      var status = document.getElementById('aiVoiceStatus');
+      recognition.onstart = function(){ isListening=true; if(btn)btn.textContent='⏹'; if(status)status.textContent='🔴 Listening...'; };
+      recognition.onresult = function(e){ var t=e.results[0][0].transcript; var inp=document.getElementById('coachInput'); if(inp)inp.value=t; };
+      recognition.onend = function(){
+        isListening=false; if(btn)btn.textContent='🎙️'; if(status)status.textContent='';
+        var inp=document.getElementById('coachInput'); if(inp&&inp.value.trim()) sendCoachMessage();
       };
-
-      recognition.onresult = function(event) {
-        var transcript = '';
-        for (var i = event.resultIndex; i < event.results.length; i++) {
-          transcript += event.results[i][0].transcript;
-        }
-        var input = document.getElementById('coachInput');
-        if (input) input.value = transcript;
-      };
-
-      recognition.onend = function() {
-        isListening = false;
-        if (voiceBtn) { voiceBtn.style.background = 'var(--slam-bg)'; voiceBtn.textContent = '🎙️'; }
-        if (statusEl) statusEl.textContent = '';
-        // Auto-send if there's text
-        var input = document.getElementById('coachInput');
-        if (input && input.value.trim()) sendCoachMessage();
-      };
-
-      recognition.onerror = function(e) {
-        isListening = false;
-        if (voiceBtn) { voiceBtn.style.background = 'var(--slam-bg)'; voiceBtn.textContent = '🎙️'; }
-        if (statusEl) statusEl.textContent = '';
-      };
-
+      recognition.onerror = function(){ isListening=false; if(btn)btn.textContent='🎙️'; if(status)status.textContent=''; };
       recognition.start();
-    }
-
-    function stopListening() {
-      if (recognition) recognition.stop();
-    }
-
-    // ── VOICE OUTPUT (Text-to-Speech) ──
-    function speakText(text) {
-      if (!('speechSynthesis' in window)) return;
-      window.speechSynthesis.cancel();
-      var utterance = new SpeechSynthesisUtterance(text.replace(/<[^>]*>/g, ''));
-      utterance.rate = 0.95;
-      utterance.pitch = 1;
-      utterance.volume = 1;
-      // Prefer a natural voice
-      var voices = window.speechSynthesis.getVoices();
-      var preferred = voices.find(function(v) {
-        return v.name.includes('Samantha') || v.name.includes('Google US') || v.name.includes('Alex');
-      });
-      if (preferred) utterance.voice = preferred;
-      window.speechSynthesis.speak(utterance);
-    }
-
-    // Toggle voice output on/off with double-tap mic
-    window.toggleVoiceOutput = function() {
-      isSpeaking = !isSpeaking;
-      var statusEl = document.getElementById('aiVoiceStatus');
-      if (statusEl) statusEl.textContent = isSpeaking ? '🔊 Voice on' : '';
     };
 
         window.signOutUser = function() { window._signOut(window._auth).then(function() { showSearch(); }); };
@@ -1729,7 +1650,6 @@
       document.getElementById('myProfilePage').style.display = 'block';
       document.getElementById('navSearch').style.color = 'rgba(255,255,255,0.72)';
       var nf=document.getElementById('navFeed');if(nf)nf.style.color='rgba(255,255,255,0.72)';
-      var na2=document.getElementById('navAI');if(na2)na2.style.color='rgba(255,255,255,0.72)';
       var user = window._currentUser;
       document.getElementById('mpName').textContent = user.displayName || 'No name';
       document.getElementById('mpEmail').textContent = user.email || '';
@@ -1781,6 +1701,7 @@
       document.getElementById('navSearch').style.color = 'rgba(255,255,255,0.72)';
       document.getElementById('navSaved').style.color = 'rgba(255,255,255,0.72)';
       var nf=document.getElementById('navFeed');if(nf)nf.style.color='rgba(255,255,255,0.72)';
+      var na3=document.getElementById('navAI');if(na3)na3.style.color='rgba(255,255,255,0.72)';
       loadNearbySessions();
     };
     window.loadNearbySessions = async function() {
