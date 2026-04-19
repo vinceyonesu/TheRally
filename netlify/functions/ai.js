@@ -20,44 +20,56 @@ exports.handler = async function(event) {
     }
     if (prompt) msgs.push({ role: 'user', content: prompt });
 
-    const body = JSON.stringify({
-      model: 'google/gemma-3-4b-it:free',
-      messages: msgs,
-      max_tokens: 400
-    });
+    // Try multiple free models in order
+    const models = [
+      'meta-llama/llama-3.3-8b-instruct:free',
+      'google/gemma-3-4b-it:free',
+      'mistralai/mistral-7b-instruct:free',
+      'deepseek/deepseek-r1:free'
+    ];
 
-    const result = await new Promise((resolve, reject) => {
-      const req = https.request({
-        hostname: 'openrouter.ai',
-        path: '/api/v1/chat/completions',
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer ' + process.env.OPENROUTER_KEY,
-          'HTTP-Referer': 'https://therally.netlify.app',
-          'X-Title': 'TheRally',
-          'Content-Length': Buffer.byteLength(body)
-        }
-      }, (res) => {
-        let data = '';
-        res.on('data', chunk => data += chunk);
-        res.on('end', () => resolve(data));
+    let lastError = null;
+    for (const model of models) {
+      const body = JSON.stringify({
+        model: model,
+        messages: msgs,
+        max_tokens: 400
       });
-      req.on('error', reject);
-      req.write(body);
-      req.end();
-    });
 
-    const data = JSON.parse(result);
-    console.log('OpenRouter response:', JSON.stringify(data).substring(0, 500));
-    
-    const text = data.choices && data.choices[0] && data.choices[0].message
-      ? data.choices[0].message.content
-      : (data.error ? data.error.message : null);
+      const result = await new Promise((resolve, reject) => {
+        const req = https.request({
+          hostname: 'openrouter.ai',
+          path: '/api/v1/chat/completions',
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + process.env.OPENROUTER_KEY,
+            'HTTP-Referer': 'https://therally.netlify.app',
+            'X-Title': 'TheRally',
+            'Content-Length': Buffer.byteLength(body)
+          }
+        }, (res) => {
+          let data = '';
+          res.on('data', chunk => data += chunk);
+          res.on('end', () => resolve(data));
+        });
+        req.on('error', reject);
+        req.write(body);
+        req.end();
+      });
 
-    return { statusCode: 200, headers, body: JSON.stringify({ text, debug: data.error || null }) };
+      const data = JSON.parse(result);
+      const text = data.choices && data.choices[0] && data.choices[0].message
+        ? data.choices[0].message.content : null;
+
+      if (text) {
+        return { statusCode: 200, headers, body: JSON.stringify({ text, model }) };
+      }
+      lastError = data.error || { message: 'No content from ' + model };
+    }
+
+    return { statusCode: 200, headers, body: JSON.stringify({ text: null, error: lastError }) };
   } catch (err) {
-    console.error('Function error:', err);
     return { statusCode: 500, headers, body: JSON.stringify({ error: err.message }) };
   }
 };
