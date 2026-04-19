@@ -1497,7 +1497,7 @@
       hideAllPages();
       document.getElementById('myProfilePage').style.display = 'block';
       document.getElementById('navSearch').style.color = 'rgba(255,255,255,0.72)';
-      var nf=document.getElementById('navFeed');if(nf)nf.style.color='rgba(255,255,255,0.72)';if(na)na.style.color='rgba(255,255,255,0.72)';
+      var nf=document.getElementById('navFeed');if(nf)nf.style.color='rgba(255,255,255,0.72)';
       var user = window._currentUser;
       document.getElementById('mpName').textContent = user.displayName || 'No name';
       document.getElementById('mpEmail').textContent = user.email || '';
@@ -1506,7 +1506,7 @@
       var p = profileSnap.exists() ? profileSnap.data() : {};
       if (p.photo || user.photoURL) { document.getElementById('mpPhoto').src = p.photo || user.photoURL; document.getElementById('mpPhoto').style.display = 'block'; document.getElementById('mpInitials').style.display = 'none'; }
       else { document.getElementById('mpInitials').textContent = user.displayName ? user.displayName[0].toUpperCase() : '?'; }
-      if (p.phoneVerified) document.getElementById('mpVerifiedBadge').style.display = 'inline-block';
+      document.getElementById('mpVerifiedBadge').style.display = p.phoneVerified ? 'inline-block' : 'none';
       document.getElementById('mpSkill').textContent = p.skill ? '🎾 ' + p.skill : '';
       document.getElementById('mpUTR').textContent = p.utr ? '📊 UTR ' + p.utr : '';
       document.getElementById('mpBio').textContent = p.bio || '';
@@ -1515,16 +1515,24 @@
       if (p.facebook) socialHtml += '<a href="https://facebook.com/' + p.facebook + '" target="_blank" style="text-decoration:none;font-size:12px;color:#1877f2;background:#f0f5ff;padding:5px 12px;border-radius:999px">📘 Facebook</a>';
       if (p.whatsapp) socialHtml += '<a href="https://wa.me/' + p.whatsapp.replace(/[^0-9]/g,'') + '" target="_blank" style="text-decoration:none;font-size:12px;color:#25d366;background:#f0fff5;padding:5px 12px;border-radius:999px">💬 WhatsApp</a>';
       document.getElementById('mpSocial').innerHTML = socialHtml;
+      document.getElementById('mpGalleryWrap').style.display = 'block';
       if (p.gallery && p.gallery.length > 0) { document.getElementById('mpGallery').innerHTML = p.gallery.map(function(url) { return '<img src="' + url + '" style="width:80px;height:80px;border-radius:10px;object-fit:cover;cursor:pointer" onclick="showPhotoModal(\'' + url + '\')">'; }).join(''); }
       else { document.getElementById('mpGalleryWrap').style.display = 'none'; }
-      var followersQ = window._fbQuery(window._fbCollection(window._db, 'follows'), window._fbWhere('followingId', '==', user.uid));
-      var followingQ = window._fbQuery(window._fbCollection(window._db, 'follows'), window._fbWhere('followerId', '==', user.uid));
-      var followersSnap = await window._fbGetDocs(followersQ);
-      var followingSnap = await window._fbGetDocs(followingQ);
-      var followerIds = []; followersSnap.forEach(function(d) { followerIds.push(d.data().followerId); });
-      var followingIds = []; followingSnap.forEach(function(d) { followingIds.push(d.data().followingId); });
-      document.getElementById('mpFollowerCount').textContent = followersSnap.size;
-      document.getElementById('mpFollowingCount').textContent = followingSnap.size;
+      // Load follower counts
+      try {
+        var followersQ = window._fbQuery(window._fbCollection(window._db, 'follows'), window._fbWhere('followingId', '==', user.uid));
+        var followingQ = window._fbQuery(window._fbCollection(window._db, 'follows'), window._fbWhere('followerId', '==', user.uid));
+        var followersSnap = await window._fbGetDocs(followersQ);
+        var followingSnap = await window._fbGetDocs(followingQ);
+        var fEl = document.getElementById('mpFollowerCount');
+        var fgEl = document.getElementById('mpFollowingCount');
+        if (fEl) fEl.textContent = followersSnap.size;
+        if (fgEl) fgEl.textContent = followingSnap.size;
+        var followerIds = []; followersSnap.forEach(function(d) { followerIds.push(d.data().followerId); });
+        var followingIds = []; followingSnap.forEach(function(d) { followingIds.push(d.data().followingId); });
+      } catch(followErr) {
+        console.log('Follower count error:', followErr);
+      }
       await loadUserSessionsForMyProfile(user.uid);
       // Load badges
       var stats = await getUserStats(user.uid);
