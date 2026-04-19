@@ -206,6 +206,7 @@
           <div style="font-size:12px;font-weight:700;color:#555;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:10px">Action Photos</div>
           <div id="mpGallery" style="display:flex;gap:8px;flex-wrap:wrap"></div>
         </div>
+        <div id="mpStreakWrap" style="margin-bottom:20px;display:none"><div style="background:linear-gradient(135deg,#fff7ed,#fef3c7);border:1.5px solid #fde68a;border-radius:14px;padding:14px 18px;display:flex;align-items:center;gap:14px"><div style="font-size:36px;line-height:1">&#128293;</div><div><div id="mpStreakText" style="font-size:16px;font-weight:800;color:#92400e"></div><div id="mpStreakSub" style="font-size:12px;color:#b45309;margin-top:2px"></div></div></div></div>
         <div style="font-size:12px;font-weight:700;color:#555;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:10px">My Upcoming Sessions</div>
         <div id="mpSessions"></div>
         <div style="font-size:12px;font-weight:700;color:#555;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:10px;margin-top:20px">🏆 My Badges</div>
@@ -818,6 +819,8 @@
       var note = document.getElementById('sessionNote') ? document.getElementById('sessionNote').value.trim() : '';
       if (!date || !time) { alert('Please fill in date and time.'); return; }
       var btn = document.getElementById('postSessionBtn');
+      var _chw = window.checkCourtHoursWarning ? window.checkCourtHoursWarning(courtDataStore[currentModalId]||{}, time) : null;
+      if (_chw && !confirm('\u26a0\ufe0f ' + _chw + '\n\nPost session anyway?')) return;
       btn.textContent = 'Posting...'; btn.disabled = true;
       try {
         var profileRef = window._fbDoc(window._db, 'profiles', window._currentUser.uid);
@@ -1843,7 +1846,85 @@
     };
 
     // ── MY PROFILE ──
-    window.signOutUser = async function() {
+    // STREAK TRACKER
+    async function calculateStreak(uid) {
+      if (!window._db || !uid) return 0;
+      try {
+        var snap = await window._fbGetDocs(window._fbQuery(window._fbCollection(window._db,'sessions'),window._fbWhere('uid','==',uid),window._fbOrderBy('date','desc')));
+        var weeks = {};
+        snap.forEach(function(d) {
+          var s = d.data(); if (!s.date||s.deleted) return;
+          var dt = new Date(s.date+'T00:00:00');
+          var mon = new Date(dt); mon.setDate(dt.getDate()-((dt.getDay()+6)%7));
+          weeks[mon.toISOString().split('T')[0]] = true;
+        });
+        var keys = Object.keys(weeks).sort().reverse();
+        if (!keys.length) return 0;
+        var now = new Date();
+        var cur = new Date(now); cur.setDate(now.getDate()-((now.getDay()+6)%7)); cur.setHours(0,0,0,0);
+        var curK = cur.toISOString().split('T')[0];
+        var prev = new Date(cur); prev.setDate(cur.getDate()-7);
+        var prevK = prev.toISOString().split('T')[0];
+        if (keys[0]!==curK && keys[0]!==prevK) return 0;
+        var streak = 1;
+        for (var i=1;i<keys.length;i++) {
+          var exp = new Date(keys[i-1]+'T00:00:00'); exp.setDate(exp.getDate()-7);
+          if (keys[i]===exp.toISOString().split('T')[0]) { streak++; } else { break; }
+        }
+        return streak;
+      } catch(e) { return 0; }
+    }
+    async function loadStreakForProfile(uid) {
+      var wrap=document.getElementById('mpStreakWrap'),txt=document.getElementById('mpStreakText'),sub=document.getElementById('mpStreakSub');
+      if (!wrap||!txt||!sub) return;
+      var streak = await calculateStreak(uid);
+      if (streak>=1) {
+        txt.textContent = streak+' week'+(streak>1?'s':'')+' in a row!';
+        sub.textContent = streak>=4?'You\'re on fire! Keep it up.':streak>=2?'Great consistency!':'Good start — keep it going!';
+        wrap.style.display='block';
+      } else { wrap.style.display='none'; }
+    }
+
+    // SHARE SESSION LINK
+    window.shareSession = function(sessionId) {
+      var url = window.location.origin + window.location.pathname + '?session=' + sessionId;
+      if (navigator.share) {
+        navigator.share({ title:'Join my tennis session on TheRally!', url:url }).catch(function(e){ if(e.name!=='AbortError') copyShareLink(url); });
+      } else { copyShareLink(url); }
+    };
+    function copyShareLink(text) {
+      if (navigator.clipboard) { navigator.clipboard.writeText(text).then(function(){ showToast('Link copied! \ud83d\udd17'); }); }
+      else { var el=document.createElement('textarea');el.value=text;el.style.position='fixed';el.style.opacity='0';document.body.appendChild(el);el.select();document.execCommand('copy');document.body.removeChild(el);showToast('Link copied!'); }
+    }
+    function showToast(msg) {
+      var t=document.getElementById('_toast');
+      if(!t){t=document.createElement('div');t.id='_toast';t.style.cssText='position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:#1a1a1a;color:#fff;padding:10px 20px;border-radius:999px;font-size:13px;font-weight:600;z-index:9999;opacity:0;transition:opacity .3s;pointer-events:none';document.body.appendChild(t);}
+      t.textContent=msg;t.style.opacity='1';setTimeout(function(){t.style.opacity='0';},2000);
+    }
+
+    // COURT HOURS WARNING
+    window.checkCourtHoursWarning = function(court, time) {
+      if (!court||!court.hours||!time) return null;
+      var days=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+      var dateVal=document.getElementById('sessionDate')?document.getElementById('sessionDate').value:null;
+      if (!dateVal) return null;
+      var dt=new Date(dateVal+'T'+time);
+      var hourStr=court.hours.find(function(h){return h.startsWith(days[dt.getDay()]);});
+      if (!hourStr) return null;
+      var match=hourStr.match(/(\d+:\d+\s*[AP]M)\s*[-\u2013]\s*(\d+:\d+\s*[AP]M)/i);
+      if (!match) return null;
+      var cp=match[2].trim().match(/(\d+):(\d+)\s*([AP]M)/i);
+      if (!cp) return null;
+      var ch=parseInt(cp[1]),cm=parseInt(cp[2]);
+      if (cp[3].toUpperCase()==='PM'&&ch!==12) ch+=12;
+      if (cp[3].toUpperCase()==='AM'&&ch===12) ch=0;
+      var sh=dt.getHours(),sm=dt.getMinutes();
+      if (sh>ch||(sh===ch&&sm>=cm)) return 'Court may be closed at this time (closes '+match[2].trim()+')';
+      if (sh===ch-1) return 'Session starts close to closing time ('+match[2].trim()+')';
+      return null;
+    };
+
+        window.signOutUser = async function() {
       try {
         await window._signOut(window._auth);
         window._currentUser = null;
@@ -1895,6 +1976,7 @@
         console.log('Follower count error:', followErr);
       }
       await loadUserSessionsForMyProfile(user.uid);
+      loadStreakForProfile(user.uid);
       // Load badges
       var stats = await getUserStats(user.uid);
       renderBadges(stats, 'mpBadges');
@@ -2074,6 +2156,17 @@
       } catch (err) { console.log('Error loading nearby sessions:', err); list.innerHTML = '<div style="text-align:center;padding:40px;color:#888;font-size:14px">Could not load sessions. Try again.</div>'; }
       // Load weather after cards render
       loadWeatherForSessions(sessions);
+      // Add share buttons
+      var _cards = document.querySelectorAll('#nearbySessionsList > div[data-sid]');
+      sessions.forEach(function(s,si){
+        var allC=document.querySelectorAll('#nearbySessionsList > div');
+        var card=allC[si]; if(!card) return;
+        var footer=card.querySelector('div[style*="justify-content:space-between"]'); if(!footer) return;
+        var sb=document.createElement('button');
+        sb.innerHTML='&#128279;'; sb.title='Share'; sb.style.cssText='background:#f0f4ff;color:#2563eb;border:1px solid #bfdbfe;border-radius:8px;padding:5px 9px;font-size:13px;cursor:pointer';
+        sb.onclick=(function(id){return function(){shareSession(id);};})(s.id);
+        footer.appendChild(sb);
+      });
     };
 
     async function loadWeatherForSessions(sessions) {
