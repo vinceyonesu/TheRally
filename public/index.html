@@ -555,6 +555,49 @@
 
   </div>
 
+  <!-- SIGN IN MODAL -->
+  <div id="signInModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.65);backdrop-filter:blur(10px);z-index:9000;justify-content:center;align-items:center;padding:20px">
+    <div style="background:#ffffff;border-radius:24px;width:90%;max-width:420px;overflow:hidden;box-shadow:0 32px 80px rgba(0,0,0,0.3);animation:modalUp .3s cubic-bezier(0.34,1.56,0.64,1) both">
+      <div style="background:var(--slam-nav,#1a5c32);padding:28px 28px 22px;text-align:center;position:relative">
+        <button onclick="closeSignInModal()" style="position:absolute;top:14px;right:14px;background:rgba(255,255,255,0.15);border:none;border-radius:50%;width:32px;height:32px;color:#fff;font-size:16px;cursor:pointer;line-height:1">✕</button>
+        <div style="font-size:32px;margin-bottom:10px">🎾</div>
+        <div style="font-family:'Syne',sans-serif;font-size:22px;font-weight:800;color:#ffffff;letter-spacing:-0.5px">Welcome to TheRally</div>
+        <div style="font-size:13px;color:rgba(255,255,255,0.65);margin-top:6px">Sign in to find courts &amp; hitting partners</div>
+      </div>
+      <div style="padding:24px 28px 28px">
+        <div id="authError" style="display:none;background:#fdecea;color:#c0392b;border:1px solid #f5c6c6;border-radius:10px;padding:10px 14px;font-size:13px;margin-bottom:16px;text-align:center"></div>
+        <button onclick="signInWithGoogle()" style="width:100%;display:flex;align-items:center;justify-content:center;gap:12px;background:#ffffff;border:1.5px solid #e0e0e0;border-radius:12px;padding:13px 20px;font-size:15px;font-weight:600;color:#1a1a1a;cursor:pointer;margin-bottom:16px;font-family:'Inter',sans-serif;box-sizing:border-box;transition:all .2s" onmouseover="this.style.borderColor='#bbb';this.style.boxShadow='0 4px 16px rgba(0,0,0,0.1)'" onmouseout="this.style.borderColor='#e0e0e0';this.style.boxShadow='none'">
+          <svg width="20" height="20" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.18 1.48-4.97 2.31-8.16 2.31-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>
+          Continue with Google
+        </button>
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px">
+          <div style="flex:1;height:1px;background:#e8e8e8"></div>
+          <div style="font-size:13px;color:#aaa;font-weight:500">or</div>
+          <div style="flex:1;height:1px;background:#e8e8e8"></div>
+        </div>
+        <div style="margin-bottom:12px">
+          <label style="font-size:13px;font-weight:600;color:#333;display:block;margin-bottom:6px">Email</label>
+          <input type="email" id="authEmail" placeholder="Enter your email" style="width:100%;border:1.5px solid #e0e0e0;border-radius:10px;padding:12px 14px;font-size:14px;font-family:'Inter',sans-serif;color:#1a1a1a;outline:none;box-sizing:border-box" onfocus="this.style.borderColor='var(--slam-primary,#1a5c32)'" onblur="this.style.borderColor='#e0e0e0'" onkeydown="if(event.key==='Enter')handleEmailAuth()"/>
+        </div>
+        <div style="margin-bottom:6px">
+          <label style="font-size:13px;font-weight:600;color:#333;display:block;margin-bottom:6px">Password</label>
+          <div style="position:relative">
+            <input type="password" id="authPassword" placeholder="Enter your password" style="width:100%;border:1.5px solid #e0e0e0;border-radius:10px;padding:12px 44px 12px 14px;font-size:14px;font-family:'Inter',sans-serif;color:#1a1a1a;outline:none;box-sizing:border-box" onfocus="this.style.borderColor='var(--slam-primary,#1a5c32)'" onblur="this.style.borderColor='#e0e0e0'" onkeydown="if(event.key==='Enter')handleEmailAuth()"/>
+            <button onclick="togglePasswordVisibility()" id="pwToggleBtn" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:#aaa;font-size:16px;padding:0;line-height:1">👁</button>
+          </div>
+        </div>
+        <div style="text-align:right;margin-bottom:20px">
+          <span onclick="handleForgotPassword()" style="font-size:13px;color:var(--slam-primary,#1a5c32);cursor:pointer;font-weight:600">Forgot your password?</span>
+        </div>
+        <button id="emailAuthBtn" onclick="handleEmailAuth()" style="width:100%;background:var(--slam-primary,#1a5c32);color:#ffffff;border:none;border-radius:12px;padding:14px;font-size:15px;font-weight:700;font-family:'Inter',sans-serif;cursor:pointer;margin-bottom:14px;box-sizing:border-box;transition:all .2s" onmouseover="this.style.filter='brightness(1.12)'" onmouseout="this.style.filter=''">Log in</button>
+        <div style="text-align:center;font-size:13px;color:#888">
+          <span id="authToggleText">Don&#39;t have an account?</span>
+          <span onclick="toggleAuthMode()" style="color:var(--slam-primary,#1a5c32);font-weight:700;cursor:pointer;margin-left:4px" id="authToggleLink">Sign up</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- MAP -->
   <div class="map-section">
     <!-- Heatmap controls -->
@@ -920,19 +963,86 @@
     // ── AUTH ──
     window.handleAuthClick = function() {
       if (window._currentUser) { showMyProfile(); return; }
-      if (!window._signInWithPopup) { alert('Firebase still loading, try again.'); return; }
-      var provider = new window._GoogleAuthProvider();
-      window._signInWithPopup(window._auth, provider)
-        .then(function(result) { console.log('Signed in:', result.user.displayName); })
-        .catch(function(err) {
-          if (err.code === 'auth/popup-closed-by-user' || err.code === 'auth/cancelled-popup-request') return;
-          console.log('Sign in error:', err); alert('Sign in failed. Please try again.');
+      openSignInModal();
+    };
+    window.openSignInModal = function() {
+      var m=document.getElementById('signInModal'); if(m){m.style.display='flex';document.body.style.overflow='hidden';} clearAuthErr();
+    };
+    window.closeSignInModal = function() {
+      var m=document.getElementById('signInModal'); if(m){m.style.display='none';document.body.style.overflow='';}
+      var em=document.getElementById('authEmail');if(em)em.value='';
+      var pw=document.getElementById('authPassword');if(pw)pw.value='';
+      clearAuthErr();
+    };
+    function clearAuthErr(){var e=document.getElementById('authError');if(!e)return;e.style.display='none';e.textContent='';e.style.background='#fdecea';e.style.color='#c0392b';e.style.borderColor='#f5c6c6';}
+    function showAuthErr(msg){var e=document.getElementById('authError');if(e){e.style.display='block';e.textContent=msg;}}
+    var authMode='login';
+    window.toggleAuthMode=function(){
+      authMode=authMode==='login'?'signup':'login';
+      var btn=document.getElementById('emailAuthBtn');
+      var tt=document.getElementById('authToggleText');
+      var tl=document.getElementById('authToggleLink');
+      if(authMode==='signup'){if(btn)btn.textContent='Create Account';if(tt)tt.textContent='Already have an account?';if(tl)tl.textContent='Log in';}
+      else{if(btn)btn.textContent='Log in';if(tt)tt.textContent='Don&#39;t have an account?';if(tl)tl.textContent='Sign up';}
+      clearAuthErr();
+    };
+    window.togglePasswordVisibility=function(){
+      var pw=document.getElementById('authPassword');var btn=document.getElementById('pwToggleBtn');
+      if(!pw)return;
+      if(pw.type==='password'){pw.type='text';if(btn)btn.textContent='🙈';}
+      else{pw.type='password';if(btn)btn.textContent='👁';}
+    };
+    window.signInWithGoogle=function(){
+      if(!window._signInWithPopup){showAuthErr('Firebase still loading, try again.');return;}
+      clearAuthErr();
+      var provider=new window._GoogleAuthProvider();
+      window._signInWithPopup(window._auth,provider)
+        .then(function(){closeSignInModal();})
+        .catch(function(err){
+          if(err.code==='auth/popup-closed-by-user'||err.code==='auth/cancelled-popup-request')return;
+          showAuthErr('Google sign-in failed. Please try again.');
         });
     };
+    window.handleEmailAuth=function(){
+      var email=document.getElementById('authEmail').value.trim();
+      var password=document.getElementById('authPassword').value;
+      if(!email||!password){showAuthErr('Please enter your email and password.');return;}
+      if(password.length<6){showAuthErr('Password must be at least 6 characters.');return;}
+      clearAuthErr();
+      var btn=document.getElementById('emailAuthBtn');
+      if(btn){btn.textContent='Please wait...';btn.disabled=true;}
+      var action=authMode==='signup'
+        ?window._createUserWithEmailAndPassword(window._auth,email,password)
+        :window._signInWithEmailAndPassword(window._auth,email,password);
+      action
+        .then(function(){if(btn){btn.textContent=authMode==='signup'?'Create Account':'Log in';btn.disabled=false;}closeSignInModal();})
+        .catch(function(err){
+          if(btn){btn.textContent=authMode==='signup'?'Create Account':'Log in';btn.disabled=false;}
+          var msg='Something went wrong. Please try again.';
+          if(err.code==='auth/user-not-found'||err.code==='auth/wrong-password'||err.code==='auth/invalid-credential')msg='Incorrect email or password.';
+          else if(err.code==='auth/email-already-in-use')msg='An account with this email already exists.';
+          else if(err.code==='auth/invalid-email')msg='Please enter a valid email address.';
+          else if(err.code==='auth/weak-password')msg='Password is too weak. Use at least 6 characters.';
+          else if(err.code==='auth/too-many-requests')msg='Too many attempts. Please try again later.';
+          showAuthErr(msg);
+        });
+    };
+    window.handleForgotPassword=function(){
+      var email=document.getElementById('authEmail').value.trim();
+      if(!email){showAuthErr('Enter your email above first.');return;}
+      clearAuthErr();
+      window._sendPasswordResetEmail(window._auth,email)
+        .then(function(){var e=document.getElementById('authError');if(e){e.style.display='block';e.textContent='Reset email sent! Check your inbox.';e.style.background='#e8f5ee';e.style.color='#1a6b3c';e.style.borderColor='#c3e6cb';}})
+        .catch(function(err){if(err.code==='auth/user-not-found')showAuthErr('No account found with this email.');else showAuthErr('Could not send reset email.');});
+    };
+    document.addEventListener('DOMContentLoaded',function(){
+      var modal=document.getElementById('signInModal');
+      if(modal)modal.addEventListener('click',function(e){if(e.target===modal)closeSignInModal();});
+    });
     // ── HIDE ALL PAGES HELPER ──
     function hideAllPages() {
       var ids = ['heroSection','savedSection','nearbyPage','profilePage','myProfilePage',
-                 'viewProfilePage','feedPage','playerCardPage','leaderboardPage','aiCoachPage'];
+                 'viewProfilePage','feedPage','playerCardPage','leaderboardPage'];
       ids.forEach(function(id){ var el=document.getElementById(id); if(el) el.style.display='none'; });
       var ms = document.getElementById('map'); if(ms) ms.closest('.map-section').style.display='none';
       var rg = document.getElementById('resultsGrid'); if(rg) rg.parentElement.style.display='none';
@@ -1730,7 +1840,10 @@
             if (typeof p === 'object' && p.photo) playerAvatars += '<img src="' + p.photo + '" style="width:22px;height:22px;border-radius:50%;object-fit:cover;border:2px solid #fff;margin-right:-4px"/>';
             else { var pName = typeof p === 'string' ? p : p.name || '?'; playerAvatars += '<div style="width:22px;height:22px;border-radius:50%;background:#1a6b3c;display:flex;align-items:center;justify-content:center;font-size:9px;color:#fff;font-weight:700;border:2px solid #fff;margin-right:-4px">' + pName[0].toUpperCase() + '</div>'; }
           });
-          list.innerHTML += '<div style="background:#ffffff;border:1px solid #ebebeb;border-radius:16px;padding:16px 18px;margin-bottom:12px;transition:box-shadow 0.2s" onmouseover="this.style.boxShadow=\'0 4px 20px rgba(0,0,0,0.08)\'" onmouseout="this.style.boxShadow=\'none\'"><div style="display:flex;align-items:flex-start;gap:12px">' + avatarHtml + '<div style="flex:1;min-width:0"><div style="display:flex;align-items:center;flex-wrap:wrap;gap:4px;margin-bottom:4px"><span style="font-size:14px;font-weight:700;color:#1a1a1a;cursor:pointer;text-decoration:underline" onclick="viewProfile(\'' + s.uid + '\')">' + s.name + '</span>' + verifiedBadge + '</div><div style="font-size:12px;color:#888;margin-bottom:6px"><span style="background:' + (isToday ? '#e6f9ee' : '#f0f0f0') + ';color:' + (isToday ? '#1a6b3c' : '#555') + ';font-weight:600;padding:2px 8px;border-radius:999px;font-size:11px">' + (isToday ? 'Today' : dateStr) + '</span> at <strong>' + timeStr + '</strong>' + distanceBadge + '</div><div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px"><span style="background:#f0f0f0;color:#555;font-size:11px;font-weight:500;padding:3px 10px;border-radius:999px">' + s.type + '</span><span style="background:#f0f0f0;color:#555;font-size:11px;font-weight:500;padding:3px 10px;border-radius:999px">' + s.skill + '</span>' + (s.courtName ? '<span style="background:#e6f9ee;color:#1a6b3c;font-size:11px;font-weight:500;padding:3px 10px;border-radius:999px">📍 ' + s.courtName + '</span>' : '') + '</div>' + (s.gallery && s.gallery.length > 0 ? '<div style="display:flex;gap:6px;margin-bottom:8px">' + s.gallery.map(function(url) { return '<img src="' + url + '" style="width:60px;height:60px;border-radius:8px;object-fit:cover;border:1px solid #e8e8e8;cursor:pointer" onclick="showPhotoModal(\'' + url + '\')">'; }).join('') + '</div>' : '') + (socialLinks ? '<div style="margin-bottom:8px">' + socialLinks + '</div>' : '') + '<div style="display:flex;align-items:center;justify-content:space-between"><div style="display:flex;align-items:center;gap:4px">' + playerAvatars + '<span style="font-size:11px;color:#888;margin-left:10px">' + playersCount + ' player' + (playersCount !== 1 ? 's' : '') + ' going</span></div>' + (isOwner ? '<div style="display:flex;gap:6px"><span style="font-size:11px;color:#1a6b3c;font-weight:600;align-self:center">Your session</span><button onclick="deleteSession(\'' + s.id + '\', null)" style="background:#fdecea;color:#c0392b;border:1px solid #f5c6c6;border-radius:8px;padding:4px 10px;font-size:11px;font-weight:600;font-family:\'Plus Jakarta Sans\',sans-serif;cursor:pointer">Cancel</button></div>' : '<button onclick="joinSessionFromNearby(\'' + s.id + '\')" style="background:#e6f9ee;color:#1a6b3c;border:1px solid #1a6b3c;border-radius:8px;padding:5px 14px;font-size:12px;font-weight:600;font-family:\'Plus Jakarta Sans\',sans-serif;cursor:pointer">I\'m In!</button>') + (s.note ? '<div style="margin-top:8px;padding:8px 12px;background:rgba(0,0,0,0.04);border-radius:8px;font-size:12px;color:#555;border-left:3px solid #1a6b3c">📝 ' + s.note + '</div>' : '') + (s.courtLat ? '<div style="margin-top:10px"><a href="https://www.google.com/maps/dir/?api=1&destination=' + s.courtLat + ',' + s.courtLng + '" target="_blank" style="display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:600;color:#1a6b3c;text-decoration:none;background:#e6f9ee;padding:7px 14px;border-radius:8px;border:1px solid #1a6b3c">📍 Get Directions to Court</a></div>' : '') + '</div></div></div></div>';
+          list.innerHTML += '<div style="background:#ffffff;border:1px solid #ebebeb;border-radius:16px;padding:16px 18px;margin-bottom:12px;transition:box-shadow 0.2s" onmouseover="this.style.boxShadow=\'0 4px 20px rgba(0,0,0,0.08)\'" onmouseout="this.style.boxShadow=\'none\'"><div style="display:flex;align-items:flex-start;gap:12px">' + avatarHtml + '<div style="flex:1;min-width:0"><div style="display:flex;align-items:center;flex-wrap:wrap;gap:4px;margin-bottom:4px"><span style="font-size:14px;font-weight:700;color:#1a1a1a;cursor:pointer;text-decoration:underline" onclick="viewProfile(\'' + s.uid + '\')">' + s.name + '</span>' + verifiedBadge + '</div><div style="font-size:12px;color:#888;margin-bottom:6px"><span style="background:' + (isToday ? '#e6f9ee' : '#f0f0f0') + ';color:' + (isToday ? '#1a6b3c' : '#555') + ';font-weight:600;padding:2px 8px;border-radius:999px;font-size:11px">' + (isToday ? 'Today' : dateStr) + '</span> at <strong>' + timeStr + '</strong>' + distanceBadge + '</div><div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px"><span style="background:#f0f0f0;color:#555;font-size:11px;font-weight:500;padding:3px 10px;border-radius:999px">' + s.type + '</span><span style="background:#f0f0f0;color:#555;font-size:11px;font-weight:500;padding:3px 10px;border-radius:999px">' + s.skill + '</span>' + (s.courtName ? '<span style="background:#e6f9ee;color:#1a6b3c;font-size:11px;font-weight:500;padding:3px 10px;border-radius:999px">📍 ' + s.courtName + '</span>' : '') + '</div>' + (s.gallery && s.gallery.length > 0 ? '<div style="display:flex;gap:6px;margin-bottom:8px">' + s.gallery.map(function(url) { return '<img src="' + url + '" style="width:60px;height:60px;border-radius:8px;object-fit:cover;border:1px solid #e8e8e8;cursor:pointer" onclick="showPhotoModal(\'' + url + '\')">'; }).join('') + '</div>' : '') + (socialLinks ? '<div style="margin-bottom:8px">' + socialLinks + '</div>' : '') + '<div style="display:flex;align-items:center;justify-content:space-between"><div style="display:flex;align-items:center;gap:4px">' + playerAvatars + '<span style="font-size:11px;color:#888;margin-left:10px">' + playersCount + ' player' + (playersCount !== 1 ? 's' : '') + ' going</span></div>' + (isOwner ? '<div style="display:flex;gap:6px"><span style="font-size:11px;color:#1a6b3c;font-weight:600;align-self:center">Your session</span><button onclick="deleteSession(\'' + s.id + '\', null)" style="background:#fdecea;color:#c0392b;border:1px solid #f5c6c6;border-radius:8px;padding:4px 10px;font-size:11px;font-weight:600;font-family:\'Plus Jakarta Sans\',sans-serif;cursor:pointer">Cancel</button></div>' : '<button onclick="joinSessionFromNearby(\'' + s.id + '\')" style="background:#e6f9ee;color:#1a6b3c;border:1px solid #1a6b3c;border-radius:8px;padding:5px 14px;font-size:12px;font-weight:600;font-family:\'Plus Jakarta Sans\',sans-serif;cursor:pointer">I\'m In!</button>') + '</div>'
+            + (s.note ? '<div style="margin-top:8px;padding:8px 12px;background:rgba(0,0,0,0.03);border-radius:8px;font-size:12px;color:#555;border-left:3px solid #1a6b3c">' + s.note + '</div>' : '')
+            + (s.courtLat ? '<a href="https://www.google.com/maps/dir/?api=1&destination=' + s.courtLat + ',' + s.courtLng + '" target="_blank" style="margin-top:8px;display:flex;align-items:center;justify-content:center;gap:6px;font-size:12px;font-weight:600;color:#1a6b3c;text-decoration:none;background:#e6f9ee;padding:9px;border-radius:8px;border:1px solid #1a6b3c">📍 Get Directions to Court</a>' : '')
+            + '</div></div></div>';
         });
       } catch (err) { console.log('Error loading nearby sessions:', err); list.innerHTML = '<div style="text-align:center;padding:40px;color:#888;font-size:14px">Could not load sessions. Try again.</div>'; }
     };
@@ -2353,7 +2466,7 @@
     // ── HIDE ALL PAGES ──
     function hideAllPages() {
       var ids = ['heroSection','savedSection','nearbyPage','profilePage','myProfilePage',
-                 'viewProfilePage','feedPage','playerCardPage','leaderboardPage','aiCoachPage'];
+                 'viewProfilePage','feedPage','playerCardPage','leaderboardPage'];
       ids.forEach(function(id) {
         var el = document.getElementById(id);
         if (el) el.style.display = 'none';
@@ -3056,7 +3169,7 @@ document.addEventListener('DOMContentLoaded',function(){
 
   <script type="module">
     import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
-    import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged, PhoneAuthProvider, RecaptchaVerifier, signInWithCredential } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
+    import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged, PhoneAuthProvider, RecaptchaVerifier, signInWithCredential, createUserWithEmailAndPassword, signInWithEmailAndPassword, sendPasswordResetEmail, updateProfile } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
     import { getStorage, ref, uploadBytes, getDownloadURL } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js';
     import { getFirestore, collection, addDoc, getDocs, query, where, orderBy, Timestamp, updateDoc, doc, arrayUnion, setDoc, getDoc, deleteDoc, onSnapshot } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
     
@@ -3086,6 +3199,9 @@ document.addEventListener('DOMContentLoaded',function(){
     window._GoogleAuthProvider = GoogleAuthProvider; window._signInWithPopup = signInWithPopup;
     window._signOut = signOut; window._PhoneAuthProvider = PhoneAuthProvider;
     window._RecaptchaVerifier = RecaptchaVerifier; window._signInWithCredential = signInWithCredential;
+    window._createUserWithEmailAndPassword = createUserWithEmailAndPassword;
+    window._signInWithEmailAndPassword = signInWithEmailAndPassword;
+    window._sendPasswordResetEmail = sendPasswordResetEmail;
 
     onAuthStateChanged(auth, async function(user) {
       window._currentUser = user;
