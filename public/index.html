@@ -27,7 +27,7 @@
       <a href="#" id="navSearch" onclick="showSearch()">Search</a>
       <a href="#" id="navNearby" onclick="showNearby()">🎾 Players Near You</a>
       <a href="#" id="navFeed" onclick="showActivityFeed()">📰 Feed</a>
-      <button id="darkModeBtn" onclick="toggleDarkMode()" title="Toggle dark mode" style="background:none;border:none;cursor:pointer;font-size:18px;padding:4px 8px;border-radius:20px;transition:background .2s;color:#fff;line-height:1" onmouseover="this.style.background='rgba(255,255,255,0.1)'" onmouseout="this.style.background='transparent'">🌙</button>
+      <button id="darkModeBtn" onclick="toggleDarkMode()" title="Toggle dark mode" style="background:none;border:none;cursor:pointer;font-size:18px;padding:4px 8px;border-radius:20px;color:#fff;line-height:1" onmouseover="this.style.background='rgba(255,255,255,0.1)'" onmouseout="this.style.background='transparent'">🌙</button>
       <div id="authBtn" onclick="handleAuthClick()" style="display:flex;align-items:center;gap:8px;cursor:pointer;background:#f0f0f0;border-radius:50px;padding:6px 14px 6px 6px;transition:all 0.2s" onmouseover="this.style.background='#e6f9ee'" onmouseout="this.style.background=window._currentUser?'#e6f9ee':'#f0f0f0'">
         <div id="authAvatar" style="width:28px;height:28px;border-radius:50%;background:#1a6b3c;display:flex;align-items:center;justify-content:center;font-size:12px;color:#fff;font-weight:700;overflow:hidden">
           <span id="authAvatarText">?</span>
@@ -845,6 +845,7 @@
           var playersCount = s.players ? s.players.length : 1;
           var isCheckedIn1 = window._checkedInUids && window._checkedInUids.indexOf(s.uid) > -1;
           var checkBadge1 = isCheckedIn1 ? '<div style="position:absolute;bottom:-2px;right:-2px;width:16px;height:16px;border-radius:50%;background:#22c55e;border:2px solid #fff;display:flex;align-items:center;justify-content:center"><svg width="8" height="8" viewBox="0 0 10 8" fill="none"><path d="M1 4l2.5 2.5L9 1" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>' : '';
+          var weatherBadge = '';
           var avatarHtml = '<div style="position:relative;flex-shrink:0;display:inline-block">' + (s.photo ? '<img src="' + s.photo + '" style="width:36px;height:36px;border-radius:50%;object-fit:cover;border:2px solid #e8e8e8"/>' : '<div style="width:36px;height:36px;border-radius:50%;background:#1a6b3c;display:flex;align-items:center;justify-content:center;font-size:14px;color:#fff;font-weight:700">' + (s.name ? s.name[0].toUpperCase() : '?') + '</div>') + checkBadge1 + '</div>';
           var verifiedBadge = s.phoneVerified ? '<span style="background:#e6f9ee;color:#1a6b3c;font-size:10px;font-weight:600;padding:2px 8px;border-radius:999px;margin-left:6px">✅ Verified</span>' : '';
           var socialLinks = '';
@@ -1417,6 +1418,23 @@
 
 
         // ── PROFILE PHOTO UPLOADS ──
+    // ── DARK MODE ──
+    window.toggleDarkMode = function() {
+      var isDark = document.documentElement.classList.toggle('dark-mode');
+      localStorage.setItem('therally_dark', isDark ? '1' : '0');
+      var btn = document.getElementById('darkModeBtn');
+      if (btn) btn.textContent = isDark ? '☀️' : '🌙';
+    };
+    (function() {
+      if (localStorage.getItem('therally_dark') === '1') {
+        document.documentElement.classList.add('dark-mode');
+        document.addEventListener('DOMContentLoaded', function() {
+          var btn = document.getElementById('darkModeBtn');
+          if (btn) btn.textContent = '☀️';
+        });
+      }
+    })();
+
     window.uploadMyProfilePhoto = async function(input) {
       if (!input.files || !input.files[0]) return;
       if (!window._currentUser) { alert('Please sign in first.'); return; }
@@ -1748,7 +1766,28 @@
             + '</div></div></div>';
         }
       } catch (err) { console.log('Error loading nearby sessions:', err); list.innerHTML = '<div style="text-align:center;padding:40px;color:#888;font-size:14px">Could not load sessions. Try again.</div>'; }
+      // Load weather after cards render
+      loadWeatherForSessions(sessions);
     };
+
+    async function loadWeatherForSessions(sessions) {
+      if (!sessions || !sessions.length) return;
+      for (var wi = 0; wi < sessions.length; wi++) {
+        var ws = sessions[wi];
+        if (!ws.courtLat || !ws.courtLng || !ws.date || !ws.id) continue;
+        try {
+          var wRes = await fetch('https://api.open-meteo.com/v1/forecast?latitude='+ws.courtLat+'&longitude='+ws.courtLng+'&daily=weathercode,temperature_2m_max&timezone=auto&start_date='+ws.date+'&end_date='+ws.date);
+          var wData = await wRes.json();
+          if (wData.daily && wData.daily.temperature_2m_max) {
+            var wTemp = Math.round(wData.daily.temperature_2m_max[0]*9/5+32);
+            var wCode = wData.daily.weathercode[0];
+            var wLabel = wCode<=1?'Sunny':wCode<=3?'Cloudy':wCode<=67?'Rainy':'Snowy';
+            var wEl = document.getElementById('weather_'+ws.id);
+            if (wEl) wEl.innerHTML = '<span style="background:#fff8e1;color:#e65100;font-size:10px;font-weight:600;padding:2px 7px;border-radius:999px;margin-left:4px">'+wTemp+'F '+wLabel+'</span>';
+          }
+        } catch(e) {}
+      }
+    }
     window.joinSessionFromNearby = async function(sessionId) {
       if (!window._currentUser) { alert('Please sign in to join a session!'); handleAuthClick(); return; }
       try {
