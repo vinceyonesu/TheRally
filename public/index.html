@@ -3349,7 +3349,7 @@ document.addEventListener('DOMContentLoaded',function(){
     import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
     import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged, PhoneAuthProvider, RecaptchaVerifier, signInWithCredential, createUserWithEmailAndPassword, signInWithEmailAndPassword, sendPasswordResetEmail, updateProfile } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
     import { getStorage, ref, uploadBytes, getDownloadURL } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js';
-    import { getFirestore, collection, addDoc, getDocs, query, where, orderBy, Timestamp, updateDoc, doc, arrayUnion, setDoc, getDoc, deleteDoc, onSnapshot } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
+    import { getFirestore, collection, addDoc, getDocs, query, where, orderBy, Timestamp, updateDoc, doc, arrayUnion, setDoc, getDoc, deleteDoc, onSnapshot, limit, increment, arrayRemove } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
     
 
     const firebaseConfig = {
@@ -3374,6 +3374,7 @@ document.addEventListener('DOMContentLoaded',function(){
     window._fbArrayUnion = arrayUnion; window._fbSetDoc = setDoc; window._fbGetDoc = getDoc;
     window._fbDeleteDoc = deleteDoc;
     window._fbOnSnapshot = onSnapshot;
+    window._fbLimit = limit; window._fbIncrement = increment; window._fbArrayRemove = arrayRemove;
     window._GoogleAuthProvider = GoogleAuthProvider; window._signInWithPopup = signInWithPopup;
     window._signOut = signOut; window._PhoneAuthProvider = PhoneAuthProvider;
     window._RecaptchaVerifier = RecaptchaVerifier; window._signInWithCredential = signInWithCredential;
