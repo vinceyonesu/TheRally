@@ -1763,7 +1763,9 @@
       if (!sessions || !sessions.length) return;
       for (var wi = 0; wi < sessions.length; wi++) {
         var ws = sessions[wi];
-        if (!ws.courtLat || !ws.courtLng || !ws.date || !ws.id) continue;
+        if (!ws.courtLat || !ws.courtLng || !ws.date) continue;
+        var list = document.getElementById('nearbySessionsList');
+        var cards = list ? Array.from(list.children) : [];
         try {
           var wRes = await fetch('https://api.open-meteo.com/v1/forecast?latitude='+ws.courtLat+'&longitude='+ws.courtLng+'&daily=weathercode,temperature_2m_max,temperature_2m_min,precipitation_sum,wind_speed_10m_max,uv_index_max&timezone=auto&start_date='+ws.date+'&end_date='+ws.date);
           var wData = await wRes.json();
@@ -1779,9 +1781,13 @@
             var wLabel = {sun:'Sunny',partly:'Partly Cloudy',cloud:'Cloudy',rain:'Rainy',snow:'Snowy',storm:'Stormy'}[wIcon];
             var wTip   = wCode>=51?'Rain expected - bring a cover!':wMax>=90?'Hot day - stay hydrated!':wUV>=8?'High UV - wear sunscreen!':'Good conditions!';
             var wTipIcon = wCode>=51?'\u26a0\ufe0f':wMax>=90?'\ud83c\udf21\ufe0f':wUV>=8?'\ud83d\udd76\ufe0f':'\u2705';
-            var wEl = document.getElementById('weather_'+ws.id);
-            if (wEl) {
-              buildWeatherWidget(wEl, ws.id, wEmoji, wLabel, wMax, wMin, wRain, wWind, wUV, wTipIcon, wTip);
+            // Find card by index and append weather widget
+            var card = cards[wi];
+            if (card) {
+              var wEl = document.createElement('div');
+              wEl.style.marginTop = '4px';
+              card.appendChild(wEl);
+              buildWeatherWidget(wEl, wi, wEmoji, wLabel, wMax, wMin, wRain, wWind, wUV, wTipIcon, wTip);
             }
           }
         } catch(e) { console.log('weather err', e); }
