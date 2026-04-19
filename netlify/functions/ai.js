@@ -7,13 +7,8 @@ exports.handler = async function(event) {
     'Content-Type': 'application/json'
   };
 
-  if (event.httpMethod === 'OPTIONS') {
-    return { statusCode: 200, headers, body: '' };
-  }
-
-  if (event.httpMethod !== 'POST') {
-    return { statusCode: 405, headers, body: 'Method Not Allowed' };
-  }
+  if (event.httpMethod === 'OPTIONS') return { statusCode: 200, headers, body: '' };
+  if (event.httpMethod !== 'POST') return { statusCode: 405, headers, body: 'Method Not Allowed' };
 
   try {
     const { prompt, systemPrompt, messages } = JSON.parse(event.body);
@@ -26,9 +21,9 @@ exports.handler = async function(event) {
     if (prompt) msgs.push({ role: 'user', content: prompt });
 
     const body = JSON.stringify({
-      model: 'meta-llama/llama-3.3-8b-instruct:free',
+      model: 'google/gemma-3-4b-it:free',
       messages: msgs,
-      max_tokens: 300
+      max_tokens: 400
     });
 
     const result = await new Promise((resolve, reject) => {
@@ -40,7 +35,7 @@ exports.handler = async function(event) {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer ' + process.env.OPENROUTER_KEY,
           'HTTP-Referer': 'https://therally.netlify.app',
-          'X-Title': 'TheRally Tennis',
+          'X-Title': 'TheRally',
           'Content-Length': Buffer.byteLength(body)
         }
       }, (res) => {
@@ -54,12 +49,15 @@ exports.handler = async function(event) {
     });
 
     const data = JSON.parse(result);
+    console.log('OpenRouter response:', JSON.stringify(data).substring(0, 500));
+    
     const text = data.choices && data.choices[0] && data.choices[0].message
       ? data.choices[0].message.content
-      : null;
+      : (data.error ? data.error.message : null);
 
-    return { statusCode: 200, headers, body: JSON.stringify({ text }) };
+    return { statusCode: 200, headers, body: JSON.stringify({ text, debug: data.error || null }) };
   } catch (err) {
+    console.error('Function error:', err);
     return { statusCode: 500, headers, body: JSON.stringify({ error: err.message }) };
   }
 };
