@@ -1455,7 +1455,7 @@
       try {
         var q = window._fbQuery(window._fbCollection(window._db,'notifications'),
           window._fbWhere('toUid','==',window._currentUser.uid),
-          window._fbOrderBy('createdAt','desc'), window._fbLimit(20));
+          window._fbOrderBy('createdAt','desc'));
         var snap = await window._fbGetDocs(q);
         if (snap.empty) { list.innerHTML = '<div style="text-align:center;padding:32px;color:#aaa;font-size:13px">No notifications yet</div>'; return; }
         var html = ''; var unread = 0;
@@ -1785,9 +1785,7 @@
         var q = window._fbQuery(
           window._fbCollection(window._db, 'comments'),
           window._fbWhere('sessionId', '==', sessionId),
-          window._fbOrderBy('createdAt', 'asc'),
-          window._fbLimit(20)
-        );
+          window._fbOrderBy('createdAt', 'asc'));
         var snap = await window._fbGetDocs(q);
         var html = '';
         if (snap.empty) {
@@ -2075,9 +2073,7 @@
         var q = window._fbQuery(
           window._fbCollection(window._db, 'notifications'),
           window._fbWhere('toUid', '==', window._currentUser.uid),
-          window._fbOrderBy('createdAt', 'desc'),
-          window._fbLimit(30)
-        );
+          window._fbOrderBy('createdAt', 'desc'));
         var snap = await window._fbGetDocs(q);
         if (snap.empty) { list.innerHTML = '<div style="text-align:center;padding:32px 20px;color:#aaa;font-size:13px">No notifications yet</div>'; return; }
         var html = '';
@@ -2123,7 +2119,7 @@
       try {
         var q = window._fbQuery(window._fbCollection(window._db,'notifications'),
           window._fbWhere('toUid','==',window._currentUser.uid),
-          window._fbWhere('read','==',false), window._fbLimit(1));
+          window._fbWhere('read','==',false));
         var snap = await window._fbGetDocs(q);
         var dot = document.getElementById('notifDot');
         if (dot) dot.style.display = snap.empty ? 'none' : 'block';
