@@ -27,6 +27,7 @@
       <a href="#" id="navSearch" onclick="showSearch()">Search</a>
       <a href="#" id="navNearby" onclick="showNearby()">🎾 Players Near You</a>
       <a href="#" id="navFeed" onclick="showActivityFeed()">📰 Feed</a>
+      <a href="#" id="navCalendar" onclick="showCalendar()">📅 Calendar</a>
       <div id="authBtn" onclick="handleAuthClick()" style="display:flex;align-items:center;gap:8px;cursor:pointer;background:#f0f0f0;border-radius:50px;padding:6px 14px 6px 6px;transition:all 0.2s" onmouseover="this.style.background='#e6f9ee'" onmouseout="this.style.background=window._currentUser?'#e6f9ee':'#f0f0f0'">
         <div id="authAvatar" style="width:28px;height:28px;border-radius:50%;background:#1a6b3c;display:flex;align-items:center;justify-content:center;font-size:12px;color:#fff;font-weight:700;overflow:hidden">
           <span id="authAvatarText">?</span>
@@ -161,6 +162,7 @@
         <div id="modalHours" class="modal-hours"></div>
         <div id="hittingPartnerSection"></div>
         <div id="courtNotesSection"></div>
+        <div id="courtPhotosSection"></div>
         <a id="modalDirections" href="#" target="_blank" class="directions-btn">Get Directions</a>
       </div>
     </div>
@@ -170,7 +172,8 @@
   <div id="myProfilePage" style="display:none;max-width:600px;margin:40px auto;padding:0 24px 60px">
     <div style="background:#ffffff;border-radius:20px;border:1px solid #ebebeb;overflow:hidden">
       <div style="background:linear-gradient(135deg,#1a6b3c,#25a05a);padding:30px 24px;text-align:center;position:relative">
-        <button onclick="showEditProfile()" style="position:absolute;top:14px;right:14px;background:rgba(255,255,255,0.2);border:none;border-radius:20px;padding:6px 14px;color:#fff;font-size:12px;font-weight:600;cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif">✏️ Edit Profile</button>
+        <button onclick="scheduleSessionReminders()" style="position:absolute;top:14px;left:14px;background:rgba(255,255,255,0.2);border:none;border-radius:20px;padding:6px 14px;color:#fff;font-size:11px;font-weight:600;cursor:pointer;font-family:Inter,sans-serif">&#128276; Remind me</button>
+      <button onclick="showEditProfile()" style="position:absolute;top:14px;right:14px;background:rgba(255,255,255,0.2);border:none;border-radius:20px;padding:6px 14px;color:#fff;font-size:12px;font-weight:600;cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif">✏️ Edit Profile</button>
         <div style="position:relative;width:80px;margin:0 auto 12px">
           <div style="width:80px;height:80px;border-radius:50%;background:rgba(255,255,255,0.3);overflow:hidden;display:flex;align-items:center;justify-content:center;font-size:32px;color:#fff;font-weight:700;border:3px solid rgba(255,255,255,0.5)">
             <span id="mpInitials">?</span>
@@ -502,6 +505,21 @@
         </div>
       </div>
     </div>
+  </div>
+
+
+  <!-- CALENDAR PAGE -->
+  <div id="calendarPage" style="display:none;max-width:700px;margin:40px auto;padding:0 24px 60px;position:relative;z-index:1">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px">
+      <div style="font-family:Syne,sans-serif;font-size:22px;font-weight:800;color:var(--slam-text-1)">My Sessions</div>
+      <div style="display:flex;gap:8px;align-items:center">
+        <button onclick="changeCalMonth(-1)" style="background:var(--slam-surface);border:1.5px solid var(--slam-border);border-radius:8px;padding:6px 14px;cursor:pointer;font-size:16px;color:var(--slam-text-1)">&#8249;</button>
+        <span id="calMonthLabel" style="font-size:15px;font-weight:700;color:var(--slam-text-1);min-width:140px;text-align:center"></span>
+        <button onclick="changeCalMonth(1)" style="background:var(--slam-surface);border:1.5px solid var(--slam-border);border-radius:8px;padding:6px 14px;cursor:pointer;font-size:16px;color:var(--slam-text-1)">&#8250;</button>
+      </div>
+    </div>
+    <div id="calGrid" style="background:var(--slam-surface);border-radius:16px;border:1px solid var(--slam-border);overflow:hidden;margin-bottom:16px"></div>
+    <div id="calSessionsList"></div>
   </div>
 
   <!-- MAP -->
@@ -1424,7 +1442,209 @@
 
         // ── PROFILE PHOTO UPLOADS ──
 
-    window.uploadMyProfilePhoto = async function(input) {
+    // ═══════════════════════════════
+    //  CALENDAR VIEW
+    // ═══════════════════════════════
+    var calYear = new Date().getFullYear();
+    var calMonth = new Date().getMonth();
+    var calSessions = [];
+
+    window.showCalendar = function() {
+      if (!window._currentUser) { handleAuthClick(); return; }
+      hideAllPages();
+      document.getElementById('calendarPage').style.display = 'block';
+      var nc = document.getElementById('navCalendar');
+      if (nc) nc.style.color = 'var(--slam-primary)';
+      loadCalendarSessions();
+    };
+
+    async function loadCalendarSessions() {
+      if (!window._db || !window._currentUser) return;
+      try {
+        var q = window._fbQuery(
+          window._fbCollection(window._db, 'sessions'),
+          window._fbWhere('uid', '==', window._currentUser.uid),
+          window._fbOrderBy('date', 'asc')
+        );
+        var snap = await window._fbGetDocs(q);
+        calSessions = [];
+        snap.forEach(function(d) {
+          var s = Object.assign({ id: d.id }, d.data());
+          if (!s.deleted) calSessions.push(s);
+        });
+        renderCalendar();
+      } catch(e) { console.log('Calendar error:', e); }
+    }
+
+    window.changeCalMonth = function(dir) {
+      calMonth += dir;
+      if (calMonth > 11) { calMonth = 0; calYear++; }
+      if (calMonth < 0)  { calMonth = 11; calYear--; }
+      renderCalendar();
+    };
+
+    function renderCalendar() {
+      var label = document.getElementById('calMonthLabel');
+      var grid  = document.getElementById('calGrid');
+      var list  = document.getElementById('calSessionsList');
+      if (!label || !grid) return;
+      var monthNames = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+      label.textContent = monthNames[calMonth] + ' ' + calYear;
+      var firstDay = new Date(calYear, calMonth, 1).getDay();
+      var daysInMonth = new Date(calYear, calMonth + 1, 0).getDate();
+      var today = new Date();
+      var sessionMap = {};
+      calSessions.forEach(function(s) {
+        if (!s.date) return;
+        var d = new Date(s.date + 'T00:00:00');
+        if (d.getFullYear() === calYear && d.getMonth() === calMonth) {
+          var day = d.getDate();
+          if (!sessionMap[day]) sessionMap[day] = [];
+          sessionMap[day].push(s);
+        }
+      });
+      var days = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+      var html = '<div style="display:grid;grid-template-columns:repeat(7,1fr);border-bottom:1px solid var(--slam-border)">';
+      days.forEach(function(d) {
+        html += '<div style="padding:8px 0;text-align:center;font-size:11px;font-weight:700;color:var(--slam-text-3);letter-spacing:.5px">' + d + '</div>';
+      });
+      html += '</div><div style="display:grid;grid-template-columns:repeat(7,1fr)">';
+      for (var b = 0; b < firstDay; b++) {
+        html += '<div style="min-height:52px;border-right:1px solid var(--slam-border);border-bottom:1px solid var(--slam-border)"></div>';
+      }
+      for (var day = 1; day <= daysInMonth; day++) {
+        var isToday = today.getFullYear()===calYear && today.getMonth()===calMonth && today.getDate()===day;
+        var hasSessions = sessionMap[day] && sessionMap[day].length > 0;
+        var col = (firstDay + day - 1) % 7;
+        var borderR = col < 6 ? '1px solid var(--slam-border)' : 'none';
+        html += '<div onclick="showDaySessions(' + day + ')" style="min-height:52px;padding:6px;border-right:' + borderR + ';border-bottom:1px solid var(--slam-border);cursor:pointer;position:relative">'
+          + '<div style="width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:' + (isToday?'800':'500') + ';background:' + (isToday?'var(--slam-primary)':'transparent') + ';color:' + (isToday?'#fff':'var(--slam-text-1)') + '">' + day + '</div>'
+          + (hasSessions ? '<div style="width:6px;height:6px;border-radius:50%;background:#f59e0b;position:absolute;bottom:5px;left:50%;transform:translateX(-50%)"></div>' : '')
+          + '</div>';
+      }
+      html += '</div>';
+      grid.innerHTML = html;
+      var monthSessions = calSessions.filter(function(s) {
+        var d = new Date(s.date + 'T00:00:00');
+        return d.getFullYear()===calYear && d.getMonth()===calMonth;
+      });
+      if (!monthSessions.length) {
+        list.innerHTML = '<div style="text-align:center;padding:32px;color:var(--slam-text-3);font-size:14px">No sessions this month</div>';
+      } else {
+        list.innerHTML = '<div style="font-size:13px;font-weight:700;color:var(--slam-text-2);margin-bottom:10px;text-transform:uppercase;letter-spacing:.5px">Sessions this month</div>'
+          + monthSessions.map(function(s) {
+          var d = new Date(s.date + 'T00:00:00');
+          var dateStr = d.toLocaleDateString('en-US', { weekday:'short', month:'short', day:'numeric' });
+          var timeStr = new Date('2000-01-01T' + s.time).toLocaleTimeString('en-US', { hour:'numeric', minute:'2-digit' });
+          return '<div style="background:var(--slam-surface);border:1px solid var(--slam-border);border-radius:12px;padding:12px 16px;margin-bottom:8px;display:flex;align-items:center;gap:12px">'
+            + '<div style="width:44px;height:44px;border-radius:10px;background:var(--slam-primary);display:flex;flex-direction:column;align-items:center;justify-content:center;flex-shrink:0;color:#fff">'
+            + '<div style="font-size:10px;font-weight:600;opacity:.8">' + d.toLocaleDateString('en-US',{month:'short'}) + '</div>'
+            + '<div style="font-size:18px;font-weight:800;line-height:1">' + d.getDate() + '</div>'
+            + '</div>'
+            + '<div style="flex:1"><div style="font-size:14px;font-weight:700;color:var(--slam-text-1)">' + (s.courtName||'Session') + '</div>'
+            + '<div style="font-size:12px;color:var(--slam-text-2);margin-top:2px">' + dateStr + ' at ' + timeStr + ' · ' + s.skill + '</div></div>'
+            + '<div style="font-size:11px;font-weight:600;color:var(--slam-primary);background:var(--slam-badge-open-bg);padding:4px 10px;border-radius:999px">' + s.type + '</div>'
+            + '</div>';
+        }).join('');
+      }
+    }
+
+    window.showDaySessions = function(day) {
+      var el = document.getElementById('calSessionsList');
+      if (el) el.scrollIntoView({ behavior:'smooth', block:'nearest' });
+    };
+
+    // ═══════════════════════════════
+    //  SESSION REMINDERS
+    // ═══════════════════════════════
+    window.scheduleSessionReminders = async function() {
+      if (!('Notification' in window)) { alert('Notifications not supported in this browser.'); return; }
+      if (Notification.permission === 'default') await Notification.requestPermission();
+      if (Notification.permission !== 'granted') { alert('Please allow notifications to enable reminders.'); return; }
+      if (!window._currentUser || !window._db) return;
+      try {
+        var today = new Date().toISOString().split('T')[0];
+        var q = window._fbQuery(
+          window._fbCollection(window._db,'sessions'),
+          window._fbWhere('uid','==',window._currentUser.uid),
+          window._fbWhere('date','>=',today),
+          window._fbOrderBy('date','asc')
+        );
+        var snap = await window._fbGetDocs(q);
+        var scheduled = 0;
+        snap.forEach(function(d) {
+          var s = d.data();
+          if (!s.date || !s.time || s.deleted) return;
+          var sessionTime = new Date(s.date + 'T' + s.time);
+          var reminderTime = new Date(sessionTime.getTime() - 60*60*1000);
+          var now = new Date();
+          var delay = reminderTime - now;
+          if (delay > 0 && delay < 24*60*60*1000) {
+            setTimeout(function() {
+              new Notification('Tennis session in 1 hour!', {
+                body: (s.courtName||'Your court') + ' at ' + new Date('2000-01-01T'+s.time).toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'}),
+                icon: '/favicon.ico', tag: 'session_'+d.id
+              });
+            }, delay);
+            scheduled++;
+          }
+        });
+        alert(scheduled > 0 ? 'Reminders set for ' + scheduled + ' upcoming session' + (scheduled>1?'s':'') + '!' : 'No sessions in the next 24 hours.');
+      } catch(e) { console.log('Reminder error:', e); }
+    };
+
+    // ═══════════════════════════════
+    //  COURT PHOTOS
+    // ═══════════════════════════════
+    window.uploadCourtPhoto = async function(input, placeId) {
+      if (!window._currentUser) { handleAuthClick(); return; }
+      var file = input.files[0];
+      if (!file) return;
+      var btn = document.getElementById('courtPhotoUploadBtn');
+      if (btn) { btn.textContent = 'Uploading...'; btn.disabled = true; }
+      try {
+        var path = 'courts/' + placeId + '/' + window._currentUser.uid + '_' + Date.now();
+        var ref = window._storageRef(window._storage, path);
+        await window._uploadBytes(ref, file);
+        var url = await window._getDownloadURL(ref);
+        await window._fbAddDoc(window._fbCollection(window._db,'courtPhotos'), {
+          placeId: placeId, uid: window._currentUser.uid,
+          name: window._currentUser.displayName||'Player',
+          url: url, createdAt: window._fbTimestamp.now()
+        });
+        if (btn) { btn.textContent = 'Add Photo'; btn.disabled = false; }
+        loadCourtPhotos(placeId);
+      } catch(e) {
+        console.log('Court photo error:', e);
+        if (btn) { btn.textContent = 'Add Photo'; btn.disabled = false; }
+      }
+    };
+
+    async function loadCourtPhotos(placeId) {
+      var section = document.getElementById('courtPhotosSection');
+      if (!section || !window._db) return;
+      try {
+        var q = window._fbQuery(
+          window._fbCollection(window._db,'courtPhotos'),
+          window._fbWhere('placeId','==',placeId),
+          window._fbOrderBy('createdAt','desc')
+        );
+        var snap = await window._fbGetDocs(q);
+        if (snap.empty) {
+          section.innerHTML = '<label id="courtPhotoUploadBtn" style="display:inline-flex;align-items:center;gap:6px;background:var(--slam-surface);border:1.5px solid var(--slam-border);border-radius:10px;padding:8px 14px;font-size:12px;font-weight:600;color:var(--slam-text-2);cursor:pointer;margin-top:12px"><input type="file" accept="image/*" style="display:none" onchange="uploadCourtPhoto(this,\'' + placeId + '\')">📷 Add court photo</label>';
+          return;
+        }
+        var html = '<div style="margin-top:12px"><div style="font-size:12px;font-weight:700;color:var(--slam-text-2);margin-bottom:8px;text-transform:uppercase;letter-spacing:.5px">Court Photos</div><div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px">';
+        snap.forEach(function(d) {
+          var p = d.data();
+          html += '<img src="' + p.url + '" onclick="showPhotoModal(\'' + p.url + '\')" title="' + (p.name||'') + '" style="width:80px;height:80px;object-fit:cover;border-radius:10px;cursor:pointer;border:2px solid var(--slam-border)">';
+        });
+        html += '</div><label id="courtPhotoUploadBtn" style="display:inline-flex;align-items:center;gap:6px;background:var(--slam-surface);border:1.5px solid var(--slam-border);border-radius:10px;padding:7px 14px;font-size:12px;font-weight:600;color:var(--slam-text-2);cursor:pointer"><input type="file" accept="image/*" style="display:none" onchange="uploadCourtPhoto(this,\'' + placeId + '\')">📷 Add photo</label></div>';
+        section.innerHTML = html;
+      } catch(e) {}
+    }
+
+        window.uploadMyProfilePhoto = async function(input) {
       if (!input.files || !input.files[0]) return;
       if (!window._currentUser) { alert('Please sign in first.'); return; }
       var file = input.files[0];
