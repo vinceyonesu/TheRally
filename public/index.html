@@ -192,10 +192,7 @@
             <div id="mpFollowingCount" style="font-size:20px;font-weight:800;color:#ffffff">0</div>
             <div style="font-size:11px;color:rgba(255,255,255,0.75)">Following</div>
           </div>
-          <div style="text-align:center">
-            <div id="mpMutualCount" style="font-size:20px;font-weight:800;color:#ffffff">0</div>
-            <div style="font-size:11px;color:rgba(255,255,255,0.75)">Mutual</div>
-          </div>
+
         </div>
       </div>
       <div style="padding:20px 24px">
@@ -360,8 +357,7 @@
             <div style="font-size:11px;color:rgba(255,255,255,0.75)">Following</div>
           </div>
           <div style="text-align:center">
-            <div id="vpMutualCount" style="font-size:20px;font-weight:800;color:#ffffff">0</div>
-            <div style="font-size:11px;color:rgba(255,255,255,0.75)">Mutual</div>
+
           </div>
         </div>
       </div>
@@ -1533,7 +1529,6 @@
       var followingIds = []; followingSnap.forEach(function(d) { followingIds.push(d.data().followingId); });
       document.getElementById('mpFollowerCount').textContent = followersSnap.size;
       document.getElementById('mpFollowingCount').textContent = followingSnap.size;
-      document.getElementById('mpMutualCount').textContent = followerIds.filter(function(id) { return followingIds.includes(id); }).length;
       await loadUserSessionsForMyProfile(user.uid);
       // Load badges
       var stats = await getUserStats(user.uid);
@@ -1684,7 +1679,6 @@
         if (window._currentUser) {
           var followerIds = []; followersSnap.forEach(function(d) { followerIds.push(d.data().followerId); });
           var followingIds = []; followingSnap.forEach(function(d) { followingIds.push(d.data().followingId); });
-          document.getElementById('vpMutualCount').textContent = followerIds.filter(function(id) { return followingIds.includes(id); }).length;
         }
       } catch (err) { console.log('Follow counts error:', err); }
     }
@@ -2684,14 +2678,30 @@ function applySlam(key,skipQuote){
   var lines=document.querySelector('.hero-court-lines');
   if(lines){
     var c=theme.courtLineColor;
-    lines.innerHTML='<svg width="100%" height="100%" viewBox="0 0 1200 560" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">'+
-      '<rect x="60" y="40" width="1080" height="480" fill="none" stroke="'+c+'" stroke-width="2"/>'+
-      '<line x1="60" y1="280" x2="1140" y2="280" stroke="'+c+'" stroke-width="3"/>'+
-      '<line x1="600" y1="130" x2="600" y2="430" stroke="'+c+'" stroke-width="1.5"/>'+
-      '<line x1="60" y1="130" x2="1140" y2="130" stroke="'+c+'" stroke-width="1.5"/>'+
-      '<line x1="60" y1="430" x2="1140" y2="430" stroke="'+c+'" stroke-width="1.5"/>'+
-      '<line x1="180" y1="40" x2="180" y2="520" stroke="'+c+'" stroke-width="1.5"/>'+
-      '<line x1="1020" y1="40" x2="1020" y2="520" stroke="'+c+'" stroke-width="1.5"/>'+
+    // Accurate tennis court: 78x36ft doubles, viewBox 1200x560
+    // Baselines at x=80 & x=1120, net at x=600
+    // Doubles sidelines: y=40 & y=520, singles: y=108 & y=452
+    // Service line: 21ft from net = x=357 & x=843
+    // Center service line: y=280
+    lines.innerHTML='<svg width="100%" height="100%" viewBox="0 0 1200 560" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg">'+
+      // Doubles court outline
+      '<rect x="80" y="40" width="1040" height="480" fill="none" stroke="'+c+'" stroke-width="2.5"/>'+
+      // Singles sidelines
+      '<line x1="80" y1="108" x2="1120" y2="108" stroke="'+c+'" stroke-width="1.5"/>'+
+      '<line x1="80" y1="452" x2="1120" y2="452" stroke="'+c+'" stroke-width="1.5"/>'+
+      // Net (center line - thicker)
+      '<line x1="600" y1="40" x2="600" y2="520" stroke="'+c+'" stroke-width="3"/>'+
+      // Net posts marker
+      '<circle cx="600" cy="40" r="4" fill="'+c+'"/>'+
+      '<circle cx="600" cy="520" r="4" fill="'+c+'"/>'+
+      // Service lines (21ft from net each side)
+      '<line x1="357" y1="108" x2="357" y2="452" stroke="'+c+'" stroke-width="1.5"/>'+
+      '<line x1="843" y1="108" x2="843" y2="452" stroke="'+c+'" stroke-width="1.5"/>'+
+      // Center service line (splits service boxes)
+      '<line x1="357" y1="280" x2="843" y2="280" stroke="'+c+'" stroke-width="1.5"/>'+
+      // Center marks on baselines
+      '<line x1="600" y1="40" x2="600" y2="60" stroke="'+c+'" stroke-width="1.5"/>'+
+      '<line x1="600" y1="500" x2="600" y2="520" stroke="'+c+'" stroke-width="1.5"/>'+
       '</svg>';
   }
   // Active slam badge
