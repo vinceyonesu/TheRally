@@ -13,28 +13,26 @@ exports.handler = async function(event) {
   try {
     const { prompt, systemPrompt, messages } = JSON.parse(event.body);
 
+    // Build messages - merge system prompt into first user message
     let msgs = [];
-    if (systemPrompt) msgs.push({ role: 'system', content: systemPrompt });
     if (messages && messages.length > 0) {
       messages.forEach(m => msgs.push({ role: m.role, content: m.content }));
     }
-    if (prompt) msgs.push({ role: 'user', content: prompt });
+    // Add current message with system context prepended
+    const fullPrompt = systemPrompt
+      ? systemPrompt + '\n\nUser: ' + prompt
+      : prompt;
+    msgs.push({ role: 'user', content: fullPrompt });
 
-    // Try multiple free models in order
     const models = [
       'meta-llama/llama-3.3-8b-instruct:free',
-      'google/gemma-3-4b-it:free',
       'mistralai/mistral-7b-instruct:free',
-      'deepseek/deepseek-r1:free'
+      'deepseek/deepseek-r1:free',
+      'qwen/qwen-2.5-7b-instruct:free'
     ];
 
-    let lastError = null;
     for (const model of models) {
-      const body = JSON.stringify({
-        model: model,
-        messages: msgs,
-        max_tokens: 400
-      });
+      const body = JSON.stringify({ model, messages: msgs, max_tokens: 400 });
 
       const result = await new Promise((resolve, reject) => {
         const req = https.request({
@@ -50,7 +48,7 @@ exports.handler = async function(event) {
           }
         }, (res) => {
           let data = '';
-          res.on('data', chunk => data += chunk);
+          res.on('data', c => data += c);
           res.on('end', () => resolve(data));
         });
         req.on('error', reject);
@@ -62,13 +60,10 @@ exports.handler = async function(event) {
       const text = data.choices && data.choices[0] && data.choices[0].message
         ? data.choices[0].message.content : null;
 
-      if (text) {
-        return { statusCode: 200, headers, body: JSON.stringify({ text, model }) };
-      }
-      lastError = data.error || { message: 'No content from ' + model };
+      if (text) return { statusCode: 200, headers, body: JSON.stringify({ text }) };
     }
 
-    return { statusCode: 200, headers, body: JSON.stringify({ text: null, error: lastError }) };
+    return { statusCode: 200, headers, body: JSON.stringify({ text: 'I am having trouble connecting right now. Please try again in a moment.' }) };
   } catch (err) {
     return { statusCode: 500, headers, body: JSON.stringify({ error: err.message }) };
   }
