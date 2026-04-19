@@ -45,6 +45,7 @@
     <a href="#" onclick="showSaved();closeMobileMenu()">❤️ Saved Courts</a>
     <a href="#" onclick="showNearby();closeMobileMenu()">🎾 Players Near You</a>
     <a href="#" onclick="handleAuthClick();closeMobileMenu()">👤 My Profile</a>
+     <a href="#" onclick="handleAuthClick();closeMobileMenu()">📅 Calendar</a>
   </div>
 
   <!-- HERO -->
@@ -484,6 +485,10 @@
           <div style="font-size:13px;color:#aaa;font-weight:500">or</div>
           <div style="flex:1;height:1px;background:#e8e8e8"></div>
         </div>
+        <div id="authNameDiv" style="display:none;margin-bottom:12px">
+          <label style="font-size:13px;font-weight:600;color:#333;display:block;margin-bottom:6px">Full Name</label>
+          <input type="text" id="authName" placeholder="Enter your name" style="width:100%;border:1.5px solid #e0e0e0;border-radius:10px;padding:12px 14px;font-size:14px;font-family:'Inter',sans-serif;color:#1a1a1a;outline:none;box-sizing:border-box" onfocus="this.style.borderColor='var(--slam-primary,#1a5c32)'" onblur="this.style.borderColor='#e0e0e0'" />
+        </div>
         <div style="margin-bottom:12px">
           <label style="font-size:13px;font-weight:600;color:#333;display:block;margin-bottom:6px">Email</label>
           <input type="email" id="authEmail" placeholder="Enter your email" style="width:100%;border:1.5px solid #e0e0e0;border-radius:10px;padding:12px 14px;font-size:14px;font-family:'Inter',sans-serif;color:#1a1a1a;outline:none;box-sizing:border-box" onfocus="this.style.borderColor='var(--slam-primary,#1a5c32)'" onblur="this.style.borderColor='#e0e0e0'" onkeydown="if(event.key==='Enter')handleEmailAuth()"/>
@@ -825,8 +830,7 @@
         var sessionOwner = sessionSnap2.exists() ? sessionSnap2.data().uid : null;
         var courtName2 = sessionSnap2.exists() ? (sessionSnap2.data().courtName || 'a court') : 'a court';
         await window._fbUpdateDoc(sessionRef, { players: window._fbArrayUnion({ name: window._currentUser.displayName || 'Player', uid: window._currentUser.uid, photo: window._currentUser.photoURL || '' }) });
-        if (sessionOwner) writeNotification(sessionOwner, 'join', window._currentUser.displayName, courtName2);
-        loadSessions(placeId);
+                loadSessions(placeId);
       } catch (err) { console.log('Error joining session:', err); alert('Could not join session. Try again.'); }
     };
     window.deleteSession = async function(sessionId, placeId) {
@@ -915,6 +919,10 @@
       var m=document.getElementById('signInModal'); if(m){m.style.display='none';document.body.style.overflow='';}
       var em=document.getElementById('authEmail');if(em)em.value='';
       var pw=document.getElementById('authPassword');if(pw)pw.value='';
+      var nm=document.getElementById('authName');if(nm)nm.value='';
+      var nd=document.getElementById('authNameDiv');if(nd)nd.style.display='none';
+      authMode='login';
+      var btn=document.getElementById('emailAuthBtn');if(btn)btn.textContent='Log in';
       clearAuthErr();
     };
     function clearAuthErr(){var e=document.getElementById('authError');if(!e)return;e.style.display='none';e.textContent='';e.style.background='#fdecea';e.style.color='#c0392b';e.style.borderColor='#f5c6c6';}
@@ -925,8 +933,9 @@
       var btn=document.getElementById('emailAuthBtn');
       var tt=document.getElementById('authToggleText');
       var tl=document.getElementById('authToggleLink');
-      if(authMode==='signup'){if(btn)btn.textContent='Create Account';if(tt)tt.textContent='Already have an account?';if(tl)tl.textContent='Log in';}
-      else{if(btn)btn.textContent='Log in';if(tt)tt.textContent='Don&#39;t have an account?';if(tl)tl.textContent='Sign up';}
+      var nd=document.getElementById('authNameDiv');
+      if(authMode==='signup'){if(btn)btn.textContent='Create Account';if(tt)tt.textContent='Already have an account?';if(tl)tl.textContent='Log in';if(nd)nd.style.display='block';}
+      else{if(btn)btn.textContent='Log in';if(tt)tt.textContent='Don&#39;t have an account?';if(tl)tl.textContent='Sign up';if(nd)nd.style.display='none';}
       clearAuthErr();
     };
     window.togglePasswordVisibility=function(){
@@ -958,7 +967,17 @@
         ?window._createUserWithEmailAndPassword(window._auth,email,password)
         :window._signInWithEmailAndPassword(window._auth,email,password);
       action
-        .then(function(){if(btn){btn.textContent=authMode==='signup'?'Create Account':'Log in';btn.disabled=false;}closeSignInModal();})
+        .then(async function(result){
+          if(btn){btn.textContent=authMode==='signup'?'Create Account':'Log in';btn.disabled=false;}
+          // Set display name if signing up
+          if(authMode==='signup') {
+            var nameVal = document.getElementById('authName') ? document.getElementById('authName').value.trim() : '';
+            if(nameVal && result && result.user) {
+              try { await window._updateProfile(result.user, { displayName: nameVal }); } catch(e) {}
+            }
+          }
+          closeSignInModal();
+        })
         .catch(function(err){
           if(btn){btn.textContent=authMode==='signup'?'Create Account':'Log in';btn.disabled=false;}
           var msg='Something went wrong. Please try again.';
@@ -985,7 +1004,7 @@
     // ── HIDE ALL PAGES HELPER ──
     function hideAllPages() {
       var ids = ['heroSection','savedSection','nearbyPage','profilePage','myProfilePage',
-                 'viewProfilePage','feedPage','playerCardPage','leaderboardPage','aiCoachPage'];
+                 'viewProfilePage','feedPage','playerCardPage','leaderboardPage','aiCoachPage','calendarPage'];
       ids.forEach(function(id){ var el=document.getElementById(id); if(el) el.style.display='none'; });
       var ms = document.getElementById('map'); if(ms) ms.closest('.map-section').style.display='none';
       var rg = document.getElementById('resultsGrid'); if(rg) rg.parentElement.style.display='none';
@@ -1551,7 +1570,28 @@
 
     window.showDaySessions = function(day) {
       var el = document.getElementById('calSessionsList');
-      if (el) el.scrollIntoView({ behavior:'smooth', block:'nearest' });
+      if (!el) return;
+      var daySessions = calSessions.filter(function(s) {
+        if (!s.date) return false;
+        var d = new Date(s.date + 'T00:00:00');
+        return d.getFullYear()===calYear && d.getMonth()===calMonth && d.getDate()===day;
+      });
+      if (!daySessions.length) return;
+      var dayLabel = new Date(calYear, calMonth, day).toLocaleDateString('en-US',{weekday:'long',month:'short',day:'numeric'});
+      el.innerHTML = '<div style="font-size:13px;font-weight:700;color:var(--slam-text-2);margin-bottom:10px;text-transform:uppercase;letter-spacing:.5px">' + dayLabel + '</div>'
+        + daySessions.map(function(s) {
+          var timeStr = s.time ? new Date('2000-01-01T'+s.time).toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'}) : '';
+          return '<div style="background:var(--slam-surface);border:2px solid var(--slam-primary);border-radius:12px;padding:12px 16px;margin-bottom:8px;display:flex;align-items:center;gap:12px">'
+            + '<div style="width:44px;height:44px;border-radius:10px;background:var(--slam-primary);display:flex;flex-direction:column;align-items:center;justify-content:center;flex-shrink:0;color:#fff">'
+            + '<div style="font-size:10px;font-weight:600;opacity:.8">' + new Date(calYear,calMonth,day).toLocaleDateString('en-US',{month:'short'}) + '</div>'
+            + '<div style="font-size:18px;font-weight:800;line-height:1">' + day + '</div>'
+            + '</div>'
+            + '<div style="flex:1"><div style="font-size:14px;font-weight:700;color:var(--slam-text-1)">' + (s.courtName||'Session') + '</div>'
+            + '<div style="font-size:12px;color:var(--slam-text-2);margin-top:2px">' + timeStr + (timeStr?' · ':'') + s.skill + ' · ' + s.type + '</div>'
+            + (s.note ? '<div style="font-size:11px;color:var(--slam-text-3);margin-top:4px">' + s.note + '</div>' : '')
+            + '</div></div>';
+        }).join('');
+      el.scrollIntoView({ behavior:'smooth', block:'nearest' });
     };
 
     // ═══════════════════════════════
@@ -1762,6 +1802,7 @@
       document.getElementById('myProfilePage').style.display = 'block';
       document.getElementById('navSearch').style.color = 'rgba(255,255,255,0.72)';
       var nf=document.getElementById('navFeed');if(nf)nf.style.color='rgba(255,255,255,0.72)';
+      var nc2=document.getElementById('navCalendar');if(nc2)nc2.style.color='rgba(255,255,255,0.72)';
       var user = window._currentUser;
       document.getElementById('mpName').textContent = user.displayName || 'No name';
       document.getElementById('mpEmail').textContent = user.email || '';
@@ -1885,7 +1926,6 @@
           text: text,
           createdAt: window._fbTimestamp.now()
         });
-        writeNotification(sessionOwnerUid, 'comment', window._currentUser.displayName, text.substring(0,40));
         loadComments(sessionId);
       } catch(e) { console.log('Comment error:', e); }
     };
@@ -1901,6 +1941,7 @@
       document.getElementById('navSearch').style.color = 'rgba(255,255,255,0.72)';
       document.getElementById('navSaved').style.color = 'rgba(255,255,255,0.72)';
       var nf=document.getElementById('navFeed');if(nf)nf.style.color='rgba(255,255,255,0.72)';
+      var nc2=document.getElementById('navCalendar');if(nc2)nc2.style.color='rgba(255,255,255,0.72)';
       var na3=document.getElementById('navAI');if(na3)na3.style.color='rgba(255,255,255,0.72)';
       loadNearbySessions();
     };
@@ -2063,8 +2104,7 @@
         var sSnap2 = await window._fbGetDoc(sRef2);
         var sOwner2 = sSnap2.exists() ? sSnap2.data().uid : null;
         var sCourt2 = sSnap2.exists() ? (sSnap2.data().courtName||'a court') : 'a court';
-        if(sOwner2) writeNotification(sOwner2,'join',window._currentUser.displayName,sCourt2);
-      } catch(e){}
+              } catch(e){}
       try {
         await window._fbUpdateDoc(window._fbDoc(window._db, 'sessions', sessionId), { players: window._fbArrayUnion({ name: window._currentUser.displayName || 'Player', uid: window._currentUser.uid, photo: window._currentUser.photoURL || '' }) });
         loadNearbySessions();
@@ -2211,7 +2251,7 @@
         var followRef = window._fbDoc(window._db, 'follows', followId);
         var followSnap = await window._fbGetDoc(followRef);
         if (followSnap.exists()) { await window._fbDeleteDoc(followRef); }
-        else { await window._fbSetDoc(followRef, { followerId: window._currentUser.uid, followerName: window._currentUser.displayName || '', followerPhoto: window._currentUser.photoURL || '', followingId: uid, createdAt: window._fbTimestamp.now() }); writeNotification(uid, 'follow', window._currentUser.displayName); }
+        else { await window._fbSetDoc(followRef, { followerId: window._currentUser.uid, followerName: window._currentUser.displayName || '', followerPhoto: window._currentUser.photoURL || '', followingId: uid, createdAt: window._fbTimestamp.now() }); }
         await loadFollowCounts(uid);
         await renderFollowButton(uid);
       } catch (err) { console.log('Toggle follow error:', err); alert('Could not follow. Try again.'); }
@@ -2711,7 +2751,7 @@
     // ── HIDE ALL PAGES ──
     function hideAllPages() {
       var ids = ['heroSection','savedSection','nearbyPage','profilePage','myProfilePage',
-                 'viewProfilePage','feedPage','playerCardPage','leaderboardPage','aiCoachPage'];
+                 'viewProfilePage','feedPage','playerCardPage','leaderboardPage','aiCoachPage','calendarPage'];
       ids.forEach(function(id) {
         var el = document.getElementById(id);
         if (el) el.style.display = 'none';
@@ -2739,6 +2779,7 @@
       document.getElementById('navSearch').style.color = 'var(--slam-primary)';
       document.getElementById('navNearby').style.color = 'rgba(255,255,255,0.72)';
       var nf=document.getElementById('navFeed');if(nf)nf.style.color='rgba(255,255,255,0.72)';
+      var nc2=document.getElementById('navCalendar');if(nc2)nc2.style.color='rgba(255,255,255,0.72)';
       if (allCourts.length > 0) document.getElementById('filterBar').style.display = 'flex';
     };
 
