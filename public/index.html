@@ -45,7 +45,7 @@
     <a href="#" onclick="showSaved();closeMobileMenu()">❤️ Saved Courts</a>
     <a href="#" onclick="showNearby();closeMobileMenu()">🎾 Players Near You</a>
     <a href="#" onclick="handleAuthClick();closeMobileMenu()">👤 My Profile</a>
-     <a href="#" onclick="handleAuthClick();closeMobileMenu()">📅 Calendar</a>
+     <a href="#" onclick="showCalendar();closeMobileMenu()">📅 Calendar</a>
   </div>
 
   <!-- HERO -->
@@ -228,6 +228,16 @@
       </div>
       <div style="padding:20px 24px">
         <div style="font-size:13px;font-weight:600;color:#555;margin-bottom:12px;text-transform:uppercase;letter-spacing:0.5px">Your Details</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px">
+          <div>
+            <label style="font-size:12px;color:#888;display:block;margin-bottom:4px">First Name</label>
+            <input type="text" id="profileFirstName" placeholder="First name" style="width:100%;border:1.5px solid #e0e0e0;border-radius:10px;padding:9px 12px;font-size:13px;font-family:'Plus Jakarta Sans',sans-serif;color:#1a1a1a;outline:none;box-sizing:border-box"/>
+          </div>
+          <div>
+            <label style="font-size:12px;color:#888;display:block;margin-bottom:4px">Last Name</label>
+            <input type="text" id="profileLastName" placeholder="Last name" style="width:100%;border:1.5px solid #e0e0e0;border-radius:10px;padding:9px 12px;font-size:13px;font-family:'Plus Jakarta Sans',sans-serif;color:#1a1a1a;outline:none;box-sizing:border-box"/>
+          </div>
+        </div>
         <div style="margin-bottom:12px">
           <label style="font-size:12px;color:#888;display:block;margin-bottom:4px">Skill Level</label>
           <select id="profileSkill" style="width:100%;border:1.5px solid #e0e0e0;border-radius:10px;padding:9px 12px;font-size:13px;font-family:'Plus Jakarta Sans',sans-serif;color:#1a1a1a;outline:none">
@@ -486,8 +496,16 @@
           <div style="flex:1;height:1px;background:#e8e8e8"></div>
         </div>
         <div id="authNameDiv" style="display:none;margin-bottom:12px">
-          <label style="font-size:13px;font-weight:600;color:#333;display:block;margin-bottom:6px">Full Name</label>
-          <input type="text" id="authName" placeholder="Enter your name" style="width:100%;border:1.5px solid #e0e0e0;border-radius:10px;padding:12px 14px;font-size:14px;font-family:'Inter',sans-serif;color:#1a1a1a;outline:none;box-sizing:border-box" onfocus="this.style.borderColor='var(--slam-primary,#1a5c32)'" onblur="this.style.borderColor='#e0e0e0'" />
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+            <div>
+              <label style="font-size:13px;font-weight:600;color:#333;display:block;margin-bottom:6px">First Name</label>
+              <input type="text" id="authFirstName" placeholder="First name" style="width:100%;border:1.5px solid #e0e0e0;border-radius:10px;padding:12px 14px;font-size:14px;font-family:'Inter',sans-serif;color:#1a1a1a;outline:none;box-sizing:border-box" onfocus="this.style.borderColor='var(--slam-primary,#1a5c32)'" onblur="this.style.borderColor='#e0e0e0'" />
+            </div>
+            <div>
+              <label style="font-size:13px;font-weight:600;color:#333;display:block;margin-bottom:6px">Last Name</label>
+              <input type="text" id="authLastName" placeholder="Last name" style="width:100%;border:1.5px solid #e0e0e0;border-radius:10px;padding:12px 14px;font-size:14px;font-family:'Inter',sans-serif;color:#1a1a1a;outline:none;box-sizing:border-box" onfocus="this.style.borderColor='var(--slam-primary,#1a5c32)'" onblur="this.style.borderColor='#e0e0e0'" />
+            </div>
+          </div>
         </div>
         <div style="margin-bottom:12px">
           <label style="font-size:13px;font-weight:600;color:#333;display:block;margin-bottom:6px">Email</label>
@@ -919,7 +937,8 @@
       var m=document.getElementById('signInModal'); if(m){m.style.display='none';document.body.style.overflow='';}
       var em=document.getElementById('authEmail');if(em)em.value='';
       var pw=document.getElementById('authPassword');if(pw)pw.value='';
-      var nm=document.getElementById('authName');if(nm)nm.value='';
+      var fn3=document.getElementById('authFirstName');if(fn3)fn3.value='';
+      var ln3=document.getElementById('authLastName');if(ln3)ln3.value='';
       var nd=document.getElementById('authNameDiv');if(nd)nd.style.display='none';
       authMode='login';
       var btn=document.getElementById('emailAuthBtn');if(btn)btn.textContent='Log in';
@@ -969,11 +988,18 @@
       action
         .then(async function(result){
           if(btn){btn.textContent=authMode==='signup'?'Create Account':'Log in';btn.disabled=false;}
-          // Set display name if signing up
+          // Set display name from first + last name
           if(authMode==='signup') {
-            var nameVal = document.getElementById('authName') ? document.getElementById('authName').value.trim() : '';
-            if(nameVal && result && result.user) {
-              try { await window._updateProfile(result.user, { displayName: nameVal }); } catch(e) {}
+            var fn2 = document.getElementById('authFirstName') ? document.getElementById('authFirstName').value.trim() : '';
+            var ln2 = document.getElementById('authLastName')  ? document.getElementById('authLastName').value.trim()  : '';
+            var fullN2 = (fn2+' '+ln2).trim();
+            if (fullN2 && result && result.user) {
+              try {
+                await window._updateProfile(result.user, { displayName: fullN2 });
+                await window._fbSetDoc(window._fbDoc(window._db,'profiles',result.user.uid),
+                  { uid:result.user.uid, name:fullN2, firstName:fn2, lastName:ln2, email:result.user.email||'', photo:'', createdAt:window._fbTimestamp.now() },
+                  { merge:true });
+              } catch(e) {}
             }
           }
           closeSignInModal();
@@ -1598,9 +1624,13 @@
     //  SESSION REMINDERS
     // ═══════════════════════════════
     window.scheduleSessionReminders = async function() {
-      if (!('Notification' in window)) { alert('Notifications not supported in this browser.'); return; }
-      if (Notification.permission === 'default') await Notification.requestPermission();
-      if (Notification.permission !== 'granted') { alert('Please allow notifications to enable reminders.'); return; }
+      var isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+      var hasNotif = ('Notification' in window);
+      var useAlert = isMobile || !hasNotif;
+      if (!useAlert) {
+        if (Notification.permission === 'default') await Notification.requestPermission();
+        if (Notification.permission !== 'granted') useAlert = true;
+      }
       if (!window._currentUser || !window._db) return;
       try {
         var today = new Date().toISOString().split('T')[0];
@@ -1620,16 +1650,26 @@
           var now = new Date();
           var delay = reminderTime - now;
           if (delay > 0 && delay < 24*60*60*1000) {
-            setTimeout(function() {
-              new Notification('Tennis session in 1 hour!', {
-                body: (s.courtName||'Your court') + ' at ' + new Date('2000-01-01T'+s.time).toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'}),
-                icon: '/favicon.ico', tag: 'session_'+d.id
-              });
-            }, delay);
+            if (!useAlert) {
+              setTimeout(function() {
+                new Notification('Tennis session in 1 hour!', {
+                  body: (s.courtName||'Your court') + ' at ' + new Date('2000-01-01T'+s.time).toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'}),
+                  icon: '/favicon.ico', tag: 'session_'+d.id
+                });
+              }, delay);
+            }
             scheduled++;
           }
         });
-        alert(scheduled > 0 ? 'Reminders set for ' + scheduled + ' upcoming session' + (scheduled>1?'s':'') + '!' : 'No sessions in the next 24 hours.');
+        if (scheduled > 0) {
+          if (useAlert) {
+            alert('You have ' + scheduled + ' upcoming session' + (scheduled>1?'s':'') + ' in the next 24 hours! To get push notifications, add TheRally to your Home Screen.');
+          } else {
+            alert('Reminders set for ' + scheduled + ' upcoming session' + (scheduled>1?'s':'') + '!');
+          }
+        } else {
+          alert('No sessions in the next 24 hours.');
+        }
       } catch(e) { console.log('Reminder error:', e); }
     };
 
@@ -1755,8 +1795,15 @@
     window.saveProfile = async function() {
       if (!window._currentUser) { alert('Please sign in first.'); return; }
       try {
+        var fn = document.getElementById('profileFirstName') ? document.getElementById('profileFirstName').value.trim() : '';
+        var ln = document.getElementById('profileLastName')  ? document.getElementById('profileLastName').value.trim()  : '';
+        var fullName = (fn + ' ' + ln).trim() || window._currentUser.displayName || '';
+        if ((fn + ' ' + ln).trim()) {
+          try { await window._updateProfile(window._currentUser, { displayName: fullName }); } catch(e) {}
+        }
         await window._fbSetDoc(window._fbDoc(window._db, 'profiles', window._currentUser.uid), {
-          uid: window._currentUser.uid, name: window._currentUser.displayName || '', email: window._currentUser.email || '', photo: window._currentUser.photoURL || '',
+          uid: window._currentUser.uid, name: fullName, firstName: fn, lastName: ln,
+          email: window._currentUser.email || '', photo: window._currentUser.photoURL || '',
           skill: document.getElementById('profileSkill').value, utr: document.getElementById('profileUTR').value || '',
           bio: document.getElementById('profileBio').value, instagram: document.getElementById('profileInstagram').value,
           facebook: document.getElementById('profileFacebook').value, whatsapp: document.getElementById('profileWhatsapp').value,
@@ -3515,6 +3562,10 @@ document.addEventListener('DOMContentLoaded',function(){
         }
         if (profileSnap.exists()) {
           var pd = profileSnap.data();
+          if (document.getElementById('profileFirstName')) document.getElementById('profileFirstName').value = pd.firstName || (pd.name ? pd.name.split(' ')[0] : '');
+          if (document.getElementById('profileLastName')) document.getElementById('profileLastName').value = pd.lastName || (pd.name && pd.name.indexOf(' ')>-1 ? pd.name.split(' ').slice(1).join(' ') : '');
+          if (document.getElementById('profileFirstName')) document.getElementById('profileFirstName').value = pd.firstName || (pd.name ? pd.name.split(' ')[0] : '');
+          if (document.getElementById('profileLastName')) document.getElementById('profileLastName').value = pd.lastName || (pd.name && pd.name.indexOf(' ')>-1 ? pd.name.split(' ').slice(1).join(' ') : '');
           if (document.getElementById('profileSkill')) document.getElementById('profileSkill').value = pd.skill || 'Intermediate (UTR 4-6)';
           if (document.getElementById('profileUTR')) document.getElementById('profileUTR').value = pd.utr || '';
           if (document.getElementById('profileBio')) document.getElementById('profileBio').value = pd.bio || '';
