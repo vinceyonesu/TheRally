@@ -1164,3 +1164,134 @@ body::before {
   .ai-tab { min-width: 90px; font-size: 11px; padding: 8px 10px; }
   .ai-msg { max-width: 90%; font-size: 12px; }
 }
+/* ══════════════════════════════
+   TENNIS ANIMATIONS
+══════════════════════════════ */
+
+/* Bouncing tennis ball loader */
+@keyframes tennisBounceFull {
+  0%,100% { transform: translateY(0) scaleY(1) scaleX(1); }
+  40%      { transform: translateY(-40px) scaleY(1.1) scaleX(0.9); }
+  50%      { transform: translateY(-50px) scaleY(1.15) scaleX(0.85); }
+  60%      { transform: translateY(-40px) scaleY(1.1) scaleX(0.9); }
+  80%      { transform: translateY(0) scaleY(0.85) scaleX(1.1); }
+}
+@keyframes tennisRoll {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+
+/* Loading spinner as tennis ball */
+.loading-msg::before {
+  content: '🎾';
+  font-size: 32px;
+  display: block;
+  margin-bottom: 8px;
+  animation: tennisBounceFull 1s ease-in-out infinite;
+}
+
+/* Court card hover - ball bounce effect */
+.court-card::after {
+  content: '';
+  position: absolute;
+  bottom: -8px; right: 16px;
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: var(--slam-accent);
+  opacity: 0;
+  transition: opacity .3s, transform .3s;
+}
+.court-card:hover::after {
+  opacity: 1;
+  animation: tennisBounceFull .6s ease-in-out infinite;
+}
+
+/* Hero badge pulse */
+.slam-active-badge {
+  animation: badgePulse 3s ease-in-out infinite !important;
+}
+@keyframes badgePulse {
+  0%,100% { box-shadow: 0 0 0 0 rgba(255,255,255,0.15); }
+  50%      { box-shadow: 0 0 0 8px rgba(255,255,255,0); }
+}
+
+/* Swing animation for session cards */
+@keyframes swingIn {
+  0%   { opacity:0; transform: rotate(-3deg) translateX(-10px); }
+  100% { opacity:1; transform: rotate(0) translateX(0); }
+}
+.session-card {
+  animation: swingIn .4s var(--ease-out) both !important;
+}
+
+/* Net line divider */
+.net-divider {
+  display: flex; align-items: center; gap: 12px;
+  margin: 24px 0; color: var(--slam-text-3); font-size: 12px; font-weight: 600;
+  letter-spacing: 2px; text-transform: uppercase;
+}
+.net-divider::before, .net-divider::after {
+  content: '';
+  flex: 1; height: 2px;
+  background: repeating-linear-gradient(
+    90deg,
+    var(--slam-border) 0px, var(--slam-border) 6px,
+    transparent 6px, transparent 10px
+  );
+}
+
+/* Spin animation on filter buttons */
+.filter-btn:active { animation: spinBounce .3s var(--ease-spring); }
+@keyframes spinBounce {
+  0%   { transform: scale(.95) rotate(-2deg); }
+  60%  { transform: scale(1.05) rotate(1deg); }
+  100% { transform: scale(1) rotate(0); }
+}
+
+/* Floating tennis balls in hero (decorative) */
+.hero-balls {
+  position: absolute; inset: 0; pointer-events: none; overflow: hidden; z-index: 2;
+}
+.hero-ball {
+  position: absolute; font-size: 18px; opacity: 0.12;
+  animation: floatBall linear infinite;
+}
+.hero-ball:nth-child(1) { left:8%;  top:20%; animation-duration:12s; animation-delay:0s; }
+.hero-ball:nth-child(2) { left:85%; top:35%; animation-duration:15s; animation-delay:2s; }
+.hero-ball:nth-child(3) { left:25%; top:65%; animation-duration:10s; animation-delay:4s; }
+.hero-ball:nth-child(4) { left:70%; top:75%; animation-duration:13s; animation-delay:1s; }
+.hero-ball:nth-child(5) { left:50%; top:15%; animation-duration:11s; animation-delay:3s; }
+
+@keyframes floatBall {
+  0%   { transform: translateY(0) rotate(0deg); opacity: 0.08; }
+  25%  { transform: translateY(-30px) rotate(90deg); opacity: 0.15; }
+  50%  { transform: translateY(-15px) rotate(180deg); opacity: 0.10; }
+  75%  { transform: translateY(-40px) rotate(270deg); opacity: 0.15; }
+  100% { transform: translateY(0) rotate(360deg); opacity: 0.08; }
+}
+
+/* Score badge bounce on session join */
+@keyframes scorePop {
+  0%   { transform: scale(1); }
+  40%  { transform: scale(1.3); }
+  70%  { transform: scale(0.9); }
+  100% { transform: scale(1); }
+}
+.badge-open { animation: scorePop .5s var(--ease-spring) both !important; }
+
+/* Racket swing on page load */
+@keyframes racketSwing {
+  0%   { transform: rotate(-30deg) scale(0.8); opacity: 0; }
+  60%  { transform: rotate(5deg) scale(1.05); opacity: 1; }
+  100% { transform: rotate(0deg) scale(1); opacity: 1; }
+}
+.nav-logo { animation: racketSwing .6s var(--ease-spring) both; }
+
+/* Ripple on court card click */
+.court-card:active::before {
+  animation: rippleEffect .4s ease-out;
+}
+@keyframes rippleEffect {
+  0%   { transform: scale(0); opacity: 0.3; }
+  100% { transform: scale(4); opacity: 0; }
+}
