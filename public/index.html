@@ -157,7 +157,6 @@
           <span id="modalRating"></span>
         </div>
         <div id="aiSummarySection"></div>
-        <div id="checkInSection"></div>
         <div id="weatherSection"></div>
         <div id="modalHours" class="modal-hours"></div>
         <div id="hittingPartnerSection"></div>
@@ -702,7 +701,6 @@
       else { statusEl.innerHTML = '<span class="surface-tag">Hours N/A</span>'; }
       document.getElementById('modalHours').innerHTML = '<p style="color:#888;font-size:13px">Loading hours...</p>';
       document.getElementById('aiSummarySection').innerHTML = '';
-      document.getElementById('checkInSection').innerHTML = '';
       document.getElementById('weatherSection').innerHTML = '';
       document.getElementById('hittingPartnerSection').innerHTML = '';
       document.getElementById('courtNotesSection').innerHTML = '';
@@ -720,7 +718,6 @@
       document.body.style.overflow = 'hidden';
       getCourtWeather(data);
       loadAICourtSummary(data);
-      loadCheckInSection(data);
       var fbWait = setInterval(function() { if (window._db) { clearInterval(fbWait); loadHittingPartnerSection(data.placeId); } }, 200);
       setTimeout(function() { clearInterval(fbWait); }, 5000);
       var reviewWait = setInterval(function() { if (window._db) { clearInterval(reviewWait); loadUserReviews(data.placeId); } }, 200);
@@ -829,6 +826,8 @@
       var sessionsList = document.getElementById('sessionsList');
       if (!sessionsList || !window._db) return;
       sessionsList.innerHTML = '<p style="font-size:12px;color:#888;text-align:center;padding:8px">Loading sessions...</p>';
+      // Load check-in status for this court
+      window._checkedInUids = await getCheckedInUids(placeId);
       try {
         var today = new Date().toISOString().split('T')[0];
         var q = window._fbQuery(window._fbCollection(window._db, 'sessions'), window._fbWhere('placeId', '==', placeId), window._fbWhere('date', '>=', today), window._fbOrderBy('date', 'asc'));
@@ -842,7 +841,9 @@
           var dateStr = new Date(s.date + 'T00:00:00').toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
           var timeStr = new Date('2000-01-01T' + s.time).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
           var playersCount = s.players ? s.players.length : 1;
-          var avatarHtml = s.photo ? '<img src="' + s.photo + '" style="width:36px;height:36px;border-radius:50%;object-fit:cover;border:2px solid #e8e8e8"/>' : '<div style="width:36px;height:36px;border-radius:50%;background:#1a6b3c;display:flex;align-items:center;justify-content:center;font-size:14px;color:#fff;font-weight:700">' + (s.name ? s.name[0].toUpperCase() : '?') + '</div>';
+          var isCheckedIn1 = window._checkedInUids && window._checkedInUids.indexOf(s.uid) > -1;
+          var checkBadge1 = isCheckedIn1 ? '<div style="position:absolute;bottom:-2px;right:-2px;width:16px;height:16px;border-radius:50%;background:#22c55e;border:2px solid #fff;display:flex;align-items:center;justify-content:center"><svg width="8" height="8" viewBox="0 0 10 8" fill="none"><path d="M1 4l2.5 2.5L9 1" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>' : '';
+          var avatarHtml = '<div style="position:relative;flex-shrink:0;display:inline-block">' + (s.photo ? '<img src="' + s.photo + '" style="width:36px;height:36px;border-radius:50%;object-fit:cover;border:2px solid #e8e8e8"/>' : '<div style="width:36px;height:36px;border-radius:50%;background:#1a6b3c;display:flex;align-items:center;justify-content:center;font-size:14px;color:#fff;font-weight:700">' + (s.name ? s.name[0].toUpperCase() : '?') + '</div>') + checkBadge1 + '</div>';
           var verifiedBadge = s.phoneVerified ? '<span style="background:#e6f9ee;color:#1a6b3c;font-size:10px;font-weight:600;padding:2px 8px;border-radius:999px;margin-left:6px">✅ Verified</span>' : '';
           var socialLinks = '';
           if (s.instagram) socialLinks += '<a href="https://instagram.com/' + s.instagram.replace('@','') + '" target="_blank" style="text-decoration:none;font-size:11px;color:#833ab4;margin-right:8px">📸 Instagram</a>';
@@ -1255,37 +1256,20 @@
     // ══════════════════════════════════════════════
     //  2. COURT CHECK-IN
     // ══════════════════════════════════════════════
-    async function loadCheckInSection(courtData) {
-      var section = document.getElementById('checkInSection');
-      if (!section || !window._db) return;
-      var placeId = courtData.placeId;
-      var cutoffTime = new Date(Date.now() - 2*60*60*1000);
+    // Get checked-in UIDs for a court (last 2 hours)
+    async function getCheckedInUids(placeId) {
+      if (!window._db || !placeId) return [];
       try {
+        var cutoff = new Date(Date.now() - 2*60*60*1000);
         var snap = await window._fbGetDocs(window._fbQuery(
           window._fbCollection(window._db,'checkins'),
           window._fbWhere('placeId','==',placeId),
-          window._fbWhere('checkedInAt','>=',window._fbTimestamp.fromDate(cutoffTime))
+          window._fbWhere('checkedInAt','>=',window._fbTimestamp.fromDate(cutoff))
         ));
-        var checkins = []; snap.forEach(function(d){ checkins.push(Object.assign({id:d.id},d.data())); });
-        var isCheckedIn = window._currentUser && checkins.some(function(c){ return c.uid===window._currentUser.uid; });
-        var count = checkins.length;
-        var avatars = checkins.slice(0,5).map(function(c){
-          return c.photo
-            ? '<img src="'+c.photo+'" title="'+(c.name||'Player')+'" style="width:28px;height:28px;border-radius:50%;object-fit:cover;border:2px solid #fff;margin-right:-6px">'
-            : '<div style="width:28px;height:28px;border-radius:50%;background:var(--slam-primary);display:flex;align-items:center;justify-content:center;font-size:11px;color:#fff;font-weight:700;border:2px solid #fff;margin-right:-6px">'+(c.name?c.name[0].toUpperCase():'?')+'</div>';
-        }).join(', ');
-        section.innerHTML = '<div style="background:var(--slam-surface);border:1.5px solid var(--slam-border);border-radius:14px;padding:14px 18px;margin-bottom:16px">'
-          + '<div style="display:flex;align-items:center;justify-content:space-between">'
-          + '<div><div style="font-family:Syne,sans-serif;font-size:13px;font-weight:700;color:var(--slam-text-1);margin-bottom:4px">🎾 Playing Right Now</div>'
-          + (count>0
-            ? '<div style="display:flex;align-items:center;gap:8px">'+avatars+'<span style="margin-left:10px;font-size:12px;color:var(--slam-text-2)">'+count+' player'+(count>1?'s':'')+' here</span></div>'
-            : '<div style="font-size:12px;color:var(--slam-text-3)">No one checked in yet</div>')
-          + '</div>'
-          + '<button onclick="toggleCheckIn(\'' + placeId + '\')" id="checkInBtn" style="background:'+(isCheckedIn?'var(--slam-badge-open-bg)':'var(--slam-primary)')+';color:'+(isCheckedIn?'var(--slam-primary)':'#fff')+';border:'+(isCheckedIn?'1.5px solid var(--slam-primary)':'none')+';border-radius:10px;padding:9px 16px;font-size:12px;font-weight:700;font-family:Inter,sans-serif;cursor:pointer;transition:all .2s">'
-          + (isCheckedIn ? '✓ Checked In' : '+ Check In')
-          + '</button>'
-          + '</div></div>';
-      } catch(e) { section.innerHTML = ''; }
+        var uids = [];
+        snap.forEach(function(d){ uids.push(d.data().uid); });
+        return uids;
+      } catch(e) { return []; }
     }
 
     window.toggleCheckIn = async function(placeId) {
@@ -1318,9 +1302,8 @@
             checkedInAt: window._fbTimestamp.now()
           });
         }
-        // Reload check-in section
-        var courtData = courtDataStore[currentModalId] || {};
-        await loadCheckInSection(courtData);
+        // Reload sessions to show updated check-in status
+        if (currentModalId) { var cd = courtDataStore[currentModalId] || {}; if (cd.placeId) loadSessions(cd.placeId); }
       } catch(e) { console.log('Check-in error:', e); if(btn){btn.textContent='Check In';btn.disabled=false;} }
     };
 
@@ -1377,7 +1360,41 @@
       }, function(err){ console.log('Session listener error:', err); });
     };
 
-        window.signOutUser = function() { window._signOut(window._auth).then(function() { showSearch(); }); };
+        window.nearbyCheckIn = async function(placeId, btn) {
+      if (!window._currentUser) { handleAuthClick(); return; }
+      btn.textContent = '...'; btn.disabled = true;
+      try {
+        var uid = window._currentUser.uid;
+        var cutoff = new Date(Date.now() - 2*60*60*1000);
+        var snap = await window._fbGetDocs(window._fbQuery(
+          window._fbCollection(window._db,'checkins'),
+          window._fbWhere('placeId','==',placeId),
+          window._fbWhere('uid','==',uid),
+          window._fbWhere('checkedInAt','>=',window._fbTimestamp.fromDate(cutoff))
+        ));
+        if (!snap.empty) {
+          var dels = []; snap.forEach(function(d){ dels.push(window._fbDeleteDoc(window._fbDoc(window._db,'checkins',d.id))); });
+          await Promise.all(dels);
+          btn.textContent = '+ Check In at this court';
+          btn.style.background = 'var(--slam-primary)'; btn.style.color = '#fff'; btn.style.border = 'none';
+        } else {
+          var prof = await window._fbGetDoc(window._fbDoc(window._db,'profiles',uid));
+          var pp = prof.exists() ? prof.data() : {};
+          await window._fbAddDoc(window._fbCollection(window._db,'checkins'), {
+            placeId: placeId, uid: uid,
+            name: window._currentUser.displayName || pp.name || 'Player',
+            photo: pp.photo || window._currentUser.photoURL || '',
+            checkedInAt: window._fbTimestamp.now()
+          });
+          btn.textContent = '✓ Checked In at this court';
+          btn.style.background = '#e6f9ee'; btn.style.color = '#1a6b3c'; btn.style.border = '1.5px solid #1a6b3c';
+        }
+        btn.disabled = false;
+        window._nearbyCheckedInUids = await getCheckedInUids(placeId);
+      } catch(e) { console.log('Check-in error:', e); btn.disabled = false; }
+    };
+
+    window.signOutUser = function() { window._signOut(window._auth).then(function() { showSearch(); }); };
 
     // ── PROFILE PHOTO UPLOADS ──
     window.uploadMyProfilePhoto = async function(input) {
@@ -1561,6 +1578,8 @@
         var skillFilter = document.getElementById('nearbySkillFilter').value;
         var typeFilter = document.getElementById('nearbyTypeFilter').value;
         var q = window._fbQuery(window._fbCollection(window._db, 'sessions'), window._fbWhere('date', '>=', today), window._fbOrderBy('date', 'asc'));
+        // Pre-load check-in UIDs per court for session cards
+        window._nearbyCheckedInUids = [];
         var snapshot = await window._fbGetDocs(q);
         if (snapshot.empty) { list.innerHTML = '<div style="text-align:center;padding:60px 20px"><div style="font-size:48px;margin-bottom:16px">🎾</div><div style="font-size:16px;font-weight:600;color:#1a1a1a;margin-bottom:8px">No sessions yet</div><div style="font-size:14px;color:#888">Be the first to post a session!</div></div>'; return; }
         var sessions = [];
@@ -1580,7 +1599,9 @@
           var isToday = s.date === today;
           var playersCount = s.players ? s.players.length : 1;
           var isOwner = window._currentUser && window._currentUser.uid === s.uid;
-          var avatarHtml = s.photo ? '<img src="' + s.photo + '" style="width:44px;height:44px;border-radius:50%;object-fit:cover;border:2px solid #e8e8e8"/>' : '<div style="width:44px;height:44px;border-radius:50%;background:#1a6b3c;display:flex;align-items:center;justify-content:center;font-size:16px;color:#fff;font-weight:700">' + (s.name ? s.name[0].toUpperCase() : '?') + '</div>';
+          var isCheckedIn2 = window._nearbyCheckedInUids && window._nearbyCheckedInUids.indexOf(s.uid) > -1;
+          var checkBadge2 = isCheckedIn2 ? '<div style="position:absolute;bottom:-2px;right:-2px;width:16px;height:16px;border-radius:50%;background:#22c55e;border:2px solid #fff;display:flex;align-items:center;justify-content:center"><svg width="8" height="8" viewBox="0 0 10 8" fill="none"><path d="M1 4l2.5 2.5L9 1" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>' : '';
+          var avatarHtml = '<div style="position:relative;flex-shrink:0;display:inline-block">' + (s.photo ? '<img src="' + s.photo + '" style="width:44px;height:44px;border-radius:50%;object-fit:cover;border:2px solid #e8e8e8"/>' : '<div style="width:44px;height:44px;border-radius:50%;background:#1a6b3c;display:flex;align-items:center;justify-content:center;font-size:16px;color:#fff;font-weight:700">' + (s.name ? s.name[0].toUpperCase() : '?') + '</div>') + checkBadge2 + '</div>';
           var verifiedBadge = s.phoneVerified ? '<span style="background:#e6f9ee;color:#1a6b3c;font-size:10px;font-weight:600;padding:2px 8px;border-radius:999px;margin-left:6px">✅ Verified</span>' : '';
           var socialLinks = '';
           if (s.instagram) socialLinks += '<a href="https://instagram.com/' + s.instagram.replace('@','') + '" target="_blank" style="text-decoration:none;font-size:11px;color:#833ab4;margin-right:8px">📸 Instagram</a>';
@@ -1602,6 +1623,7 @@
           list.innerHTML += '<div style="background:#ffffff;border:1px solid #ebebeb;border-radius:16px;padding:16px 18px;margin-bottom:12px;transition:box-shadow 0.2s" onmouseover="this.style.boxShadow=\'0 4px 20px rgba(0,0,0,0.08)\'" onmouseout="this.style.boxShadow=\'none\'"><div style="display:flex;align-items:flex-start;gap:12px">' + avatarHtml + '<div style="flex:1;min-width:0"><div style="display:flex;align-items:center;flex-wrap:wrap;gap:4px;margin-bottom:4px"><span style="font-size:14px;font-weight:700;color:#1a1a1a;cursor:pointer;text-decoration:underline" onclick="viewProfile(\'' + s.uid + '\')">' + s.name + '</span>' + verifiedBadge + '</div><div style="font-size:12px;color:#888;margin-bottom:6px"><span style="background:' + (isToday ? '#e6f9ee' : '#f0f0f0') + ';color:' + (isToday ? '#1a6b3c' : '#555') + ';font-weight:600;padding:2px 8px;border-radius:999px;font-size:11px">' + (isToday ? 'Today' : dateStr) + '</span> at <strong>' + timeStr + '</strong>' + distanceBadge + '</div><div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px"><span style="background:#f0f0f0;color:#555;font-size:11px;font-weight:500;padding:3px 10px;border-radius:999px">' + s.type + '</span><span style="background:#f0f0f0;color:#555;font-size:11px;font-weight:500;padding:3px 10px;border-radius:999px">' + s.skill + '</span>' + (s.courtName ? '<span style="background:#e6f9ee;color:#1a6b3c;font-size:11px;font-weight:500;padding:3px 10px;border-radius:999px">📍 ' + s.courtName + '</span>' : '') + '</div>' + (s.gallery && s.gallery.length > 0 ? '<div style="display:flex;gap:6px;margin-bottom:8px">' + s.gallery.map(function(url) { return '<img src="' + url + '" style="width:60px;height:60px;border-radius:8px;object-fit:cover;border:1px solid #e8e8e8;cursor:pointer" onclick="showPhotoModal(\'' + url + '\')">'; }).join('') + '</div>' : '') + (socialLinks ? '<div style="margin-bottom:8px">' + socialLinks + '</div>' : '') + '<div style="display:flex;align-items:center;justify-content:space-between"><div style="display:flex;align-items:center;gap:4px">' + playerAvatars + '<span style="font-size:11px;color:#888;margin-left:10px">' + playersCount + ' player' + (playersCount !== 1 ? 's' : '') + ' going</span></div>' + (isOwner ? '<div style="display:flex;gap:6px"><span style="font-size:11px;color:#1a6b3c;font-weight:600;align-self:center">Your session</span><button onclick="deleteSession(\'' + s.id + '\', null)" style="background:#fdecea;color:#c0392b;border:1px solid #f5c6c6;border-radius:8px;padding:4px 10px;font-size:11px;font-weight:600;font-family:\'Plus Jakarta Sans\',sans-serif;cursor:pointer">Cancel</button></div>' : '<button onclick="joinSessionFromNearby(\'' + s.id + '\')" style="background:#e6f9ee;color:#1a6b3c;border:1px solid #1a6b3c;border-radius:8px;padding:5px 14px;font-size:12px;font-weight:600;font-family:\'Plus Jakarta Sans\',sans-serif;cursor:pointer">I\'m In!</button>') + '</div>'
             + (s.note ? '<div style="margin-top:8px;padding:8px 12px;background:rgba(0,0,0,0.03);border-radius:8px;font-size:12px;color:#555;border-left:3px solid #1a6b3c">' + s.note + '</div>' : '')
             + (s.courtLat ? '<a href="https://www.google.com/maps/dir/?api=1&destination=' + s.courtLat + ',' + s.courtLng + '" target="_blank" style="margin-top:8px;display:flex;align-items:center;justify-content:center;gap:6px;font-size:12px;font-weight:600;color:#1a6b3c;text-decoration:none;background:#e6f9ee;padding:9px;border-radius:8px;border:1px solid #1a6b3c">📍 Get Directions to Court</a>' : '')
+            + (s.placeId ? '<button onclick="nearbyCheckIn(\'' + s.placeId + '\', this)" style="margin-top:8px;width:100%;background:' + (isCheckedIn2 ? '#e6f9ee' : 'var(--slam-primary)') + ';color:' + (isCheckedIn2 ? '#1a6b3c' : '#fff') + ';border:' + (isCheckedIn2 ? '1.5px solid #1a6b3c' : 'none') + ';border-radius:8px;padding:9px;font-size:12px;font-weight:700;font-family:Inter,sans-serif;cursor:pointer;transition:all .2s">' + (isCheckedIn2 ? '✓ Checked In at this court' : '+ Check In at this court') + '</button>' : '')
             + '</div></div></div>';
         });
       } catch (err) { console.log('Error loading nearby sessions:', err); list.innerHTML = '<div style="text-align:center;padding:40px;color:#888;font-size:14px">Could not load sessions. Try again.</div>'; }
