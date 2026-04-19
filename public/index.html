@@ -27,7 +27,6 @@
       <a href="#" id="navSearch" onclick="showSearch()">Search</a>
       <a href="#" id="navNearby" onclick="showNearby()">🎾 Players Near You</a>
       <a href="#" id="navFeed" onclick="showActivityFeed()">📰 Feed</a>
-      <a href="#" id="navAI" onclick="showAICoach()">🤖 AI Coach</a>
       <div id="authBtn" onclick="handleAuthClick()" style="display:flex;align-items:center;gap:8px;cursor:pointer;background:#f0f0f0;border-radius:50px;padding:6px 14px 6px 6px;transition:all 0.2s" onmouseover="this.style.background='#e6f9ee'" onmouseout="this.style.background=window._currentUser?'#e6f9ee':'#f0f0f0'">
         <div id="authAvatar" style="width:28px;height:28px;border-radius:50%;background:#1a6b3c;display:flex;align-items:center;justify-content:center;font-size:12px;color:#fff;font-weight:700;overflow:hidden">
           <span id="authAvatarText">?</span>
@@ -459,12 +458,6 @@
     </div>
   </div>
 
-
-
-  <!-- ═══════════════════════════════
-       AI COACH PAGE
-  ═══════════════════════════════ -->
-
   <!-- SIGN IN MODAL -->
   <div id="signInModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.65);backdrop-filter:blur(10px);z-index:9000;justify-content:center;align-items:center;padding:20px">
     <div style="background:#ffffff;border-radius:24px;width:90%;max-width:420px;overflow:hidden;box-shadow:0 32px 80px rgba(0,0,0,0.3);animation:modalUp .3s cubic-bezier(0.34,1.56,0.64,1) both">
@@ -505,40 +498,6 @@
           <span onclick="toggleAuthMode()" style="color:var(--slam-primary,#1a5c32);font-weight:700;cursor:pointer;margin-left:4px" id="authToggleLink">Sign up</span>
         </div>
       </div>
-    </div>
-  </div>
-
-
-  <!-- AI COACH PAGE -->
-  <div id="aiCoachPage" style="display:none;max-width:680px;margin:40px auto;padding:0 24px 60px;position:relative;z-index:1">
-    <div style="background:linear-gradient(135deg,var(--slam-nav),var(--slam-primary));border-radius:20px;padding:24px;margin-bottom:20px">
-      <div style="display:flex;align-items:center;gap:16px">
-        <div style="width:52px;height:52px;border-radius:50%;background:rgba(255,255,255,0.15);display:flex;align-items:center;justify-content:center;font-size:26px;flex-shrink:0">🤖</div>
-        <div>
-          <div style="font-family:Syne,sans-serif;font-size:20px;font-weight:800;color:#fff">AI Tennis Coach</div>
-          <div style="font-size:13px;color:rgba(255,255,255,0.7);margin-top:2px">Ask anything · tap 🎙️ to speak</div>
-        </div>
-        <div id="aiVoiceStatus" style="margin-left:auto;font-size:11px;color:rgba(255,255,255,0.6)"></div>
-      </div>
-    </div>
-    <div id="coachMessages" style="background:var(--slam-surface);border-radius:16px;border:1px solid var(--slam-border);min-height:380px;max-height:480px;overflow-y:auto;padding:20px;display:flex;flex-direction:column;gap:12px;margin-bottom:14px;scroll-behavior:smooth">
-      <div class="ai-msg ai-msg-bot">Hi! I am your AI tennis coach. Ask me anything — technique, tactics, training or equipment. Tap 🎙️ to speak! 🎾</div>
-    </div>
-    <div style="background:var(--slam-surface);border-radius:14px;border:1px solid var(--slam-border);padding:12px 14px">
-      <div style="display:flex;gap:10px;align-items:flex-end">
-        <textarea id="coachInput" placeholder="Ask your coach..." rows="2" style="flex:1;border:none;outline:none;font-size:14px;font-family:Inter,sans-serif;color:var(--slam-text-1);background:transparent;resize:none;line-height:1.5" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendCoachMessage();}"></textarea>
-        <div style="display:flex;gap:8px;flex-shrink:0">
-          <button id="voiceBtn" onclick="toggleVoiceInput()" style="width:40px;height:40px;border-radius:50%;border:none;background:var(--slam-bg);cursor:pointer;font-size:18px;display:flex;align-items:center;justify-content:center">mic</button>
-          <button onclick="sendCoachMessage()" style="width:40px;height:40px;border-radius:50%;border:none;background:var(--slam-primary);color:#fff;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center">➤</button>
-        </div>
-      </div>
-    </div>
-    <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:12px">
-      <button onclick="quickCoachPrompt(this)" style="background:var(--slam-surface);border:1.5px solid var(--slam-border);border-radius:999px;padding:7px 14px;font-size:12px;font-weight:600;font-family:Inter,sans-serif;cursor:pointer;color:var(--slam-text-2)">💪 Improve my serve</button>
-      <button onclick="quickCoachPrompt(this)" style="background:var(--slam-surface);border:1.5px solid var(--slam-border);border-radius:999px;padding:7px 14px;font-size:12px;font-weight:600;font-family:Inter,sans-serif;cursor:pointer;color:var(--slam-text-2)">🎯 Volley technique</button>
-      <button onclick="quickCoachPrompt(this)" style="background:var(--slam-surface);border:1.5px solid var(--slam-border);border-radius:999px;padding:7px 14px;font-size:12px;font-weight:600;font-family:Inter,sans-serif;cursor:pointer;color:var(--slam-text-2)">🔄 Beat topspin players</button>
-      <button onclick="quickCoachPrompt(this)" style="background:var(--slam-surface);border:1.5px solid var(--slam-border);border-radius:999px;padding:7px 14px;font-size:12px;font-weight:600;font-family:Inter,sans-serif;cursor:pointer;color:var(--slam-text-2)">🧠 Mental game tips</button>
-      <button onclick="quickCoachPrompt(this)" style="background:var(--slam-surface);border:1.5px solid var(--slam-border);border-radius:999px;padding:7px 14px;font-size:12px;font-weight:600;font-family:Inter,sans-serif;cursor:pointer;color:var(--slam-text-2)">📋 Weekly training plan</button>
     </div>
   </div>
 
@@ -1436,96 +1395,6 @@
         btn.disabled = false;
       } catch(e) { console.log('Check-in error:', e); btn.textContent = checkedIn ? '✓ Checked In at this court' : '+ Check In at this court'; btn.disabled = false; }
     };
-
-    // ══ AI COACH ══
-    var coachHistory = [];
-    var isListening = false;
-    var recognition = null;
-
-    window.showAICoach = function() {
-      if (!window._currentUser) { handleAuthClick(); return; }
-      hideAllPages();
-      document.getElementById('aiCoachPage').style.display = 'block';
-      var na=document.getElementById('navAI');if(na)na.style.color='var(--slam-primary)';
-    };
-
-    window.sendCoachMessage = async function() {
-      var input = document.getElementById('coachInput');
-      var msg = input ? input.value.trim() : '';
-      if (!msg) return;
-      input.value = '';
-      appendCoachMsg(msg, 'user');
-      var thinkEl = appendCoachMsg('Thinking...', 'bot thinking');
-      try {
-        var systemCtx = 'You are an expert tennis coach. Give specific, actionable advice under 100 words.';
-        var msgs = [];
-        coachHistory.slice(-10).forEach(function(m){ msgs.push({role:m.role,content:m.content}); });
-        msgs.push({role:'user', content: systemCtx + ' ' + msg});
-        var res = await fetch('https://openrouter.ai/api/v1/chat/completions', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': 'Bearer ' + _OR_KEY,
-            'HTTP-Referer': 'https://therally.netlify.app',
-            'X-Title': 'TheRally'
-          },
-          body: JSON.stringify({model:'meta-llama/llama-3.3-8b-instruct:free', messages:msgs, max_tokens:300})
-        });
-        var data = await res.json();
-        var reply = data.choices && data.choices[0] && data.choices[0].message
-          ? data.choices[0].message.content : null;
-        if (!reply && data.error) reply = 'Error: ' + data.error.message;
-        if (!reply) reply = 'Sorry, could not get a response. Please try again.';
-        coachHistory.push({role:'user',content:msg});
-        coachHistory.push({role:'assistant',content:reply});
-        thinkEl.remove();
-        appendCoachMsg(reply, 'bot');
-      } catch(e) {
-        thinkEl.remove();
-        appendCoachMsg('Connection error: ' + e.message, 'bot');
-      }
-    };
-
-    function appendCoachMsg(text, type) {
-      var container = document.getElementById('coachMessages');
-      if (!container) return null;
-      var div = document.createElement('div');
-      div.className = 'ai-msg ' + (type === 'user' ? 'ai-msg-user' : 'ai-msg-bot');
-      if (type === 'bot thinking') div.classList.add('ai-thinking');
-      div.innerHTML = text.split('\n').join('<br>');
-      container.appendChild(div);
-      container.scrollTop = container.scrollHeight;
-      return div;
-    }
-
-    window.quickCoachPrompt = function(btn) {
-      var input = document.getElementById('coachInput');
-      if (input) { input.value = btn.textContent.slice(3); sendCoachMessage(); }
-    };
-
-    window.toggleVoiceInput = function() {
-      if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
-        alert('Voice not supported. Use Chrome or Safari.'); return;
-      }
-      if (isListening) { if(recognition) recognition.stop(); return; }
-      var SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-      recognition = new SR();
-      recognition.lang = 'en-US';
-      recognition.continuous = false;
-      recognition.interimResults = false;
-      var btn = document.getElementById('voiceBtn');
-      var status = document.getElementById('aiVoiceStatus');
-      recognition.onstart = function(){ isListening=true; if(btn)btn.textContent='stop'; if(status)status.textContent='🔴 Listening...'; };
-      recognition.onresult = function(e){ var t=e.results[0][0].transcript; var inp=document.getElementById('coachInput'); if(inp)inp.value=t; };
-      recognition.onend = function(){
-        isListening=false; if(btn)btn.textContent='mic'; if(status)status.textContent='';
-        var inp=document.getElementById('coachInput'); if(inp&&inp.value.trim()) sendCoachMessage();
-      };
-      recognition.onerror = function(){ isListening=false; if(btn)btn.textContent='mic'; if(status)status.textContent=''; };
-      recognition.start();
-    };
-
-        window.signOutUser = function() { window._signOut(window._auth).then(function() { showSearch(); }); };
 
     // ── PROFILE PHOTO UPLOADS ──
     window.uploadMyProfilePhoto = async function(input) {
