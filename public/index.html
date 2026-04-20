@@ -2,6 +2,8 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <link rel="shortcut icon" href="/favicon.svg">
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Tennis Court Finder</title>
   <link rel="preconnect" href="https://fonts.googleapis.com"/>
@@ -2131,7 +2133,8 @@
           var isToday = s.date === today;
           // Fetch weather for session date/court location
           var weatherBadge = '';
-          if (s.courtLat && s.courtLng && s.date) {
+          var _diff = s.date ? (new Date(s.date+'T00:00:00') - new Date()) / (1000*60*60*24) : 99;
+          if (s.courtLat && s.courtLng && s.date && _diff <= 14 && _diff >= -1) {
             try {
               var wRes = await fetch('https://api.open-meteo.com/v1/forecast?latitude=' + s.courtLat + '&longitude=' + s.courtLng + '&daily=weathercode,temperature_2m_max&timezone=auto&start_date=' + s.date + '&end_date=' + s.date);
               var wData = await wRes.json();
@@ -2191,6 +2194,9 @@
       for (var wi = 0; wi < sessions.length; wi++) {
         var ws = sessions[wi];
         if (!ws.courtLat || !ws.courtLng || !ws.date) continue;
+        // Open-Meteo only supports 16-day forecast - skip dates too far out
+        var _wDiff = (new Date(ws.date+'T00:00:00') - new Date()) / (1000*60*60*24);
+        if (_wDiff > 14 || _wDiff < -1) continue;
         var list = document.getElementById('nearbySessionsList');
         var cards = list ? Array.from(list.children) : [];
         try {
