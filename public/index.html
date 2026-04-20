@@ -1978,7 +1978,13 @@
           facebook: document.getElementById('profileFacebook').value, whatsapp: document.getElementById('profileWhatsapp').value,
           phone: document.getElementById('profilePhone').value, updatedAt: window._fbTimestamp.now()
         }, { merge: true });
+        // Update name shown on profile header immediately
+        var mpN = document.getElementById('mpName');
+        if (mpN && fullName) mpN.textContent = fullName;
+        var mpI = document.getElementById('mpInitials');
+        if (mpI && fullName) mpI.textContent = fullName.split(' ').map(function(w){return w[0]||'';}).join('').toUpperCase().substring(0,2);
         alert('Profile saved!');
+        showMyProfile();
       } catch (err) { console.log('Save profile error:', err); alert('Could not save profile. Try again.'); }
     };
 
