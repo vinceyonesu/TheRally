@@ -167,6 +167,7 @@
         <div id="hittingPartnerSection"></div>
         <div id="courtNotesSection"></div>
         <div id="courtPhotosSection"></div>
+        <div id="reportHoursSection"></div>
         <a id="modalDirections" href="#" target="_blank" class="directions-btn">Get Directions</a>
       </div>
     </div>
@@ -747,6 +748,7 @@
       document.getElementById('hittingPartnerSection').innerHTML = '';
       document.getElementById('courtNotesSection').innerHTML = '';
       document.getElementById('courtPhotosSection').innerHTML = '';
+      document.getElementById('reportHoursSection').innerHTML = '';
       document.getElementById('modalDirections').href = 'https://www.google.com/maps/dir/?api=1&destination=' + encodeURIComponent(data.address) + '&destination_place_id=' + data.placeId;
       document.getElementById('modalRating').innerHTML =
         '<div style="display:flex;align-items:center;gap:6px;cursor:pointer" onclick="toggleReviews()">' +
@@ -767,7 +769,7 @@
       setTimeout(function() { clearInterval(reviewWait); }, 5000);
       loadCourtNotes(data.placeId);
       // Load court photos
-      var photoWait = setInterval(function() { if (window._db) { clearInterval(photoWait); loadCourtPhotos(data.placeId); } }, 200);
+      var photoWait = setInterval(function() { if (window._db) { clearInterval(photoWait); loadCourtPhotos(data.placeId); loadReportedHours(data.placeId); } }, 200);
       setTimeout(function() { clearInterval(photoWait); }, 5000);
       if (data.placeId) {
         try {
@@ -1673,52 +1675,200 @@
     // ═══════════════════════════════
     //  COURT PHOTOS
     // ═══════════════════════════════
-    window.uploadCourtPhoto = async function(input, placeId) {
+    // ═══════════════════════════════════════
+    //  REPORT COURT HOURS
+    // ═══════════════════════════════════════
+    window.showReportHoursForm = function(placeId) {
+      var section = document.getElementById('reportHoursSection');
+      if (!section) return;
       if (!window._currentUser) { handleAuthClick(); return; }
-      var file = input.files[0];
-      if (!file) return;
-      var btn = document.getElementById('courtPhotoUploadBtn');
-      if (btn) { btn.textContent = 'Uploading...'; btn.disabled = true; }
+      var days = ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'];
+      var formHtml = '<div style="margin-top:16px;padding:16px;background:var(--slam-surface);border:1.5px solid var(--slam-border);border-radius:14px">'
+        + '<div style="font-size:13px;font-weight:700;color:var(--slam-text-1);margin-bottom:12px">📋 Report Updated Hours</div>'
+        + '<div style="font-size:12px;color:var(--slam-text-3);margin-bottom:12px">Help other players by reporting the current court hours.</div>'
+        + '<div style="display:grid;grid-template-columns:auto 1fr 1fr;gap:6px;align-items:center;margin-bottom:12px">'
+        + '<div style="font-size:11px;font-weight:700;color:var(--slam-text-3)">Day</div>'
+        + '<div style="font-size:11px;font-weight:700;color:var(--slam-text-3)">Opens</div>'
+        + '<div style="font-size:11px;font-weight:700;color:var(--slam-text-3)">Closes</div>';
+      days.forEach(function(day) {
+        formHtml += '<div style="font-size:12px;font-weight:600;color:var(--slam-text-2)">' + day.substring(0,3) + '</div>'
+          + '<input type="time" id="rh_open_' + day + '" style="border:1px solid var(--slam-border);border-radius:7px;padding:5px 8px;font-size:12px;background:var(--slam-bg);color:var(--slam-text-1);outline:none">'
+          + '<input type="time" id="rh_close_' + day + '" style="border:1px solid var(--slam-border);border-radius:7px;padding:5px 8px;font-size:12px;background:var(--slam-bg);color:var(--slam-text-1);outline:none">';
+      });
+      formHtml += '</div>'
+        + '<textarea id="rh_note" placeholder="Any notes? (e.g. gates locked after 9pm, weekends only open 8-4)" style="width:100%;border:1px solid var(--slam-border);border-radius:8px;padding:8px;font-size:12px;font-family:Inter,sans-serif;color:var(--slam-text-1);background:var(--slam-bg);resize:none;height:60px;box-sizing:border-box;margin-bottom:10px;outline:none"></textarea>'
+        + '<div style="display:flex;gap:8px">'
+        + '<button onclick="submitReportedHours(\'' + placeId + '\')" style="flex:1;background:var(--slam-primary);color:#fff;border:none;border-radius:10px;padding:10px;font-size:13px;font-weight:600;cursor:pointer;font-family:Inter,sans-serif">Submit Hours</button>'
+        + '<button onclick="loadReportedHours(\'' + placeId + '\')" style="background:var(--slam-surface);border:1px solid var(--slam-border);border-radius:10px;padding:10px 14px;font-size:13px;cursor:pointer;color:var(--slam-text-2)">Cancel</button>'
+        + '</div></div>';
+      section.innerHTML = formHtml;
+    };
+
+    window.submitReportedHours = async function(placeId) {
+      if (!window._currentUser || !window._db) return;
+      var days = ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'];
+      var hoursData = {};
+      days.forEach(function(day) {
+        var open  = document.getElementById('rh_open_' + day)  ? document.getElementById('rh_open_' + day).value  : '';
+        var close = document.getElementById('rh_close_' + day) ? document.getElementById('rh_close_' + day).value : '';
+        if (open || close) hoursData[day] = { open: open, close: close };
+      });
+      if (!Object.keys(hoursData).length) { alert('Please enter at least one day\'s hours.'); return; }
+      var note = document.getElementById('rh_note') ? document.getElementById('rh_note').value.trim() : '';
       try {
-        var path = 'courts/' + placeId + '/' + window._currentUser.uid + '_' + Date.now();
-        var ref = window._storageRef(window._storage, path);
-        await window._uploadBytes(ref, file);
-        var url = await window._getDownloadURL(ref);
-        await window._fbAddDoc(window._fbCollection(window._db,'courtPhotos'), {
+        await window._fbAddDoc(window._fbCollection(window._db,'courtHoursReports'), {
           placeId: placeId, uid: window._currentUser.uid,
-          name: window._currentUser.displayName||'Player',
-          url: url, createdAt: window._fbTimestamp.now()
+          name: window._currentUser.displayName || 'Player',
+          hours: hoursData, note: note,
+          createdAt: window._fbTimestamp.now(),
+          reportedAt: new Date().toISOString().split('T')[0]
         });
-        if (btn) { btn.textContent = 'Add Photo'; btn.disabled = false; }
-        loadCourtPhotos(placeId);
-      } catch(e) {
-        console.log('Court photo error:', e);
-        if (btn) { btn.textContent = 'Add Photo'; btn.disabled = false; }
+        loadReportedHours(placeId);
+      } catch(e) { console.log('Report hours error:', e); alert('Could not submit. Try again.'); }
+    };
+
+    async function loadReportedHours(placeId) {
+      var section = document.getElementById('reportHoursSection');
+      if (!section || !window._db) return;
+      try {
+        var q = window._fbQuery(
+          window._fbCollection(window._db,'courtHoursReports'),
+          window._fbWhere('placeId','==',placeId)
+        );
+        var snap = await window._fbGetDocs(q);
+        var reports = [];
+        snap.forEach(function(d) { reports.push(Object.assign({id:d.id}, d.data())); });
+        reports.sort(function(a,b) {
+          return (b.createdAt?b.createdAt.seconds:0) - (a.createdAt?a.createdAt.seconds:0);
+        });
+
+        var reportBtn = '<button onclick="showReportHoursForm(\'' + placeId + '\')" style="display:inline-flex;align-items:center;gap:6px;background:var(--slam-surface);border:1.5px solid var(--slam-border);border-radius:10px;padding:8px 14px;font-size:12px;font-weight:600;color:var(--slam-text-2);cursor:pointer;margin-top:8px">🕐 Report Updated Hours</button>';
+
+        if (!reports.length) {
+          section.innerHTML = '<div style="margin-top:8px">' + reportBtn + '</div>';
+          return;
+        }
+
+        var latest = reports[0];
+        var days = ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'];
+        var html = '<div style="margin-top:16px;padding-top:16px;border-top:1px solid var(--slam-border)">'
+          + '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">'
+          + '<div style="font-size:12px;font-weight:700;color:var(--slam-text-2);text-transform:uppercase;letter-spacing:.5px">🕐 Community Hours</div>'
+          + '<div style="font-size:11px;color:var(--slam-text-3)">Reported by ' + (latest.name||'Player') + ' · ' + (latest.reportedAt||'') + '</div>'
+          + '</div>';
+
+        if (latest.hours && Object.keys(latest.hours).length) {
+          html += '<div style="background:var(--slam-surface);border-radius:10px;padding:10px 14px;margin-bottom:8px">';
+          days.forEach(function(day) {
+            if (latest.hours[day]) {
+              var o = latest.hours[day].open  || '–';
+              var c = latest.hours[day].close || '–';
+              // Format time from HH:MM to 12h
+              function fmt(t) {
+                if (!t || t==='–') return t;
+                var p=t.split(':'),h=parseInt(p[0]),m=p[1];
+                var ap=h>=12?'PM':'AM'; h=h%12||12;
+                return h+':'+m+' '+ap;
+              }
+              html += '<div style="display:flex;justify-content:space-between;font-size:12px;padding:3px 0;border-bottom:1px solid var(--slam-border)">'
+                + '<span style="color:var(--slam-text-2);font-weight:600">' + day.substring(0,3) + '</span>'
+                + '<span style="color:var(--slam-text-1)">' + fmt(o) + ' – ' + fmt(c) + '</span>'
+                + '</div>';
+            }
+          });
+          html += '</div>';
+        }
+        if (latest.note) {
+          html += '<div style="font-size:12px;color:var(--slam-text-2);background:var(--slam-bg);border-radius:8px;padding:8px 10px;margin-bottom:8px;border:1px solid var(--slam-border)">💬 ' + latest.note + '</div>';
+        }
+        html += reportBtn + '</div>';
+        section.innerHTML = html;
+      } catch(e) { console.log('loadReportedHours error:', e); }
+    }
+
+        window.uploadCourtPhoto = async function(input, placeId) {
+      if (!window._currentUser) { handleAuthClick(); return; }
+      var files = Array.from(input.files);
+      if (!files.length) return;
+      var btn = document.getElementById('courtPhotoUploadBtn');
+      if (btn) { btn.innerHTML = '⏳ Uploading ' + files.length + ' photo' + (files.length>1?'s':'') + '...'; btn.disabled = true; }
+      var uploaded = 0;
+      for (var fi = 0; fi < files.length; fi++) {
+        var file = files[fi];
+        if (!file.type.startsWith('image/')) continue;
+        try {
+          var path = 'courts/' + placeId + '/' + window._currentUser.uid + '_' + Date.now() + '_' + fi;
+          var ref = window._storageRef(window._storage, path);
+          await window._uploadBytes(ref, file);
+          var url = await window._getDownloadURL(ref);
+          await window._fbAddDoc(window._fbCollection(window._db,'courtPhotos'), {
+            placeId: placeId, uid: window._currentUser.uid,
+            name: window._currentUser.displayName || 'Player',
+            url: url, takenAt: new Date().toISOString().split('T')[0],
+            createdAt: window._fbTimestamp.now()
+          });
+          uploaded++;
+          if (btn) btn.innerHTML = '⏳ ' + uploaded + '/' + files.length + ' uploaded...';
+        } catch(e) { console.log('Court photo error:', e); }
       }
+      if (btn) { btn.innerHTML = '📷 Add Photos'; btn.disabled = false; }
+      loadCourtPhotos(placeId);
     };
 
     async function loadCourtPhotos(placeId) {
       var section = document.getElementById('courtPhotosSection');
       if (!section || !window._db) return;
       try {
+        // No orderBy to avoid needing composite index - sort client-side
         var q = window._fbQuery(
           window._fbCollection(window._db,'courtPhotos'),
-          window._fbWhere('placeId','==',placeId),
-          window._fbOrderBy('createdAt','desc')
+          window._fbWhere('placeId','==',placeId)
         );
         var snap = await window._fbGetDocs(q);
-        if (snap.empty) {
-          section.innerHTML = '<label id="courtPhotoUploadBtn" style="display:inline-flex;align-items:center;gap:6px;background:var(--slam-surface);border:1.5px solid var(--slam-border);border-radius:10px;padding:8px 14px;font-size:12px;font-weight:600;color:var(--slam-text-2);cursor:pointer;margin-top:12px"><input type="file" accept="image/*" style="display:none" onchange="uploadCourtPhoto(this,\'' + placeId + '\')">📷 Add court photo</label>';
+        // Sort by createdAt desc client-side
+        var photos = [];
+        snap.forEach(function(d) { photos.push(Object.assign({id:d.id}, d.data())); });
+        photos.sort(function(a,b) {
+          var at = a.createdAt ? a.createdAt.seconds||0 : 0;
+          var bt = b.createdAt ? b.createdAt.seconds||0 : 0;
+          return bt - at;
+        });
+
+        var addBtn = '<label id="courtPhotoUploadBtn" style="display:inline-flex;align-items:center;gap:6px;background:var(--slam-surface);border:1.5px solid var(--slam-primary);border-radius:10px;padding:8px 16px;font-size:12px;font-weight:600;color:var(--slam-primary);cursor:pointer;margin-top:8px"><input type="file" accept="image/*" multiple style="display:none" onchange="uploadCourtPhoto(this,\'' + placeId + '\')">📷 Add Photos</label>';
+
+        if (!photos.length) {
+          section.innerHTML = '<div style="margin-top:16px;padding-top:16px;border-top:1px solid var(--slam-border)">' + addBtn + '</div>';
           return;
         }
-        var html = '<div style="margin-top:12px"><div style="font-size:12px;font-weight:700;color:var(--slam-text-2);margin-bottom:8px;text-transform:uppercase;letter-spacing:.5px">Court Photos</div><div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px">';
-        snap.forEach(function(d) {
-          var p = d.data();
-          html += '<img src="' + p.url + '" onclick="showPhotoModal(\'' + p.url + '\')" title="' + (p.name||'') + '" style="width:80px;height:80px;object-fit:cover;border-radius:10px;cursor:pointer;border:2px solid var(--slam-border)">';
+
+        var html = '<div style="margin-top:16px;padding-top:16px;border-top:1px solid var(--slam-border)">'
+          + '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">'
+          + '<div style="font-size:12px;font-weight:700;color:var(--slam-text-2);text-transform:uppercase;letter-spacing:.5px">📸 Court Photos <span style="font-weight:400;color:var(--slam-text-3);font-size:11px;text-transform:none">(' + photos.length + ')</span></div>'
+          + '</div>'
+          + '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px">';
+        photos.forEach(function(p) {
+          var dateLabel = '';
+          if (p.takenAt) {
+            var d = new Date(p.takenAt + 'T00:00:00');
+            var now = new Date();
+            var diffDays = Math.floor((now - d) / (1000*60*60*24));
+            if (diffDays === 0) dateLabel = 'Today';
+            else if (diffDays === 1) dateLabel = 'Yesterday';
+            else if (diffDays < 7) dateLabel = diffDays + 'd ago';
+            else if (diffDays < 30) dateLabel = Math.floor(diffDays/7) + 'w ago';
+            else if (diffDays < 365) dateLabel = Math.floor(diffDays/30) + 'mo ago';
+            else dateLabel = Math.floor(diffDays/365) + 'y ago';
+          }
+          html += '<div style="position:relative;flex-shrink:0">'
+            + '<img src="' + p.url + '" onclick="showPhotoModal(\'' + p.url + '\')" '
+            + 'style="width:90px;height:90px;object-fit:cover;border-radius:10px;cursor:pointer;border:2px solid var(--slam-border);display:block">'
+            + (dateLabel ? '<div style="position:absolute;bottom:0;left:0;right:0;background:rgba(0,0,0,0.55);color:#fff;font-size:9px;font-weight:600;text-align:center;padding:3px 2px;border-radius:0 0 8px 8px">' + dateLabel + '</div>' : '')
+            + '<div style="font-size:10px;color:var(--slam-text-3);text-align:center;margin-top:3px;max-width:90px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + (p.name||'') + '</div>'
+            + '</div>';
         });
-        html += '</div><label id="courtPhotoUploadBtn" style="display:inline-flex;align-items:center;gap:6px;background:var(--slam-surface);border:1.5px solid var(--slam-border);border-radius:10px;padding:7px 14px;font-size:12px;font-weight:600;color:var(--slam-text-2);cursor:pointer"><input type="file" accept="image/*" style="display:none" onchange="uploadCourtPhoto(this,\'' + placeId + '\')">📷 Add photo</label></div>';
+        html += '</div>' + addBtn + '</div>';
         section.innerHTML = html;
-      } catch(e) {}
+      } catch(e) { console.log('loadCourtPhotos error:', e); }
     }
 
         window.uploadMyProfilePhoto = async function(input) {
