@@ -746,6 +746,7 @@
       document.getElementById('weatherSection').innerHTML = '';
       document.getElementById('hittingPartnerSection').innerHTML = '';
       document.getElementById('courtNotesSection').innerHTML = '';
+      document.getElementById('courtPhotosSection').innerHTML = '';
       document.getElementById('modalDirections').href = 'https://www.google.com/maps/dir/?api=1&destination=' + encodeURIComponent(data.address) + '&destination_place_id=' + data.placeId;
       document.getElementById('modalRating').innerHTML =
         '<div style="display:flex;align-items:center;gap:6px;cursor:pointer" onclick="toggleReviews()">' +
@@ -765,6 +766,9 @@
       var reviewWait = setInterval(function() { if (window._db) { clearInterval(reviewWait); loadUserReviews(data.placeId); } }, 200);
       setTimeout(function() { clearInterval(reviewWait); }, 5000);
       loadCourtNotes(data.placeId);
+      // Load court photos
+      var photoWait = setInterval(function() { if (window._db) { clearInterval(photoWait); loadCourtPhotos(data.placeId); } }, 200);
+      setTimeout(function() { clearInterval(photoWait); }, 5000);
       if (data.placeId) {
         try {
           var placesLib = await google.maps.importLibrary('places');
@@ -1312,25 +1316,9 @@
         + '<div style="height:100%;width:60%;background:linear-gradient(90deg,var(--slam-primary),var(--slam-accent));border-radius:3px;animation:shimmer 1.5s ease-in-out infinite"></div>'
         + '</div></div>';
       try {
-        var prompt = 'You are a tennis expert. Court: "' + courtData.name + '", Location: "' + courtData.address + '", Rating: ' + (courtData.rating||'N/A') + '/5 (' + (courtData.reviews||0) + ' reviews). Write 2-3 sentences: court quality, best time to visit, who it suits. Max 55 words. Be specific.';
-        var res = await fetch('/api/ai', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ prompt: prompt })
-        });
-        var data = await res.json();
-        var summary = data.text || null;
-        if (summary) {
-          section.innerHTML = '<div style="background:linear-gradient(135deg,var(--slam-surface-2),var(--slam-bg));border:1px solid var(--slam-border);border-radius:14px;padding:16px 18px;margin-bottom:16px">'
-            + '<div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">'
-            + '<span style="font-size:20px">🤖</span>'
-            + '<span style="font-family:Syne,sans-serif;font-size:13px;font-weight:700;color:var(--slam-text-1)">AI Court Summary</span>'
-            + '<span style="margin-left:auto;background:var(--slam-badge-open-bg);color:var(--slam-badge-open-color);font-size:10px;font-weight:700;padding:2px 8px;border-radius:999px">Gemini AI</span>'
-            + '</div>'
-            + '<p style="font-size:13px;color:var(--slam-text-2);line-height:1.7;margin:0">' + summary + '</p>'
-            + '</div>';
-        } else { section.innerHTML = ''; }
-      } catch(e) { section.innerHTML = ''; }
+        // AI summary disabled
+        section.innerHTML = '';
+      } catch(e) {}
     }
 
     // ══════════════════════════════════════════════
