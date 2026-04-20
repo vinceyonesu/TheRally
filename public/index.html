@@ -3848,8 +3848,7 @@ document.addEventListener('DOMContentLoaded',function(){
         var img = document.getElementById('authAvatarImg');
         if (user.photoURL) { img.src = user.photoURL; img.style.display = 'block'; }
         else { document.getElementById('authAvatarText').style.display = 'block'; document.getElementById('authAvatarText').textContent = user.displayName ? user.displayName[0].toUpperCase() : '?'; }
-        var _navName = (p && p.name) ? p.name : (user.displayName || '');
-        document.getElementById('authBtnText').textContent = _navName ? _navName.split(' ')[0] : 'Profile';
+        document.getElementById('authBtnText').textContent = user.displayName ? user.displayName.split(' ')[0] : 'Profile';
         document.getElementById('authBtn').style.background = '#e6f9ee';
         var profileRef = window._fbDoc(db, 'profiles', user.uid);
         var profileSnap = await window._fbGetDoc(profileRef);
@@ -3858,6 +3857,9 @@ document.addEventListener('DOMContentLoaded',function(){
         }
         if (profileSnap.exists()) {
           var pd = profileSnap.data();
+          // Use Firestore name for nav if available
+          var _navName = pd.name || user.displayName || '';
+          document.getElementById('authBtnText').textContent = _navName ? _navName.split(' ')[0] : 'Profile';
           if (document.getElementById('profileFirstName')) document.getElementById('profileFirstName').value = pd.firstName || (pd.name ? pd.name.split(' ')[0] : '');
           if (document.getElementById('profileLastName')) document.getElementById('profileLastName').value = pd.lastName || (pd.name && pd.name.indexOf(' ')>-1 ? pd.name.split(' ').slice(1).join(' ') : '');
           if (document.getElementById('profileFirstName')) document.getElementById('profileFirstName').value = pd.firstName || (pd.name ? pd.name.split(' ')[0] : '');
