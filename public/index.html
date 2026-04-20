@@ -1515,17 +1515,29 @@
       var grid = document.getElementById('calGrid');
       if (grid) grid.innerHTML = '<div style="text-align:center;padding:40px;color:var(--slam-text-3);font-size:13px">Loading...</div>';
       try {
-        var q = window._fbQuery(
-          window._fbCollection(window._db, 'sessions'),
-          window._fbWhere('uid', '==', window._currentUser.uid),
-          window._fbOrderBy('date', 'asc')
-        );
-        var snap = await window._fbGetDocs(q);
+        var uid = window._currentUser.uid;
+        // Fetch sessions I created
+        var q1 = window._fbQuery(window._fbCollection(window._db,'sessions'), window._fbWhere('uid','==',uid), window._fbOrderBy('date','asc'));
+        // Fetch sessions I joined (players array contains my uid)
+        var q2 = window._fbQuery(window._fbCollection(window._db,'sessions'), window._fbWhere('players','array-contains',{name:window._currentUser.displayName||'',uid:uid,photo:window._currentUser.photoURL||''}), window._fbOrderBy('date','asc'));
+        var snap1 = await window._fbGetDocs(q1);
         calSessions = [];
-        snap.forEach(function(d) {
+        var seenIds = {};
+        snap1.forEach(function(d) {
           var s = Object.assign({ id: d.id }, d.data());
-          if (!s.deleted) calSessions.push(s);
+          if (!s.deleted && !seenIds[d.id]) { calSessions.push(s); seenIds[d.id] = true; }
         });
+        // Also scan all upcoming sessions to find ones I joined
+        var q3 = window._fbQuery(window._fbCollection(window._db,'sessions'), window._fbOrderBy('date','asc'));
+        var snap3 = await window._fbGetDocs(q3);
+        snap3.forEach(function(d) {
+          var s = Object.assign({ id: d.id }, d.data());
+          if (s.deleted || seenIds[d.id]) return;
+          if (s.players && s.players.some(function(p){ return p.uid === uid; })) {
+            calSessions.push(s); seenIds[d.id] = true;
+          }
+        });
+        calSessions.sort(function(a,b){ return a.date > b.date ? 1 : -1; });
         renderCalendar();
       } catch(e) { console.log('Calendar error:', e); }
     }
