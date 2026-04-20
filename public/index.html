@@ -1503,11 +1503,17 @@
       document.getElementById('calendarPage').style.display = 'block';
       var nc = document.getElementById('navCalendar');
       if (nc) nc.style.color = 'var(--slam-primary)';
+      // Always reset to current month and reload fresh
+      calYear = new Date().getFullYear();
+      calMonth = new Date().getMonth();
+      calSessions = [];
       loadCalendarSessions();
     };
 
     async function loadCalendarSessions() {
       if (!window._db || !window._currentUser) return;
+      var grid = document.getElementById('calGrid');
+      if (grid) grid.innerHTML = '<div style="text-align:center;padding:40px;color:var(--slam-text-3);font-size:13px">Loading...</div>';
       try {
         var q = window._fbQuery(
           window._fbCollection(window._db, 'sessions'),
