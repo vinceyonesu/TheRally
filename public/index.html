@@ -776,14 +776,15 @@
           var placesLib = await google.maps.importLibrary('places');
           var Place = placesLib.Place;
           var place = new Place({ id: data.placeId, requestedLanguage: 'en' });
-          await place.fetchFields({ fields: ['regularOpeningHours', 'nationalPhoneNumber', 'websiteURI', 'reviews', 'displayName'] });
+          await place.fetchFields({ fields: ['regularOpeningHours', 'currentOpeningHours', 'nationalPhoneNumber', 'websiteURI', 'reviews', 'displayName'] });
           var hoursDiv = document.getElementById('modalHours');
           var html = '';
-          if (place.regularOpeningHours && place.regularOpeningHours.weekdayDescriptions) {
+          var _hours = place.regularOpeningHours || place.currentOpeningHours;
+          if (_hours && _hours.weekdayDescriptions) {
             var today = new Date().getDay();
-            var weekdayText = place.regularOpeningHours.weekdayDescriptions;
+            var weekdayText = _hours.weekdayDescriptions;
             var todayLine = weekdayText.find(function(line,i){return (i+1)%7===today;});
-            if(todayLine){var tp=todayLine.split(': '),th=tp.slice(1).join(': ')||'Closed';var io=place.regularOpeningHours.isOpen?place.regularOpeningHours.isOpen():null;var sc=io===true?'#1a6b3c':io===false?'#c0392b':'#888';var sb=io===true?'#e6f9ee':io===false?'#fdecea':'#f5f5f5';html+='<div style="background:'+sb+';border-radius:10px;padding:10px 14px;margin-bottom:10px;display:flex;align-items:center;justify-content:space-between"><div style="font-size:13px;font-weight:700;color:'+sc+'">'+(io===true?'Open Now':io===false?'Closed Now':'Hours Today')+'</div><div style="font-size:14px;font-weight:700;color:'+sc+'">'+th+'</div></div>';}
+            if(todayLine){var tp=todayLine.split(': '),th=tp.slice(1).join(': ')||'Closed';var io=_hours.isOpen?_hours.isOpen():null;var sc=io===true?'#1a6b3c':io===false?'#c0392b':'#888';var sb=io===true?'#e6f9ee':io===false?'#fdecea':'#f5f5f5';html+='<div style="background:'+sb+';border-radius:10px;padding:10px 14px;margin-bottom:10px;display:flex;align-items:center;justify-content:space-between"><div style="font-size:13px;font-weight:700;color:'+sc+'">'+(io===true?'Open Now':io===false?'Closed Now':'Hours Today')+'</div><div style="font-size:14px;font-weight:700;color:'+sc+'">'+th+'</div></div>';}
             html += '<table style="width:100%;font-size:13px;border-collapse:collapse">';
             weekdayText.forEach(function(line, i) {
               var dayIndex = (i + 1) % 7, isToday = dayIndex === today;
@@ -797,8 +798,8 @@
           if (place.nationalPhoneNumber) html += '<p style="margin-top:10px;font-size:13px;color:#555">Phone: ' + place.nationalPhoneNumber + '</p>';
           if (place.websiteURI) html += '<p style="margin-top:4px;font-size:13px"><a href="' + place.websiteURI + '" target="_blank" style="color:#1a6b3c">Visit website</a></p>';
           hoursDiv.innerHTML = html;
-          if (currentModalId && courtDataStore[currentModalId] && place.regularOpeningHours && place.regularOpeningHours.weekdayDescriptions) {
-            courtDataStore[currentModalId].hours = place.regularOpeningHours.weekdayDescriptions;
+          if (currentModalId && courtDataStore[currentModalId] && _hours && _hours.weekdayDescriptions) {
+            courtDataStore[currentModalId].hours = _hours.weekdayDescriptions;
           }
           if (place.reviews && place.reviews.length > 0) {
             var reviewsHtml = '';
@@ -816,7 +817,7 @@
             document.getElementById('googleReviewsSection').innerHTML = '<div style="font-size:13px;color:#aaa;padding:8px 0">No reviews available.</div>';
           }
         } catch (err) {
-          console.log('Places details error:', err);
+          console.log('Places details error:', err.message || err);
           document.getElementById('modalHours').innerHTML = '<p style="color:#888;font-size:13px">Hours not available.</p>';
         }
       }
