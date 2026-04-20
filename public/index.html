@@ -3829,6 +3829,7 @@ document.addEventListener('DOMContentLoaded',function(){
     window._createUserWithEmailAndPassword = createUserWithEmailAndPassword;
     window._signInWithEmailAndPassword = signInWithEmailAndPassword;
     window._sendPasswordResetEmail = sendPasswordResetEmail;
+    window._updateProfile = updateProfile;
 
     onAuthStateChanged(auth, async function(user) {
       window._currentUser = user;
