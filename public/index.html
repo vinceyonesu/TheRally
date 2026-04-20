@@ -782,6 +782,8 @@
           if (place.regularOpeningHours && place.regularOpeningHours.weekdayDescriptions) {
             var today = new Date().getDay();
             var weekdayText = place.regularOpeningHours.weekdayDescriptions;
+            var todayLine = weekdayText.find(function(line,i){return (i+1)%7===today;});
+            if(todayLine){var tp=todayLine.split(': '),th=tp.slice(1).join(': ')||'Closed';var io=place.regularOpeningHours.isOpen?place.regularOpeningHours.isOpen():null;var sc=io===true?'#1a6b3c':io===false?'#c0392b':'#888';var sb=io===true?'#e6f9ee':io===false?'#fdecea':'#f5f5f5';html+='<div style="background:'+sb+';border-radius:10px;padding:10px 14px;margin-bottom:10px;display:flex;align-items:center;justify-content:space-between"><div style="font-size:13px;font-weight:700;color:'+sc+'">'+(io===true?'Open Now':io===false?'Closed Now':'Hours Today')+'</div><div style="font-size:14px;font-weight:700;color:'+sc+'">'+th+'</div></div>';}
             html += '<table style="width:100%;font-size:13px;border-collapse:collapse">';
             weekdayText.forEach(function(line, i) {
               var dayIndex = (i + 1) % 7, isToday = dayIndex === today;
@@ -1011,6 +1013,7 @@
             if (fullN2 && result && result.user) {
               try {
                 await window._updateProfile(result.user, { displayName: fullN2 });
+                try { await result.user.reload(); window._currentUser = window._auth.currentUser; } catch(re){}
                 await window._fbSetDoc(window._fbDoc(window._db,'profiles',result.user.uid),
                   { uid:result.user.uid, name:fullN2, firstName:fn2, lastName:ln2, email:result.user.email||'', photo:'', createdAt:window._fbTimestamp.now() },
                   { merge:true });
@@ -1678,6 +1681,13 @@
     // ═══════════════════════════════════════
     //  REPORT COURT HOURS
     // ═══════════════════════════════════════
+    window.deleteHoursReport = async function(docId, placeId) {
+      if (!window._currentUser) return;
+      if (!confirm('Delete your hours report?')) return;
+      try { await window._fbDeleteDoc(window._fbDoc(window._db,'courtHoursReports',docId)); loadReportedHours(placeId); }
+      catch(e) { alert('Could not delete. Try again.'); }
+    };
+
     window.showReportHoursForm = function(placeId) {
       var section = document.getElementById('reportHoursSection');
       if (!section) return;
@@ -1742,7 +1752,9 @@
           return (b.createdAt?b.createdAt.seconds:0) - (a.createdAt?a.createdAt.seconds:0);
         });
 
-        var reportBtn = '<button onclick="showReportHoursForm(\'' + placeId + '\')" style="display:inline-flex;align-items:center;gap:6px;background:var(--slam-surface);border:1.5px solid var(--slam-border);border-radius:10px;padding:8px 14px;font-size:12px;font-weight:600;color:var(--slam-text-2);cursor:pointer;margin-top:8px">🕐 Report Updated Hours</button>';
+        var _canDel = window._currentUser && latest && latest.uid === window._currentUser.uid;
+        var _delBtnH = _canDel ? ('<button onclick="deleteHoursReport(\'' + latest.id + '\',\'' + placeId + '\')" style="background:#fdecea;color:#c0392b;border:1px solid #f5c6c6;border-radius:8px;padding:6px 12px;font-size:11px;font-weight:600;cursor:pointer;margin-left:8px">Delete report</button>') : '';
+        var reportBtn = '<button onclick="showReportHoursForm(\'' + placeId + '\')" style="display:inline-flex;align-items:center;gap:6px;background:var(--slam-surface);border:1.5px solid var(--slam-border);border-radius:10px;padding:8px 14px;font-size:12px;font-weight:600;color:var(--slam-text-2);cursor:pointer;margin-top:8px">&#128336; Report Updated Hours</button>' + _delBtnH;
 
         if (!reports.length) {
           section.innerHTML = '<div style="margin-top:8px">' + reportBtn + '</div>';
@@ -1815,6 +1827,13 @@
       loadCourtPhotos(placeId);
     };
 
+    window.deleteCourtPhoto = async function(docId, placeId) {
+      if (!window._currentUser) return;
+      if (!confirm('Delete this photo?')) return;
+      try { await window._fbDeleteDoc(window._fbDoc(window._db,'courtPhotos',docId)); loadCourtPhotos(placeId); }
+      catch(e) { alert('Could not delete. Try again.'); }
+    };
+
     async function loadCourtPhotos(placeId) {
       var section = document.getElementById('courtPhotosSection');
       if (!section || !window._db) return;
@@ -1859,10 +1878,12 @@
             else if (diffDays < 365) dateLabel = Math.floor(diffDays/30) + 'mo ago';
             else dateLabel = Math.floor(diffDays/365) + 'y ago';
           }
+          var _mine = window._currentUser && window._currentUser.uid === p.uid;
           html += '<div style="position:relative;flex-shrink:0">'
             + '<img src="' + p.url + '" onclick="showPhotoModal(\'' + p.url + '\')" '
             + 'style="width:90px;height:90px;object-fit:cover;border-radius:10px;cursor:pointer;border:2px solid var(--slam-border);display:block">'
             + (dateLabel ? '<div style="position:absolute;bottom:0;left:0;right:0;background:rgba(0,0,0,0.55);color:#fff;font-size:9px;font-weight:600;text-align:center;padding:3px 2px;border-radius:0 0 8px 8px">' + dateLabel + '</div>' : '')
+            + (_mine ? '<button onclick="deleteCourtPhoto(\'' + p.id + '\',\'' + p.placeId + '\')" style="position:absolute;top:-6px;right:-6px;background:#e74c3c;color:#fff;border:none;border-radius:50%;width:20px;height:20px;font-size:11px;cursor:pointer;line-height:1">&#10005;</button>' : '')
             + '<div style="font-size:10px;color:var(--slam-text-3);text-align:center;margin-top:3px;max-width:90px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + (p.name||'') + '</div>'
             + '</div>';
         });
@@ -1946,7 +1967,7 @@
         var ln = document.getElementById('profileLastName')  ? document.getElementById('profileLastName').value.trim()  : '';
         var fullName = (fn + ' ' + ln).trim() || window._currentUser.displayName || '';
         if ((fn + ' ' + ln).trim()) {
-          try { await window._updateProfile(window._currentUser, { displayName: fullName }); } catch(e) {}
+          try { await window._updateProfile(window._currentUser, { displayName: fullName }); await window._currentUser.reload(); window._currentUser = window._auth.currentUser; } catch(e) {}
         }
         await window._fbSetDoc(window._fbDoc(window._db, 'profiles', window._currentUser.uid), {
           uid: window._currentUser.uid, name: fullName, firstName: fn, lastName: ln,
