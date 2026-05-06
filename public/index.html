@@ -30,6 +30,7 @@
       <a href="#" id="navNearby" onclick="showNearby()">🎾 Players Near You</a>
       <a href="#" id="navFeed" onclick="showActivityFeed()">📰 Feed</a>
       <a href="#" id="navCalendar" onclick="showCalendar()">📅 Calendar</a>
+      <a href="#" id="navSkills" onclick="showSkills()">🎾 Improve Game</a>
       <div id="authBtn" onclick="handleAuthClick()" style="display:flex;align-items:center;gap:8px;cursor:pointer;background:#f0f0f0;border-radius:50px;padding:6px 14px 6px 6px;transition:all 0.2s" onmouseover="this.style.background='#e6f9ee'" onmouseout="this.style.background=window._currentUser?'#e6f9ee':'#f0f0f0'">
         <div id="authAvatar" style="width:28px;height:28px;border-radius:50%;background:#1a6b3c;display:flex;align-items:center;justify-content:center;font-size:12px;color:#fff;font-weight:700;overflow:hidden">
           <span id="authAvatarText">?</span>
@@ -49,6 +50,7 @@
     <a href="#" onclick="handleAuthClick();closeMobileMenu()">👤 My Profile</a>
     <a href="#" onclick="showActivityFeed();closeMobileMenu()">📰 Feed</a>
     <a href="#" onclick="showCalendar();closeMobileMenu()">📅 Calendar</a>
+    <a href="#" onclick="showSkills();closeMobileMenu()">🎾 Improve Game</a>
   </div>
 
   <!-- HERO -->
@@ -550,6 +552,137 @@
     <div id="calSessionsList"></div>
   </div>
 
+
+  <!-- SKILLS PAGE -->
+  <div id="skillsPage" style="display:none;max-width:900px;margin:40px auto;padding:0 24px 80px;position:relative;z-index:1">
+
+    <div style="margin-bottom:28px">
+      <div style="font-family:Syne,sans-serif;font-size:26px;font-weight:800;color:var(--slam-text-1);margin-bottom:6px">🎾 Improve Your Game</div>
+      <div style="font-size:14px;color:var(--slam-text-3)">Handpicked lessons from the world's best tennis coaches — sorted by skill</div>
+    </div>
+
+    <!-- FOREHAND -->
+    <div style="margin-bottom:32px">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">
+        <div style="width:4px;height:24px;background:var(--slam-primary);border-radius:2px"></div>
+        <div style="font-family:Syne,sans-serif;font-size:17px;font-weight:800;color:var(--slam-text-1)">Forehand</div>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px">
+        <div onclick="window.open('https://www.youtube.com/watch?v=aZj7DIEftPg','_blank')" style="background:var(--slam-surface);border:1px solid var(--slam-border);border-radius:14px;overflow:hidden;cursor:pointer;transition:box-shadow .2s" onmouseover="this.style.boxShadow='0 6px 24px rgba(0,0,0,0.1)'" onmouseout="this.style.boxShadow='none'">
+          <div style="position:relative"><img src="https://img.youtube.com/vi/aZj7DIEftPg/mqdefault.jpg" style="width:100%;height:140px;object-fit:cover;display:block"><div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center"><div style="width:44px;height:44px;background:rgba(255,0,0,0.85);border-radius:50%;display:flex;align-items:center;justify-content:center"><div style="width:0;height:0;border-style:solid;border-width:8px 0 8px 16px;border-color:transparent transparent transparent #fff;margin-left:3px"></div></div></div></div>
+          <div style="padding:12px 14px"><div style="font-size:13px;font-weight:700;color:var(--slam-text-1);margin-bottom:4px;line-height:1.3">Perfect Forehand in 5 Steps</div><div style="font-size:11px;color:var(--slam-text-3)">Top Tennis Training · 8M+ views</div></div>
+        </div>
+        <div onclick="window.open('https://www.youtube.com/watch?v=5arVdubK9Pg','_blank')" style="background:var(--slam-surface);border:1px solid var(--slam-border);border-radius:14px;overflow:hidden;cursor:pointer;transition:box-shadow .2s" onmouseover="this.style.boxShadow='0 6px 24px rgba(0,0,0,0.1)'" onmouseout="this.style.boxShadow='none'">
+          <div style="position:relative"><img src="https://img.youtube.com/vi/5arVdubK9Pg/mqdefault.jpg" style="width:100%;height:140px;object-fit:cover;display:block"><div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center"><div style="width:44px;height:44px;background:rgba(255,0,0,0.85);border-radius:50%;display:flex;align-items:center;justify-content:center"><div style="width:0;height:0;border-style:solid;border-width:8px 0 8px 16px;border-color:transparent transparent transparent #fff;margin-left:3px"></div></div></div></div>
+          <div style="padding:12px 14px"><div style="font-size:13px;font-weight:700;color:var(--slam-text-1);margin-bottom:4px;line-height:1.3">Perfect Forehand in 3 Easy Steps</div><div style="font-size:11px;color:var(--slam-text-3)">Top Tennis Training · 5M+ views</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- BACKHAND -->
+    <div style="margin-bottom:32px">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">
+        <div style="width:4px;height:24px;background:#2563eb;border-radius:2px"></div>
+        <div style="font-family:Syne,sans-serif;font-size:17px;font-weight:800;color:var(--slam-text-1)">Backhand</div>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px">
+        <div onclick="window.open('https://www.youtube.com/watch?v=PBguk3yRPgI','_blank')" style="background:var(--slam-surface);border:1px solid var(--slam-border);border-radius:14px;overflow:hidden;cursor:pointer;transition:box-shadow .2s" onmouseover="this.style.boxShadow='0 6px 24px rgba(0,0,0,0.1)'" onmouseout="this.style.boxShadow='none'">
+          <div style="position:relative"><img src="https://img.youtube.com/vi/PBguk3yRPgI/mqdefault.jpg" style="width:100%;height:140px;object-fit:cover;display:block"><div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center"><div style="width:44px;height:44px;background:rgba(255,0,0,0.85);border-radius:50%;display:flex;align-items:center;justify-content:center"><div style="width:0;height:0;border-style:solid;border-width:8px 0 8px 16px;border-color:transparent transparent transparent #fff;margin-left:3px"></div></div></div></div>
+          <div style="padding:12px 14px"><div style="font-size:13px;font-weight:700;color:var(--slam-text-1);margin-bottom:4px;line-height:1.3">Two-Handed Backhand — 3 Steps</div><div style="font-size:11px;color:var(--slam-text-3)">Top Tennis Training · 6M+ views</div></div>
+        </div>
+        <div onclick="window.open('https://www.youtube.com/watch?v=hf5U3I7Z5YQ','_blank')" style="background:var(--slam-surface);border:1px solid var(--slam-border);border-radius:14px;overflow:hidden;cursor:pointer;transition:box-shadow .2s" onmouseover="this.style.boxShadow='0 6px 24px rgba(0,0,0,0.1)'" onmouseout="this.style.boxShadow='none'">
+          <div style="position:relative"><img src="https://img.youtube.com/vi/hf5U3I7Z5YQ/mqdefault.jpg" style="width:100%;height:140px;object-fit:cover;display:block"><div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center"><div style="width:44px;height:44px;background:rgba(255,0,0,0.85);border-radius:50%;display:flex;align-items:center;justify-content:center"><div style="width:0;height:0;border-style:solid;border-width:8px 0 8px 16px;border-color:transparent transparent transparent #fff;margin-left:3px"></div></div></div></div>
+          <div style="padding:12px 14px"><div style="font-size:13px;font-weight:700;color:var(--slam-text-1);margin-bottom:4px;line-height:1.3">One-Handed Backhand — 3 Steps</div><div style="font-size:11px;color:var(--slam-text-3)">Top Tennis Training · 4M+ views</div></div>
+        </div>
+        <div onclick="window.open('https://www.youtube.com/watch?v=esufEYZUI2Y','_blank')" style="background:var(--slam-surface);border:1px solid var(--slam-border);border-radius:14px;overflow:hidden;cursor:pointer;transition:box-shadow .2s" onmouseover="this.style.boxShadow='0 6px 24px rgba(0,0,0,0.1)'" onmouseout="this.style.boxShadow='none'">
+          <div style="position:relative"><img src="https://img.youtube.com/vi/esufEYZUI2Y/mqdefault.jpg" style="width:100%;height:140px;object-fit:cover;display:block"><div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center"><div style="width:44px;height:44px;background:rgba(255,0,0,0.85);border-radius:50%;display:flex;align-items:center;justify-content:center"><div style="width:0;height:0;border-style:solid;border-width:8px 0 8px 16px;border-color:transparent transparent transparent #fff;margin-left:3px"></div></div></div></div>
+          <div style="padding:12px 14px"><div style="font-size:13px;font-weight:700;color:var(--slam-text-1);margin-bottom:4px;line-height:1.3">Backhand for Topspin + Control</div><div style="font-size:11px;color:var(--slam-text-3)">Essential Tennis · 3M+ views</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SERVE -->
+    <div style="margin-bottom:32px">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">
+        <div style="width:4px;height:24px;background:#d97706;border-radius:2px"></div>
+        <div style="font-family:Syne,sans-serif;font-size:17px;font-weight:800;color:var(--slam-text-1)">Serve</div>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px">
+        <div onclick="window.open('https://www.youtube.com/watch?v=ael71EkjvHw','_blank')" style="background:var(--slam-surface);border:1px solid var(--slam-border);border-radius:14px;overflow:hidden;cursor:pointer;transition:box-shadow .2s" onmouseover="this.style.boxShadow='0 6px 24px rgba(0,0,0,0.1)'" onmouseout="this.style.boxShadow='none'">
+          <div style="position:relative"><img src="https://img.youtube.com/vi/ael71EkjvHw/mqdefault.jpg" style="width:100%;height:140px;object-fit:cover;display:block"><div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center"><div style="width:44px;height:44px;background:rgba(255,0,0,0.85);border-radius:50%;display:flex;align-items:center;justify-content:center"><div style="width:0;height:0;border-style:solid;border-width:8px 0 8px 16px;border-color:transparent transparent transparent #fff;margin-left:3px"></div></div></div></div>
+          <div style="padding:12px 14px"><div style="font-size:13px;font-weight:700;color:var(--slam-text-1);margin-bottom:4px;line-height:1.3">Ultimate Tennis Serve Lesson</div><div style="font-size:11px;color:var(--slam-text-3)">Top Tennis Training · 7M+ views</div></div>
+        </div>
+        <div onclick="window.open('https://www.youtube.com/watch?v=w03NVg7YtNo','_blank')" style="background:var(--slam-surface);border:1px solid var(--slam-border);border-radius:14px;overflow:hidden;cursor:pointer;transition:box-shadow .2s" onmouseover="this.style.boxShadow='0 6px 24px rgba(0,0,0,0.1)'" onmouseout="this.style.boxShadow='none'">
+          <div style="position:relative"><img src="https://img.youtube.com/vi/w03NVg7YtNo/mqdefault.jpg" style="width:100%;height:140px;object-fit:cover;display:block"><div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center"><div style="width:44px;height:44px;background:rgba(255,0,0,0.85);border-radius:50%;display:flex;align-items:center;justify-content:center"><div style="width:0;height:0;border-style:solid;border-width:8px 0 8px 16px;border-color:transparent transparent transparent #fff;margin-left:3px"></div></div></div></div>
+          <div style="padding:12px 14px"><div style="font-size:13px;font-weight:700;color:var(--slam-text-1);margin-bottom:4px;line-height:1.3">Perfect Serve in 5 Simple Steps</div><div style="font-size:11px;color:var(--slam-text-3)">Top Tennis Training · 5M+ views</div></div>
+        </div>
+        <div onclick="window.open('https://www.youtube.com/watch?v=IiRGdagtOKE','_blank')" style="background:var(--slam-surface);border:1px solid var(--slam-border);border-radius:14px;overflow:hidden;cursor:pointer;transition:box-shadow .2s" onmouseover="this.style.boxShadow='0 6px 24px rgba(0,0,0,0.1)'" onmouseout="this.style.boxShadow='none'">
+          <div style="position:relative"><img src="https://img.youtube.com/vi/IiRGdagtOKE/mqdefault.jpg" style="width:100%;height:140px;object-fit:cover;display:block"><div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center"><div style="width:44px;height:44px;background:rgba(255,0,0,0.85);border-radius:50%;display:flex;align-items:center;justify-content:center"><div style="width:0;height:0;border-style:solid;border-width:8px 0 8px 16px;border-color:transparent transparent transparent #fff;margin-left:3px"></div></div></div></div>
+          <div style="padding:12px 14px"><div style="font-size:13px;font-weight:700;color:var(--slam-text-1);margin-bottom:4px;line-height:1.3">Serve Masterclass for Beginners</div><div style="font-size:11px;color:var(--slam-text-3)">Top Tennis Training · 2024</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- FOOTWORK -->
+    <div style="margin-bottom:32px">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">
+        <div style="width:4px;height:24px;background:#7c3aed;border-radius:2px"></div>
+        <div style="font-family:Syne,sans-serif;font-size:17px;font-weight:800;color:var(--slam-text-1)">Footwork & Movement</div>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px">
+        <div onclick="window.open('https://www.youtube.com/watch?v=y6IBn6hxDZ4','_blank')" style="background:var(--slam-surface);border:1px solid var(--slam-border);border-radius:14px;overflow:hidden;cursor:pointer;transition:box-shadow .2s" onmouseover="this.style.boxShadow='0 6px 24px rgba(0,0,0,0.1)'" onmouseout="this.style.boxShadow='none'">
+          <div style="position:relative"><img src="https://img.youtube.com/vi/y6IBn6hxDZ4/mqdefault.jpg" style="width:100%;height:140px;object-fit:cover;display:block"><div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center"><div style="width:44px;height:44px;background:rgba(255,0,0,0.85);border-radius:50%;display:flex;align-items:center;justify-content:center"><div style="width:0;height:0;border-style:solid;border-width:8px 0 8px 16px;border-color:transparent transparent transparent #fff;margin-left:3px"></div></div></div></div>
+          <div style="padding:12px 14px"><div style="font-size:13px;font-weight:700;color:var(--slam-text-1);margin-bottom:4px;line-height:1.3">Most Important Footwork Lesson</div><div style="font-size:11px;color:var(--slam-text-3)">Top Tennis Training · 2023</div></div>
+        </div>
+        <div onclick="window.open('https://www.youtube.com/watch?v=eGWhONP7558','_blank')" style="background:var(--slam-surface);border:1px solid var(--slam-border);border-radius:14px;overflow:hidden;cursor:pointer;transition:box-shadow .2s" onmouseover="this.style.boxShadow='0 6px 24px rgba(0,0,0,0.1)'" onmouseout="this.style.boxShadow='none'">
+          <div style="position:relative"><img src="https://img.youtube.com/vi/eGWhONP7558/mqdefault.jpg" style="width:100%;height:140px;object-fit:cover;display:block"><div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center"><div style="width:44px;height:44px;background:rgba(255,0,0,0.85);border-radius:50%;display:flex;align-items:center;justify-content:center"><div style="width:0;height:0;border-style:solid;border-width:8px 0 8px 16px;border-color:transparent transparent transparent #fff;margin-left:3px"></div></div></div></div>
+          <div style="padding:12px 14px"><div style="font-size:13px;font-weight:700;color:var(--slam-text-1);margin-bottom:4px;line-height:1.3">5 Footwork Drills to Improve Movement</div><div style="font-size:11px;color:var(--slam-text-3)">Top Tennis Training · 4M+ views</div></div>
+        </div>
+        <div onclick="window.open('https://www.youtube.com/watch?v=lb1pW5nCPtw','_blank')" style="background:var(--slam-surface);border:1px solid var(--slam-border);border-radius:14px;overflow:hidden;cursor:pointer;transition:box-shadow .2s" onmouseover="this.style.boxShadow='0 6px 24px rgba(0,0,0,0.1)'" onmouseout="this.style.boxShadow='none'">
+          <div style="position:relative"><img src="https://img.youtube.com/vi/lb1pW5nCPtw/mqdefault.jpg" style="width:100%;height:140px;object-fit:cover;display:block"><div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center"><div style="width:44px;height:44px;background:rgba(255,0,0,0.85);border-radius:50%;display:flex;align-items:center;justify-content:center"><div style="width:0;height:0;border-style:solid;border-width:8px 0 8px 16px;border-color:transparent transparent transparent #fff;margin-left:3px"></div></div></div></div>
+          <div style="padding:12px 14px"><div style="font-size:13px;font-weight:700;color:var(--slam-text-1);margin-bottom:4px;line-height:1.3">Transform Your Footwork in 10 Minutes</div><div style="font-size:11px;color:var(--slam-text-3)">Top Tennis Training · 3M+ views</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CONSISTENCY -->
+    <div style="margin-bottom:32px">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">
+        <div style="width:4px;height:24px;background:#059669;border-radius:2px"></div>
+        <div style="font-family:Syne,sans-serif;font-size:17px;font-weight:800;color:var(--slam-text-1)">Consistency & Rally</div>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px">
+        <div onclick="window.open('https://www.youtube.com/watch?v=teZlZP_0gEg','_blank')" style="background:var(--slam-surface);border:1px solid var(--slam-border);border-radius:14px;overflow:hidden;cursor:pointer;transition:box-shadow .2s" onmouseover="this.style.boxShadow='0 6px 24px rgba(0,0,0,0.1)'" onmouseout="this.style.boxShadow='none'">
+          <div style="position:relative"><img src="https://img.youtube.com/vi/teZlZP_0gEg/mqdefault.jpg" style="width:100%;height:140px;object-fit:cover;display:block"><div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center"><div style="width:44px;height:44px;background:rgba(255,0,0,0.85);border-radius:50%;display:flex;align-items:center;justify-content:center"><div style="width:0;height:0;border-style:solid;border-width:8px 0 8px 16px;border-color:transparent transparent transparent #fff;margin-left:3px"></div></div></div></div>
+          <div style="padding:12px 14px"><div style="font-size:13px;font-weight:700;color:var(--slam-text-1);margin-bottom:4px;line-height:1.3">Play Your Best Tennis Under Pressure</div><div style="font-size:11px;color:var(--slam-text-3)">Essential Tennis · Mental Toughness</div></div>
+        </div>
+        <div onclick="window.open('https://www.youtube.com/watch?v=ixAA_8GikaY','_blank')" style="background:var(--slam-surface);border:1px solid var(--slam-border);border-radius:14px;overflow:hidden;cursor:pointer;transition:box-shadow .2s" onmouseover="this.style.boxShadow='0 6px 24px rgba(0,0,0,0.1)'" onmouseout="this.style.boxShadow='none'">
+          <div style="position:relative"><img src="https://img.youtube.com/vi/ixAA_8GikaY/mqdefault.jpg" style="width:100%;height:140px;object-fit:cover;display:block"><div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center"><div style="width:44px;height:44px;background:rgba(255,0,0,0.85);border-radius:50%;display:flex;align-items:center;justify-content:center"><div style="width:0;height:0;border-style:solid;border-width:8px 0 8px 16px;border-color:transparent transparent transparent #fff;margin-left:3px"></div></div></div></div>
+          <div style="padding:12px 14px"><div style="font-size:13px;font-weight:700;color:var(--slam-text-1);margin-bottom:4px;line-height:1.3">How to Rally with Direction — USTA</div><div style="font-size:11px;color:var(--slam-text-3)">USTA Coaching · Official</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- VOLLEYS -->
+    <div style="margin-bottom:32px">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">
+        <div style="width:4px;height:24px;background:#dc2626;border-radius:2px"></div>
+        <div style="font-family:Syne,sans-serif;font-size:17px;font-weight:800;color:var(--slam-text-1)">Volleys & Net Play</div>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px">
+        <div onclick="window.open('https://www.youtube.com/watch?v=5MznrgnSleI','_blank')" style="background:var(--slam-surface);border:1px solid var(--slam-border);border-radius:14px;overflow:hidden;cursor:pointer;transition:box-shadow .2s" onmouseover="this.style.boxShadow='0 6px 24px rgba(0,0,0,0.1)'" onmouseout="this.style.boxShadow='none'">
+          <div style="position:relative"><img src="https://img.youtube.com/vi/5MznrgnSleI/mqdefault.jpg" style="width:100%;height:140px;object-fit:cover;display:block"><div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center"><div style="width:44px;height:44px;background:rgba(255,0,0,0.85);border-radius:50%;display:flex;align-items:center;justify-content:center"><div style="width:0;height:0;border-style:solid;border-width:8px 0 8px 16px;border-color:transparent transparent transparent #fff;margin-left:3px"></div></div></div></div>
+          <div style="padding:12px 14px"><div style="font-size:13px;font-weight:700;color:var(--slam-text-1);margin-bottom:4px;line-height:1.3">Serve Power vs Consistency</div><div style="font-size:11px;color:var(--slam-text-3)">Top Tennis Training · Strategy</div></div>
+        </div>
+        <div onclick="window.open('https://www.youtube.com/watch?v=Bcqi_M9aPmg','_blank')" style="background:var(--slam-surface);border:1px solid var(--slam-border);border-radius:14px;overflow:hidden;cursor:pointer;transition:box-shadow .2s" onmouseover="this.style.boxShadow='0 6px 24px rgba(0,0,0,0.1)'" onmouseout="this.style.boxShadow='none'">
+          <div style="position:relative"><img src="https://img.youtube.com/vi/Bcqi_M9aPmg/mqdefault.jpg" style="width:100%;height:140px;object-fit:cover;display:block"><div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center"><div style="width:44px;height:44px;background:rgba(255,0,0,0.85);border-radius:50%;display:flex;align-items:center;justify-content:center"><div style="width:0;height:0;border-style:solid;border-width:8px 0 8px 16px;border-color:transparent transparent transparent #fff;margin-left:3px"></div></div></div></div>
+          <div style="padding:12px 14px"><div style="font-size:13px;font-weight:700;color:var(--slam-text-1);margin-bottom:4px;line-height:1.3">Serve Drills for Ultra Fast Improvement</div><div style="font-size:11px;color:var(--slam-text-3)">Top Tennis Training · 2023</div></div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
   <!-- MAP -->
   <div class="map-section">
     <!-- Heatmap controls -->
@@ -776,15 +909,14 @@
           var placesLib = await google.maps.importLibrary('places');
           var Place = placesLib.Place;
           var place = new Place({ id: data.placeId, requestedLanguage: 'en' });
-          await place.fetchFields({ fields: ['regularOpeningHours', 'currentOpeningHours', 'nationalPhoneNumber', 'websiteURI', 'reviews', 'displayName'] });
+          await place.fetchFields({ fields: ['regularOpeningHours', 'nationalPhoneNumber', 'websiteURI', 'reviews', 'displayName'] });
           var hoursDiv = document.getElementById('modalHours');
           var html = '';
-          var _hours = place.regularOpeningHours || place.currentOpeningHours;
-          if (_hours && _hours.weekdayDescriptions) {
+          if (place.regularOpeningHours && place.regularOpeningHours.weekdayDescriptions) {
             var today = new Date().getDay();
-            var weekdayText = _hours.weekdayDescriptions;
+            var weekdayText = place.regularOpeningHours.weekdayDescriptions;
             var todayLine = weekdayText.find(function(line,i){return (i+1)%7===today;});
-            if(todayLine){var tp=todayLine.split(': '),th=tp.slice(1).join(': ')||'Closed';var io=_hours.isOpen?_hours.isOpen():null;var sc=io===true?'#1a6b3c':io===false?'#c0392b':'#888';var sb=io===true?'#e6f9ee':io===false?'#fdecea':'#f5f5f5';html+='<div style="background:'+sb+';border-radius:10px;padding:10px 14px;margin-bottom:10px;display:flex;align-items:center;justify-content:space-between"><div style="font-size:13px;font-weight:700;color:'+sc+'">'+(io===true?'Open Now':io===false?'Closed Now':'Hours Today')+'</div><div style="font-size:14px;font-weight:700;color:'+sc+'">'+th+'</div></div>';}
+            if(todayLine){var tp=todayLine.split(': '),th=tp.slice(1).join(': ')||'Closed';var io=place.regularOpeningHours.isOpen?place.regularOpeningHours.isOpen():null;var sc=io===true?'#1a6b3c':io===false?'#c0392b':'#888';var sb=io===true?'#e6f9ee':io===false?'#fdecea':'#f5f5f5';html+='<div style="background:'+sb+';border-radius:10px;padding:10px 14px;margin-bottom:10px;display:flex;align-items:center;justify-content:space-between"><div style="font-size:13px;font-weight:700;color:'+sc+'">'+(io===true?'Open Now':io===false?'Closed Now':'Hours Today')+'</div><div style="font-size:14px;font-weight:700;color:'+sc+'">'+th+'</div></div>';}
             html += '<table style="width:100%;font-size:13px;border-collapse:collapse">';
             weekdayText.forEach(function(line, i) {
               var dayIndex = (i + 1) % 7, isToday = dayIndex === today;
@@ -798,8 +930,8 @@
           if (place.nationalPhoneNumber) html += '<p style="margin-top:10px;font-size:13px;color:#555">Phone: ' + place.nationalPhoneNumber + '</p>';
           if (place.websiteURI) html += '<p style="margin-top:4px;font-size:13px"><a href="' + place.websiteURI + '" target="_blank" style="color:#1a6b3c">Visit website</a></p>';
           hoursDiv.innerHTML = html;
-          if (currentModalId && courtDataStore[currentModalId] && _hours && _hours.weekdayDescriptions) {
-            courtDataStore[currentModalId].hours = _hours.weekdayDescriptions;
+          if (currentModalId && courtDataStore[currentModalId] && place.regularOpeningHours && place.regularOpeningHours.weekdayDescriptions) {
+            courtDataStore[currentModalId].hours = place.regularOpeningHours.weekdayDescriptions;
           }
           if (place.reviews && place.reviews.length > 0) {
             var reviewsHtml = '';
@@ -817,7 +949,7 @@
             document.getElementById('googleReviewsSection').innerHTML = '<div style="font-size:13px;color:#aaa;padding:8px 0">No reviews available.</div>';
           }
         } catch (err) {
-          console.log('Places details error:', err.message || err);
+          console.log('Places details error:', err);
           document.getElementById('modalHours').innerHTML = '<p style="color:#888;font-size:13px">Hours not available.</p>';
         }
       }
@@ -843,7 +975,7 @@
         var profile = profileSnap.exists() ? profileSnap.data() : {};
         var courtData = courtDataStore[currentModalId] || {};
         await window._fbAddDoc(window._fbCollection(window._db, 'sessions'), {
-          placeId: placeId, courtName: courtData.name || '', courtAddress: courtData.address || '', courtLat: courtData.lat || null, courtLng: courtData.lng || null,
+          placeId: placeId, courtName: courtData.name || '', courtLat: courtData.lat || null, courtLng: courtData.lng || null,
           name: name, uid: window._currentUser.uid, photo: window._currentUser.photoURL || '',
           date: date, time: time, skill: skill, type: type,
           players: [{ name: name, uid: window._currentUser.uid, photo: window._currentUser.photoURL || '' }],
@@ -1049,7 +1181,7 @@
     // ── HIDE ALL PAGES HELPER ──
     function hideAllPages() {
       var ids = ['heroSection','savedSection','nearbyPage','profilePage','myProfilePage',
-                 'viewProfilePage','feedPage','playerCardPage','leaderboardPage','aiCoachPage','calendarPage'];
+                 'viewProfilePage','feedPage','playerCardPage','leaderboardPage','aiCoachPage','calendarPage','skillsPage'];
       ids.forEach(function(id){ var el=document.getElementById(id); if(el) el.style.display='none'; });
       var ms = document.getElementById('map'); if(ms) ms.closest('.map-section').style.display='none';
       var rg = document.getElementById('resultsGrid'); if(rg) rg.parentElement.style.display='none';
@@ -1503,41 +1635,23 @@
       document.getElementById('calendarPage').style.display = 'block';
       var nc = document.getElementById('navCalendar');
       if (nc) nc.style.color = 'var(--slam-primary)';
-      // Always reset to current month and reload fresh
-      calYear = new Date().getFullYear();
-      calMonth = new Date().getMonth();
-      calSessions = [];
       loadCalendarSessions();
     };
 
     async function loadCalendarSessions() {
       if (!window._db || !window._currentUser) return;
-      var grid = document.getElementById('calGrid');
-      if (grid) grid.innerHTML = '<div style="text-align:center;padding:40px;color:var(--slam-text-3);font-size:13px">Loading...</div>';
       try {
-        var uid = window._currentUser.uid;
-        // Fetch sessions I created
-        var q1 = window._fbQuery(window._fbCollection(window._db,'sessions'), window._fbWhere('uid','==',uid), window._fbOrderBy('date','asc'));
-        // Fetch sessions I joined (players array contains my uid)
-        var q2 = window._fbQuery(window._fbCollection(window._db,'sessions'), window._fbWhere('players','array-contains',{name:window._currentUser.displayName||'',uid:uid,photo:window._currentUser.photoURL||''}), window._fbOrderBy('date','asc'));
-        var snap1 = await window._fbGetDocs(q1);
+        var q = window._fbQuery(
+          window._fbCollection(window._db, 'sessions'),
+          window._fbWhere('uid', '==', window._currentUser.uid),
+          window._fbOrderBy('date', 'asc')
+        );
+        var snap = await window._fbGetDocs(q);
         calSessions = [];
-        var seenIds = {};
-        snap1.forEach(function(d) {
+        snap.forEach(function(d) {
           var s = Object.assign({ id: d.id }, d.data());
-          if (!s.deleted && !seenIds[d.id]) { calSessions.push(s); seenIds[d.id] = true; }
+          if (!s.deleted) calSessions.push(s);
         });
-        // Also scan all upcoming sessions to find ones I joined
-        var q3 = window._fbQuery(window._fbCollection(window._db,'sessions'), window._fbOrderBy('date','asc'));
-        var snap3 = await window._fbGetDocs(q3);
-        snap3.forEach(function(d) {
-          var s = Object.assign({ id: d.id }, d.data());
-          if (s.deleted || seenIds[d.id]) return;
-          if (s.players && s.players.some(function(p){ return p.uid === uid; })) {
-            calSessions.push(s); seenIds[d.id] = true;
-          }
-        });
-        calSessions.sort(function(a,b){ return a.date > b.date ? 1 : -1; });
         renderCalendar();
       } catch(e) { console.log('Calendar error:', e); }
     }
@@ -1986,8 +2100,7 @@
         var ln = document.getElementById('profileLastName')  ? document.getElementById('profileLastName').value.trim()  : '';
         var fullName = (fn + ' ' + ln).trim() || window._currentUser.displayName || '';
         if ((fn + ' ' + ln).trim()) {
-        // Try Firebase Auth update (works for email, may skip for Google)
-        if ((fn + ' ' + ln).trim()) { try { if(window._updateProfile) await window._updateProfile(window._currentUser, {displayName: fullName}); } catch(e){} }
+          try { await window._updateProfile(window._currentUser, { displayName: fullName }); await window._currentUser.reload(); window._currentUser = window._auth.currentUser; } catch(e) {}
         }
         await window._fbSetDoc(window._fbDoc(window._db, 'profiles', window._currentUser.uid), {
           uid: window._currentUser.uid, name: fullName, firstName: fn, lastName: ln,
@@ -1997,13 +2110,7 @@
           facebook: document.getElementById('profileFacebook').value, whatsapp: document.getElementById('profileWhatsapp').value,
           phone: document.getElementById('profilePhone').value, updatedAt: window._fbTimestamp.now()
         }, { merge: true });
-        // Update name shown on profile header immediately
-        var mpN = document.getElementById('mpName');
-        if (mpN && fullName) mpN.textContent = fullName;
-        var mpI = document.getElementById('mpInitials');
-        if (mpI && fullName) mpI.textContent = fullName.split(' ').map(function(w){return w[0]||'';}).join('').toUpperCase().substring(0,2);
         alert('Profile saved!');
-        showMyProfile();
       } catch (err) { console.log('Save profile error:', err); alert('Could not save profile. Try again.'); }
     };
 
@@ -2128,6 +2235,13 @@
       return null;
     };
 
+        window.showSkills = function() {
+      hideAllPages();
+      document.getElementById('skillsPage').style.display = 'block';
+      var ns = document.getElementById('navSkills');
+      if (ns) ns.style.color = 'var(--slam-primary)';
+    };
+
         window.signOutUser = async function() {
       try {
         await window._signOut(window._auth);
@@ -2144,16 +2258,15 @@
       document.getElementById('navSearch').style.color = 'rgba(255,255,255,0.72)';
       var nf=document.getElementById('navFeed');if(nf)nf.style.color='rgba(255,255,255,0.72)';
       var nc2=document.getElementById('navCalendar');if(nc2)nc2.style.color='rgba(255,255,255,0.72)';
+      var ns2=document.getElementById('navSkills');if(ns2)ns2.style.color='rgba(255,255,255,0.72)';
       var user = window._currentUser;
+      document.getElementById('mpName').textContent = user.displayName || 'No name';
       document.getElementById('mpEmail').textContent = user.email || '';
       var profileRef = window._fbDoc(window._db, 'profiles', user.uid);
       var profileSnap = await window._fbGetDoc(profileRef);
       var p = profileSnap.exists() ? profileSnap.data() : {};
-      // Use Firestore name first (allows overriding Google display name)
-      var displayName = p.name || user.displayName || 'No name';
-      document.getElementById('mpName').textContent = displayName;
       if (p.photo || user.photoURL) { document.getElementById('mpPhoto').src = p.photo || user.photoURL; document.getElementById('mpPhoto').style.display = 'block'; document.getElementById('mpInitials').style.display = 'none'; }
-      else { document.getElementById('mpInitials').textContent = displayName ? displayName[0].toUpperCase() : '?'; }
+      else { document.getElementById('mpInitials').textContent = user.displayName ? user.displayName[0].toUpperCase() : '?'; }
       document.getElementById('mpVerifiedBadge').style.display = p.phoneVerified ? 'inline-block' : 'none';
       document.getElementById('mpSkill').textContent = p.skill ? '🎾 ' + p.skill : '';
       document.getElementById('mpUTR').textContent = p.utr ? '📊 UTR ' + p.utr : '';
@@ -2355,7 +2468,7 @@
               playerAvatars += '<div onclick="' + (pUid2 ? 'viewProfile(\'' + pUid2 + '\')' : '') + '" title="' + pName + '" style="width:26px;height:26px;border-radius:50%;background:var(--slam-primary);display:flex;align-items:center;justify-content:center;font-size:10px;color:#fff;font-weight:700;border:2px solid #fff;margin-right:-5px;cursor:' + (pUid2?'pointer':'default') + '">' + pName[0].toUpperCase() + '</div>';
             }
           });
-          list.innerHTML += '<div style="background:#ffffff;border:1px solid #ebebeb;border-radius:16px;padding:16px 18px;margin-bottom:12px;transition:box-shadow 0.2s" onmouseover="this.style.boxShadow=\'0 4px 20px rgba(0,0,0,0.08)\'" onmouseout="this.style.boxShadow=\'none\'"><div style="display:flex;align-items:flex-start;gap:12px">' + avatarHtml + '<div style="flex:1;min-width:0"><div style="display:flex;align-items:center;flex-wrap:wrap;gap:4px;margin-bottom:4px"><span style="font-size:14px;font-weight:700;color:#1a1a1a;cursor:pointer;text-decoration:underline" onclick="viewProfile(\'' + s.uid + '\')">' + s.name + '</span>' + verifiedBadge + '</div><div style="font-size:12px;color:#888;margin-bottom:6px"><span style="background:' + (isToday ? '#e6f9ee' : '#f0f0f0') + ';color:' + (isToday ? '#1a6b3c' : '#555') + ';font-weight:600;padding:2px 8px;border-radius:999px;font-size:11px">' + (isToday ? 'Today' : dateStr) + '</span> at <strong>' + timeStr + '</strong>' + distanceBadge + '</div><div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px"><span style="background:#f0f0f0;color:#555;font-size:11px;font-weight:500;padding:3px 10px;border-radius:999px">' + s.type + '</span><span style="background:#f0f0f0;color:#555;font-size:11px;font-weight:500;padding:3px 10px;border-radius:999px">' + s.skill + '</span>' + (s.courtName ? '<span style="background:#e6f9ee;color:#1a6b3c;font-size:11px;font-weight:500;padding:3px 10px;border-radius:999px">📍 ' + s.courtName + '</span>' : '') + (s.courtAddress ? '<div style="font-size:11px;color:#888;margin-top:4px">📌 ' + s.courtAddress + '</div>' : '') + '</div>' + (s.gallery && s.gallery.length > 0 ? '<div style="display:flex;gap:6px;margin-bottom:8px">' + s.gallery.map(function(url) { return '<img src="' + url + '" style="width:60px;height:60px;border-radius:8px;object-fit:cover;border:1px solid #e8e8e8;cursor:pointer" onclick="showPhotoModal(\'' + url + '\')">'; }).join('') + '</div>' : '') + (socialLinks ? '<div style="margin-bottom:8px">' + socialLinks + '</div>' : '') + '<div style="display:flex;align-items:center;justify-content:space-between"><div style="display:flex;align-items:center;gap:4px">' + playerAvatars + '<span style="font-size:11px;color:#888;margin-left:10px">' + playersCount + ' player' + (playersCount !== 1 ? 's' : '') + ' going</span></div>' + (isOwner ? '<div style="display:flex;gap:6px"><span style="font-size:11px;color:#1a6b3c;font-weight:600;align-self:center">Your session</span><button onclick="deleteSession(\'' + s.id + '\', null)" style="background:#fdecea;color:#c0392b;border:1px solid #f5c6c6;border-radius:8px;padding:7px 12px;font-size:11px;font-weight:600;font-family:\'Plus Jakarta Sans\',sans-serif;cursor:pointer">Cancel</button></div>' : '<button onclick="joinSessionFromNearby(\'' + s.id + '\')" style="background:#e6f9ee;color:#1a6b3c;border:1px solid #1a6b3c;border-radius:8px;padding:5px 14px;font-size:12px;font-weight:600;font-family:\'Plus Jakarta Sans\',sans-serif;cursor:pointer">I\'m In!</button>') + '</div>'
+          list.innerHTML += '<div style="background:#ffffff;border:1px solid #ebebeb;border-radius:16px;padding:16px 18px;margin-bottom:12px;transition:box-shadow 0.2s" onmouseover="this.style.boxShadow=\'0 4px 20px rgba(0,0,0,0.08)\'" onmouseout="this.style.boxShadow=\'none\'"><div style="display:flex;align-items:flex-start;gap:12px">' + avatarHtml + '<div style="flex:1;min-width:0"><div style="display:flex;align-items:center;flex-wrap:wrap;gap:4px;margin-bottom:4px"><span style="font-size:14px;font-weight:700;color:#1a1a1a;cursor:pointer;text-decoration:underline" onclick="viewProfile(\'' + s.uid + '\')">' + s.name + '</span>' + verifiedBadge + '</div><div style="font-size:12px;color:#888;margin-bottom:6px"><span style="background:' + (isToday ? '#e6f9ee' : '#f0f0f0') + ';color:' + (isToday ? '#1a6b3c' : '#555') + ';font-weight:600;padding:2px 8px;border-radius:999px;font-size:11px">' + (isToday ? 'Today' : dateStr) + '</span> at <strong>' + timeStr + '</strong>' + distanceBadge + '</div><div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px"><span style="background:#f0f0f0;color:#555;font-size:11px;font-weight:500;padding:3px 10px;border-radius:999px">' + s.type + '</span><span style="background:#f0f0f0;color:#555;font-size:11px;font-weight:500;padding:3px 10px;border-radius:999px">' + s.skill + '</span>' + (s.courtName ? '<span style="background:#e6f9ee;color:#1a6b3c;font-size:11px;font-weight:500;padding:3px 10px;border-radius:999px">📍 ' + s.courtName + '</span>' : '') + '</div>' + (s.gallery && s.gallery.length > 0 ? '<div style="display:flex;gap:6px;margin-bottom:8px">' + s.gallery.map(function(url) { return '<img src="' + url + '" style="width:60px;height:60px;border-radius:8px;object-fit:cover;border:1px solid #e8e8e8;cursor:pointer" onclick="showPhotoModal(\'' + url + '\')">'; }).join('') + '</div>' : '') + (socialLinks ? '<div style="margin-bottom:8px">' + socialLinks + '</div>' : '') + '<div style="display:flex;align-items:center;justify-content:space-between"><div style="display:flex;align-items:center;gap:4px">' + playerAvatars + '<span style="font-size:11px;color:#888;margin-left:10px">' + playersCount + ' player' + (playersCount !== 1 ? 's' : '') + ' going</span></div>' + (isOwner ? '<div style="display:flex;gap:6px"><span style="font-size:11px;color:#1a6b3c;font-weight:600;align-self:center">Your session</span><button onclick="deleteSession(\'' + s.id + '\', null)" style="background:#fdecea;color:#c0392b;border:1px solid #f5c6c6;border-radius:8px;padding:7px 12px;font-size:11px;font-weight:600;font-family:\'Plus Jakarta Sans\',sans-serif;cursor:pointer">Cancel</button></div>' : '<button onclick="joinSessionFromNearby(\'' + s.id + '\')" style="background:#e6f9ee;color:#1a6b3c;border:1px solid #1a6b3c;border-radius:8px;padding:5px 14px;font-size:12px;font-weight:600;font-family:\'Plus Jakarta Sans\',sans-serif;cursor:pointer">I\'m In!</button>') + '</div>'
             + (s.note ? '<div style="margin-top:8px;padding:8px 12px;background:rgba(0,0,0,0.03);border-radius:8px;font-size:12px;color:#555;border-left:3px solid #1a6b3c">' + s.note + '</div>' : '')
             + (s.courtLat ? '<a href="https://www.google.com/maps/dir/?api=1&destination=' + s.courtLat + ',' + s.courtLng + '" target="_blank" style="margin-top:8px;display:flex;align-items:center;justify-content:center;gap:6px;font-size:12px;font-weight:600;color:#1a6b3c;text-decoration:none;background:#e6f9ee;padding:9px;border-radius:8px;border:1px solid #1a6b3c">📍 Get Directions to Court</a>' : '')
             + '</div></div></div>';
@@ -3110,7 +3223,7 @@
     // ── HIDE ALL PAGES ──
     function hideAllPages() {
       var ids = ['heroSection','savedSection','nearbyPage','profilePage','myProfilePage',
-                 'viewProfilePage','feedPage','playerCardPage','leaderboardPage','aiCoachPage','calendarPage'];
+                 'viewProfilePage','feedPage','playerCardPage','leaderboardPage','aiCoachPage','calendarPage','skillsPage'];
       ids.forEach(function(id) {
         var el = document.getElementById(id);
         if (el) el.style.display = 'none';
@@ -3850,7 +3963,6 @@ document.addEventListener('DOMContentLoaded',function(){
     window._createUserWithEmailAndPassword = createUserWithEmailAndPassword;
     window._signInWithEmailAndPassword = signInWithEmailAndPassword;
     window._sendPasswordResetEmail = sendPasswordResetEmail;
-    window._updateProfile = updateProfile;
 
     onAuthStateChanged(auth, async function(user) {
       window._currentUser = user;
@@ -3875,9 +3987,6 @@ document.addEventListener('DOMContentLoaded',function(){
         }
         if (profileSnap.exists()) {
           var pd = profileSnap.data();
-          // Use Firestore name for nav if available
-          var _navName = pd.name || user.displayName || '';
-          document.getElementById('authBtnText').textContent = _navName ? _navName.split(' ')[0] : 'Profile';
           if (document.getElementById('profileFirstName')) document.getElementById('profileFirstName').value = pd.firstName || (pd.name ? pd.name.split(' ')[0] : '');
           if (document.getElementById('profileLastName')) document.getElementById('profileLastName').value = pd.lastName || (pd.name && pd.name.indexOf(' ')>-1 ? pd.name.split(' ').slice(1).join(' ') : '');
           if (document.getElementById('profileFirstName')) document.getElementById('profileFirstName').value = pd.firstName || (pd.name ? pd.name.split(' ')[0] : '');
