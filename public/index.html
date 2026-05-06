@@ -835,7 +835,7 @@
       var _ss = document.getElementById('sessionSkill');
       var _sy = document.getElementById('sessionType');
       if (!_sd || !_st || !_ss || !_sy) { alert('Session form not found. Please open a court modal first.'); return; }
-      var name = (window._currentUser.displayName || (_sn ? _sn.value.trim() : '')) || 'Player';
+      var name = window._myProfileName || window._currentUser.displayName || (_sn ? _sn.value.trim() : '') || 'Player';
       var date = _sd.value;
       var time = _st.value;
       var skill = _ss.value;
@@ -3863,6 +3863,7 @@ document.addEventListener('DOMContentLoaded',function(){
         }
         if (profileSnap.exists()) {
           var pd = profileSnap.data();
+          window._myProfileName = pd.name || '';
           // Update nav with Firestore name (fixes null displayName for email signup)
           if (pd.name) {
             document.getElementById('authBtnText').textContent = pd.name.split(' ')[0];
