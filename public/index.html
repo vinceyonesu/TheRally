@@ -3827,6 +3827,8 @@ document.addEventListener('DOMContentLoaded',function(){
     window._createUserWithEmailAndPassword = createUserWithEmailAndPassword;
     window._signInWithEmailAndPassword = signInWithEmailAndPassword;
     window._sendPasswordResetEmail = sendPasswordResetEmail;
+    window._updateProfile = updateProfile;
+    window._onAuthStateChanged = onAuthStateChanged;
 
     onAuthStateChanged(auth, async function(user) {
       window._currentUser = user;
@@ -3888,5 +3890,6 @@ document.addEventListener('DOMContentLoaded',function(){
 
     console.log('✅ Firebase ready!');
   </script>
+  <div id="_toast" style="position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:#1a1a1a;color:#fff;padding:10px 20px;border-radius:999px;font-size:13px;font-weight:600;z-index:9999;opacity:0;transition:opacity .3s;pointer-events:none"></div>
 </body>
 </html>
