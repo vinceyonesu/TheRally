@@ -574,7 +574,9 @@
     var allCourts = [];
     var currentFilter = 'all';
     var currentModalId = null;
-    var favorites = JSON.parse(localStorage.getItem('courtFavorites') || '{}');
+    var favorites = {};
+    function getFavKey(){ return 'courtFavorites_'+(window._currentUser?window._currentUser.uid:'guest'); }
+    function loadFavorites(){ try{ favorites=JSON.parse(localStorage.getItem(getFavKey())||'{}')}catch(e){favorites={};} }
     var activeInfoWindow = null;
     var currentViewProfileUid = null;
     var currentPage = 1;
@@ -825,7 +827,7 @@
     // ── SESSIONS ──
     window.postSession = async function(placeId) {
       if (!window._currentUser) { alert('Please sign in first to post a session!'); handleAuthClick(); return; }
-      var name = window._currentUser.displayName || document.getElementById('sessionName').value.trim();
+      var name = window._myProfileName || window._currentUser.displayName || (document.getElementById('sessionName')?document.getElementById('sessionName').value.trim():'') || 'Player';
       var date = document.getElementById('sessionDate').value;
       var time = document.getElementById('sessionTime').value;
       var skill = document.getElementById('sessionSkill').value;
@@ -1247,7 +1249,7 @@
     //  RACKET & STRING LOG
     // ═══════════════════════════════════════════
     function loadRacketLog() {
-      var rackets = JSON.parse(localStorage.getItem('racketLog') || '[]');
+      var rackets = JSON.parse(localStorage.getItem(('racketLog_'+(window._currentUser?window._currentUser.uid:'guest'))) || '[]');
       var list = document.getElementById('racketLogList'); if (!list) return;
       if (rackets.length === 0) { list.innerHTML = '<div style="text-align:center;padding:20px;font-size:13px;color:var(--slam-text-3)">No rackets added yet.</div>'; return; }
       list.innerHTML = rackets.map(function(r, i) {
@@ -1281,7 +1283,7 @@
     window.saveRacket = function() {
       var brand = document.getElementById('racketBrand').value.trim();
       if (!brand) { alert('Please enter a racket brand/model.'); return; }
-      var rackets = JSON.parse(localStorage.getItem('racketLog') || '[]');
+      var rackets = JSON.parse(localStorage.getItem(('racketLog_'+(window._currentUser?window._currentUser.uid:'guest'))) || '[]');
       rackets.unshift({
         brand: brand,
         string: document.getElementById('racketString').value.trim(),
@@ -1289,7 +1291,8 @@
         date: document.getElementById('racketDate').value,
         notes: document.getElementById('racketNotes').value.trim()
       });
-      localStorage.setItem('racketLog', JSON.stringify(rackets));
+      localStorage.setItem(('racketLog_'+(window._currentUser?window._currentUser.uid:'guest')), JSON.stringify(rackets));
+      if(window._currentUser&&window._db){window._fbSetDoc(window._fbDoc(window._db,'racketLogs',window._currentUser.uid),{rackets:rackets},{merge:true}).catch(function(e){});}
       closeRacketModal();
       document.getElementById('racketBrand').value='';
       document.getElementById('racketString').value='';
@@ -1299,9 +1302,10 @@
     };
     window.deleteRacket = function(index) {
       if (!confirm('Delete this racket?')) return;
-      var rackets = JSON.parse(localStorage.getItem('racketLog') || '[]');
+      var rackets = JSON.parse(localStorage.getItem(('racketLog_'+(window._currentUser?window._currentUser.uid:'guest'))) || '[]');
       rackets.splice(index, 1);
-      localStorage.setItem('racketLog', JSON.stringify(rackets));
+      localStorage.setItem(('racketLog_'+(window._currentUser?window._currentUser.uid:'guest')), JSON.stringify(rackets));
+      if(window._currentUser&&window._db){window._fbSetDoc(window._fbDoc(window._db,'racketLogs',window._currentUser.uid),{rackets:rackets},{merge:true}).catch(function(e){});}
       loadRacketLog();
     };
 
@@ -2144,18 +2148,12 @@
         var followingQ = window._fbQuery(window._fbCollection(window._db, 'follows'), window._fbWhere('followerId', '==', user.uid));
         var followersSnap = await window._fbGetDocs(followersQ);
         var followingSnap = await window._fbGetDocs(followingQ);
-        // Check each profile exists to exclude deleted accounts
-        var followerIds = [], followingIds = [];
-        var _fChecks = [], _fgChecks = [];
-        followersSnap.forEach(function(d){ var id=d.data().followerId; if(id){followerIds.push(id);_fChecks.push(window._fbGetDoc(window._fbDoc(window._db,'profiles',id)));} });
-        followingSnap.forEach(function(d){ var id=d.data().followingId; if(id){followingIds.push(id);_fgChecks.push(window._fbGetDoc(window._fbDoc(window._db,'profiles',id)));} });
-        var _fR=await Promise.all(_fChecks), _fgR=await Promise.all(_fgChecks);
-        var validF=_fR.filter(function(s){return s.exists();}).length;
-        var validFg=_fgR.filter(function(s){return s.exists();}).length;
         var fEl = document.getElementById('mpFollowerCount');
         var fgEl = document.getElementById('mpFollowingCount');
-        if (fEl) fEl.textContent = validF;
-        if (fgEl) fgEl.textContent = validFg;
+        if (fEl) fEl.textContent = followersSnap.size;
+        if (fgEl) fgEl.textContent = followingSnap.size;
+        var followerIds = []; followersSnap.forEach(function(d) { followerIds.push(d.data().followerId); });
+        var followingIds = []; followingSnap.forEach(function(d) { followingIds.push(d.data().followingId); });
       } catch(followErr) {
         console.log('Follower count error:', followErr);
       }
@@ -2512,15 +2510,8 @@
       try {
         var followersSnap = await window._fbGetDocs(window._fbQuery(window._fbCollection(window._db, 'follows'), window._fbWhere('followingId', '==', uid)));
         var followingSnap = await window._fbGetDocs(window._fbQuery(window._fbCollection(window._db, 'follows'), window._fbWhere('followerId', '==', uid)));
-        // Verify each follower/following profile actually exists
-        var _fc=[], _fgc=[];
-        followersSnap.forEach(function(d){ var id=d.data().followerId; if(id) _fc.push(window._fbGetDoc(window._fbDoc(window._db,'profiles',id))); });
-        followingSnap.forEach(function(d){ var id=d.data().followingId; if(id) _fgc.push(window._fbGetDoc(window._fbDoc(window._db,'profiles',id))); });
-        var _fcR=await Promise.all(_fc), _fgcR=await Promise.all(_fgc);
-        var vf=_fcR.filter(function(s){return s.exists();}).length;
-        var vfg=_fgcR.filter(function(s){return s.exists();}).length;
-        document.getElementById('vpFollowerCount').textContent = vf;
-        document.getElementById('vpFollowingCount').textContent = vfg;
+        document.getElementById('vpFollowerCount').textContent = followersSnap.size;
+        document.getElementById('vpFollowingCount').textContent = followingSnap.size;
         if (window._currentUser) {
           var followerIds = []; followersSnap.forEach(function(d) { followerIds.push(d.data().followerId); });
           var followingIds = []; followingSnap.forEach(function(d) { followingIds.push(d.data().followingId); });
@@ -2622,34 +2613,28 @@
       if (!currentViewProfileUid || !window._db) return;
       var modal = document.getElementById('followListModal');
       var title = document.getElementById('followListTitle');
-      var listContent = document.getElementById('followListContent');
+      var content = document.getElementById('followListContent');
       title.textContent = type === 'followers' ? 'Followers' : 'Following';
-      listContent.innerHTML = '<p style="color:#aaa;font-size:13px">Loading...</p>';
+      content.innerHTML = '<p style="color:#aaa;font-size:13px">Loading...</p>';
       modal.style.display = 'flex';
       try {
         var field = type === 'followers' ? 'followingId' : 'followerId';
         var returnField = type === 'followers' ? 'followerId' : 'followingId';
         var snap = await window._fbGetDocs(window._fbQuery(window._fbCollection(window._db, 'follows'), window._fbWhere(field, '==', currentViewProfileUid)));
-        if (snap.empty) { listContent.innerHTML = '<p style="color:#aaa;font-size:13px;padding:12px 0">No ' + type + ' yet.</p>'; return; }
-        // Collect UIDs then fetch all profiles
-        var uids = [];
-        snap.forEach(function(d) { var uid = d.data()[returnField]; if(uid) uids.push(uid); });
-        var profileSnaps = await Promise.all(uids.map(function(uid){ return window._fbGetDoc(window._fbDoc(window._db,'profiles',uid)); }));
+        if (snap.empty) { content.innerHTML = '<p style="color:#aaa;font-size:13px;padding:12px 0">No ' + type + ' yet.</p>'; return; }
         var html = '';
-        profileSnaps.forEach(function(profileSnap, idx) {
-          if (!profileSnap.exists()) return;
-          var p = profileSnap.data();
-          var uid = uids[idx];
-          html += '<div onclick="closeFollowList();viewProfile(\'' + uid + '\')" style="display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid #f0f0f0;cursor:pointer">'
-            + (p.photo ? '<img src="' + p.photo + '" style="width:44px;height:44px;border-radius:50%;object-fit:cover;flex-shrink:0"/>'
-              : '<div style="width:44px;height:44px;border-radius:50%;background:#1a6b3c;display:flex;align-items:center;justify-content:center;font-size:18px;color:#fff;font-weight:700;flex-shrink:0">' + (p.name ? p.name[0].toUpperCase() : '?') + '</div>')
-            + '<div style="flex:1"><div style="font-size:14px;font-weight:700;color:#1a1a1a">' + (p.name || 'Unknown') + '</div>'
-            + '<div style="font-size:12px;color:#888">' + (p.skill || 'No skill set') + '</div></div>'
-            + '<div style="font-size:12px;color:#1a6b3c;font-weight:600">View →</div>'
-            + '</div>';
+        var promises = [];
+        snap.forEach(function(d) {
+          var uid = d.data()[returnField];
+          promises.push(window._fbGetDoc(window._fbDoc(window._db, 'profiles', uid)).then(function(profileSnap) {
+            if (!profileSnap.exists()) return;
+            var p = profileSnap.data();
+            html += '<div onclick="closeFollowList();viewProfile(\'' + uid + '\')" style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid #f0f0f0;cursor:pointer">' + (p.photo ? '<img src="' + p.photo + '" style="width:40px;height:40px;border-radius:50%;object-fit:cover"/>' : '<div style="width:40px;height:40px;border-radius:50%;background:#1a6b3c;display:flex;align-items:center;justify-content:center;font-size:16px;color:#fff;font-weight:700">' + (p.name ? p.name[0].toUpperCase() : '?') + '</div>') + '<div><div style="font-size:14px;font-weight:600;color:#1a1a1a">' + (p.name || 'Unknown') + '</div><div style="font-size:12px;color:#888">' + (p.skill || '') + '</div></div></div>';
+          }));
         });
-        listContent.innerHTML = html || '<p style="color:#aaa;font-size:13px">No ' + type + ' yet.</p>';
-      } catch (err) { console.log('Follow list error:', err); listContent.innerHTML = '<p style="color:#e74c3c;font-size:13px">Could not load. Try again.</p>'; }
+        await Promise.all(promises);
+        content.innerHTML = html || '<p style="color:#aaa;font-size:13px">No ' + type + ' yet.</p>';
+      } catch (err) { console.log('Follow list error:', err); content.innerHTML = '<p style="color:#e74c3c;font-size:13px">Could not load.</p>'; }
     };
     window.closeFollowList = function() { document.getElementById('followListModal').style.display = 'none'; };
     window.showMyFollowList = async function(type) {
@@ -3058,7 +3043,7 @@
     }, 60000);
 
     // ── FAVORITES ──
-    function saveFavorites() { localStorage.setItem('courtFavorites', JSON.stringify(favorites)); updateSavedCount(); }
+    function saveFavorites() { localStorage.setItem(getFavKey(), JSON.stringify(favorites)); updateSavedCount(); }
     function updateSavedCount() {
       var count = Object.keys(favorites).length;
       document.getElementById('savedCount').textContent = count;
@@ -3844,6 +3829,9 @@ document.addEventListener('DOMContentLoaded',function(){
 
     onAuthStateChanged(auth, async function(user) {
       window._currentUser = user;
+      // Clear old shared favorites key if present
+      if (localStorage.getItem('courtFavorites')) { localStorage.removeItem('courtFavorites'); }
+      loadFavorites();
       if (user) { window.requestNotificationPermission && window.requestNotificationPermission();
           // Start session listener for push notifications
           window._fbGetDocs(window._fbQuery(window._fbCollection(db,'follows'),window._fbWhere('followerId','==',user.uid))).then(function(snap){
