@@ -2144,21 +2144,18 @@
         var followingQ = window._fbQuery(window._fbCollection(window._db, 'follows'), window._fbWhere('followerId', '==', user.uid));
         var followersSnap = await window._fbGetDocs(followersQ);
         var followingSnap = await window._fbGetDocs(followingQ);
-        // Filter out follows pointing to deleted accounts
-        var validFollowers = 0, validFollowing = 0;
-        var followerChecks = [], followingChecks = [];
-        followersSnap.forEach(function(d) { followerChecks.push(window._fbGetDoc(window._fbDoc(window._db,'profiles',d.data().followerId))); });
-        followingSnap.forEach(function(d) { followingChecks.push(window._fbGetDoc(window._fbDoc(window._db,'profiles',d.data().followingId))); });
-        var fChecked = await Promise.all(followerChecks);
-        var fgChecked = await Promise.all(followingChecks);
-        fChecked.forEach(function(s){ if(s.exists()) validFollowers++; });
-        fgChecked.forEach(function(s){ if(s.exists()) validFollowing++; });
+        // Check each profile exists to exclude deleted accounts
+        var followerIds = [], followingIds = [];
+        var _fChecks = [], _fgChecks = [];
+        followersSnap.forEach(function(d){ var id=d.data().followerId; if(id){followerIds.push(id);_fChecks.push(window._fbGetDoc(window._fbDoc(window._db,'profiles',id)));} });
+        followingSnap.forEach(function(d){ var id=d.data().followingId; if(id){followingIds.push(id);_fgChecks.push(window._fbGetDoc(window._fbDoc(window._db,'profiles',id)));} });
+        var _fR=await Promise.all(_fChecks), _fgR=await Promise.all(_fgChecks);
+        var validF=_fR.filter(function(s){return s.exists();}).length;
+        var validFg=_fgR.filter(function(s){return s.exists();}).length;
         var fEl = document.getElementById('mpFollowerCount');
         var fgEl = document.getElementById('mpFollowingCount');
-        if (fEl) fEl.textContent = validFollowers;
-        if (fgEl) fgEl.textContent = validFollowing;
-        var followerIds = []; followersSnap.forEach(function(d) { followerIds.push(d.data().followerId); });
-        var followingIds = []; followingSnap.forEach(function(d) { followingIds.push(d.data().followingId); });
+        if (fEl) fEl.textContent = validF;
+        if (fgEl) fgEl.textContent = validFg;
       } catch(followErr) {
         console.log('Follower count error:', followErr);
       }
@@ -2515,13 +2512,13 @@
       try {
         var followersSnap = await window._fbGetDocs(window._fbQuery(window._fbCollection(window._db, 'follows'), window._fbWhere('followingId', '==', uid)));
         var followingSnap = await window._fbGetDocs(window._fbQuery(window._fbCollection(window._db, 'follows'), window._fbWhere('followerId', '==', uid)));
-        // Filter out deleted accounts
-        var fc=[], fgc=[];
-        followersSnap.forEach(function(d){ fc.push(window._fbGetDoc(window._fbDoc(window._db,'profiles',d.data().followerId))); });
-        followingSnap.forEach(function(d){ fgc.push(window._fbGetDoc(window._fbDoc(window._db,'profiles',d.data().followingId))); });
-        var fcR=await Promise.all(fc), fgcR=await Promise.all(fgc);
-        var vf=fcR.filter(function(s){return s.exists();}).length;
-        var vfg=fgcR.filter(function(s){return s.exists();}).length;
+        // Verify each follower/following profile actually exists
+        var _fc=[], _fgc=[];
+        followersSnap.forEach(function(d){ var id=d.data().followerId; if(id) _fc.push(window._fbGetDoc(window._fbDoc(window._db,'profiles',id))); });
+        followingSnap.forEach(function(d){ var id=d.data().followingId; if(id) _fgc.push(window._fbGetDoc(window._fbDoc(window._db,'profiles',id))); });
+        var _fcR=await Promise.all(_fc), _fgcR=await Promise.all(_fgc);
+        var vf=_fcR.filter(function(s){return s.exists();}).length;
+        var vfg=_fgcR.filter(function(s){return s.exists();}).length;
         document.getElementById('vpFollowerCount').textContent = vf;
         document.getElementById('vpFollowingCount').textContent = vfg;
         if (window._currentUser) {
