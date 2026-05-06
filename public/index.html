@@ -576,7 +576,9 @@
     var allCourts = [];
     var currentFilter = 'all';
     var currentModalId = null;
-    var favorites = JSON.parse(localStorage.getItem('courtFavorites') || '{}');
+    var favorites = {};
+    function getFavKey() { return 'courtFavorites_' + (window._currentUser ? window._currentUser.uid : 'guest'); }
+    function loadFavorites() { favorites = JSON.parse(localStorage.getItem(getFavKey()) || '{}'); }
     var activeInfoWindow = null;
     var currentViewProfileUid = null;
     var currentPage = 1;
@@ -2109,6 +2111,7 @@
       try {
         await window._signOut(window._auth);
         window._currentUser = null;
+        favorites = {};
         showSearch();
         location.reload();
       } catch(e) { console.log('Sign out error:', e); alert('Could not sign out. Try again.'); }
@@ -3044,7 +3047,7 @@
     }, 60000);
 
     // ── FAVORITES ──
-    function saveFavorites() { localStorage.setItem('courtFavorites', JSON.stringify(favorites)); updateSavedCount(); }
+    function saveFavorites() { localStorage.setItem(getFavKey(), JSON.stringify(favorites)); updateSavedCount(); }
     function updateSavedCount() {
       var count = Object.keys(favorites).length;
       document.getElementById('savedCount').textContent = count;
@@ -3832,6 +3835,7 @@ document.addEventListener('DOMContentLoaded',function(){
 
     onAuthStateChanged(auth, async function(user) {
       window._currentUser = user;
+      loadFavorites(); // Reload favorites for this user
       if (user) { window.requestNotificationPermission && window.requestNotificationPermission();
           // Start session listener for push notifications
           window._fbGetDocs(window._fbQuery(window._fbCollection(db,'follows'),window._fbWhere('followerId','==',user.uid))).then(function(snap){
