@@ -1001,26 +1001,28 @@
       clearAuthErr();
       var btn=document.getElementById('emailAuthBtn');
       if(btn){btn.textContent='Please wait...';btn.disabled=true;}
-      var action=authMode==='signup'
+      // Read name BEFORE async call so fields aren't cleared
+      var _fn = document.getElementById('authFirstName') ? document.getElementById('authFirstName').value.trim() : '';
+      var _ln = document.getElementById('authLastName')  ? document.getElementById('authLastName').value.trim()  : '';
+      var _fullName = (_fn + ' ' + _ln).trim();
+      var _isSignup = authMode === 'signup';
+      var action=_isSignup
         ?window._createUserWithEmailAndPassword(window._auth,email,password)
         :window._signInWithEmailAndPassword(window._auth,email,password);
       action
         .then(async function(result){
-          if(btn){btn.textContent=authMode==='signup'?'Create Account':'Log in';btn.disabled=false;}
-          // Set display name from first + last name
-          if(authMode==='signup') {
-            var fn2 = document.getElementById('authFirstName') ? document.getElementById('authFirstName').value.trim() : '';
-            var ln2 = document.getElementById('authLastName')  ? document.getElementById('authLastName').value.trim()  : '';
-            var fullN2 = (fn2+' '+ln2).trim();
-            if (fullN2 && result && result.user) {
-              try {
-                await window._updateProfile(result.user, { displayName: fullN2 });
-                try { await result.user.reload(); window._currentUser = window._auth.currentUser; } catch(re){}
-                await window._fbSetDoc(window._fbDoc(window._db,'profiles',result.user.uid),
-                  { uid:result.user.uid, name:fullN2, firstName:fn2, lastName:ln2, email:result.user.email||'', photo:'', createdAt:window._fbTimestamp.now() },
-                  { merge:true });
-              } catch(e) {}
-            }
+          if(btn){btn.textContent=_isSignup?'Create Account':'Log in';btn.disabled=false;}
+          if(_isSignup && _fullName && result && result.user) {
+            try {
+              if (window._updateProfile) await window._updateProfile(result.user, { displayName: _fullName });
+            } catch(e) { console.log('updateProfile err:', e); }
+            try {
+              await window._fbSetDoc(window._fbDoc(window._db,'profiles',result.user.uid),
+                { uid:result.user.uid, name:_fullName, firstName:_fn, lastName:_ln,
+                  email:result.user.email||'', photo:'', createdAt:window._fbTimestamp.now() },
+                { merge:true });
+              console.log('Profile saved:', _fullName);
+            } catch(e) { console.log('Firestore save err:', e); }
           }
           closeSignInModal();
         })
