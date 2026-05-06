@@ -1259,7 +1259,7 @@
     //  RACKET & STRING LOG
     // ═══════════════════════════════════════════
     function loadRacketLog() {
-      var rackets = JSON.parse(localStorage.getItem('racketLog') || '[]');
+      var rackets = JSON.parse(localStorage.getItem(('racketLog_'+(window._currentUser?window._currentUser.uid:'guest'))) || '[]');
       var list = document.getElementById('racketLogList'); if (!list) return;
       if (rackets.length === 0) { list.innerHTML = '<div style="text-align:center;padding:20px;font-size:13px;color:var(--slam-text-3)">No rackets added yet.</div>'; return; }
       list.innerHTML = rackets.map(function(r, i) {
@@ -1293,7 +1293,7 @@
     window.saveRacket = function() {
       var brand = document.getElementById('racketBrand').value.trim();
       if (!brand) { alert('Please enter a racket brand/model.'); return; }
-      var rackets = JSON.parse(localStorage.getItem('racketLog') || '[]');
+      var rackets = JSON.parse(localStorage.getItem(('racketLog_'+(window._currentUser?window._currentUser.uid:'guest'))) || '[]');
       rackets.unshift({
         brand: brand,
         string: document.getElementById('racketString').value.trim(),
@@ -1301,7 +1301,7 @@
         date: document.getElementById('racketDate').value,
         notes: document.getElementById('racketNotes').value.trim()
       });
-      localStorage.setItem('racketLog', JSON.stringify(rackets));
+      localStorage.setItem(('racketLog_'+(window._currentUser?window._currentUser.uid:'guest')), JSON.stringify(rackets));
       closeRacketModal();
       document.getElementById('racketBrand').value='';
       document.getElementById('racketString').value='';
@@ -1311,9 +1311,9 @@
     };
     window.deleteRacket = function(index) {
       if (!confirm('Delete this racket?')) return;
-      var rackets = JSON.parse(localStorage.getItem('racketLog') || '[]');
+      var rackets = JSON.parse(localStorage.getItem(('racketLog_'+(window._currentUser?window._currentUser.uid:'guest'))) || '[]');
       rackets.splice(index, 1);
-      localStorage.setItem('racketLog', JSON.stringify(rackets));
+      localStorage.setItem(('racketLog_'+(window._currentUser?window._currentUser.uid:'guest')), JSON.stringify(rackets));
       loadRacketLog();
     };
 
