@@ -2122,13 +2122,15 @@
       var nf=document.getElementById('navFeed');if(nf)nf.style.color='rgba(255,255,255,0.72)';
       var nc2=document.getElementById('navCalendar');if(nc2)nc2.style.color='rgba(255,255,255,0.72)';
       var user = window._currentUser;
-      document.getElementById('mpName').textContent = user.displayName || 'No name';
+      document.getElementById('mpName').textContent = 'Loading...';
       document.getElementById('mpEmail').textContent = user.email || '';
       var profileRef = window._fbDoc(window._db, 'profiles', user.uid);
       var profileSnap = await window._fbGetDoc(profileRef);
       var p = profileSnap.exists() ? profileSnap.data() : {};
+      var displayName = p.name || user.displayName || 'No name';
+      document.getElementById('mpName').textContent = displayName;
       if (p.photo || user.photoURL) { document.getElementById('mpPhoto').src = p.photo || user.photoURL; document.getElementById('mpPhoto').style.display = 'block'; document.getElementById('mpInitials').style.display = 'none'; }
-      else { document.getElementById('mpInitials').textContent = user.displayName ? user.displayName[0].toUpperCase() : '?'; }
+      else { document.getElementById('mpInitials').textContent = displayName ? displayName[0].toUpperCase() : '?'; }
       document.getElementById('mpVerifiedBadge').style.display = p.phoneVerified ? 'inline-block' : 'none';
       document.getElementById('mpSkill').textContent = p.skill ? '🎾 ' + p.skill : '';
       document.getElementById('mpUTR').textContent = p.utr ? '📊 UTR ' + p.utr : '';
@@ -3840,7 +3842,7 @@ document.addEventListener('DOMContentLoaded',function(){
         var img = document.getElementById('authAvatarImg');
         if (user.photoURL) { img.src = user.photoURL; img.style.display = 'block'; }
         else { document.getElementById('authAvatarText').style.display = 'block'; document.getElementById('authAvatarText').textContent = user.displayName ? user.displayName[0].toUpperCase() : '?'; }
-        document.getElementById('authBtnText').textContent = user.displayName ? user.displayName.split(' ')[0] : 'Profile';
+        document.getElementById('authBtnText').textContent = user.displayName ? user.displayName.split(' ')[0] : 'Profile'; /* updated after Firestore below */
         document.getElementById('authBtn').style.background = '#e6f9ee';
         var profileRef = window._fbDoc(db, 'profiles', user.uid);
         var profileSnap = await window._fbGetDoc(profileRef);
@@ -3849,6 +3851,12 @@ document.addEventListener('DOMContentLoaded',function(){
         }
         if (profileSnap.exists()) {
           var pd = profileSnap.data();
+          // Update nav with Firestore name (fixes null displayName for email signup)
+          if (pd.name) {
+            document.getElementById('authBtnText').textContent = pd.name.split(' ')[0];
+            var _at = document.getElementById('authAvatarText');
+            if (_at && _at.style.display !== 'none') _at.textContent = pd.name[0].toUpperCase();
+          }
           if (document.getElementById('profileFirstName')) document.getElementById('profileFirstName').value = pd.firstName || (pd.name ? pd.name.split(' ')[0] : '');
           if (document.getElementById('profileLastName')) document.getElementById('profileLastName').value = pd.lastName || (pd.name && pd.name.indexOf(' ')>-1 ? pd.name.split(' ').slice(1).join(' ') : '');
           if (document.getElementById('profileFirstName')) document.getElementById('profileFirstName').value = pd.firstName || (pd.name ? pd.name.split(' ')[0] : '');
