@@ -2622,28 +2622,34 @@
       if (!currentViewProfileUid || !window._db) return;
       var modal = document.getElementById('followListModal');
       var title = document.getElementById('followListTitle');
-      var content = document.getElementById('followListContent');
+      var listContent = document.getElementById('followListContent');
       title.textContent = type === 'followers' ? 'Followers' : 'Following';
-      content.innerHTML = '<p style="color:#aaa;font-size:13px">Loading...</p>';
+      listContent.innerHTML = '<p style="color:#aaa;font-size:13px">Loading...</p>';
       modal.style.display = 'flex';
       try {
         var field = type === 'followers' ? 'followingId' : 'followerId';
         var returnField = type === 'followers' ? 'followerId' : 'followingId';
         var snap = await window._fbGetDocs(window._fbQuery(window._fbCollection(window._db, 'follows'), window._fbWhere(field, '==', currentViewProfileUid)));
-        if (snap.empty) { content.innerHTML = '<p style="color:#aaa;font-size:13px;padding:12px 0">No ' + type + ' yet.</p>'; return; }
+        if (snap.empty) { listContent.innerHTML = '<p style="color:#aaa;font-size:13px;padding:12px 0">No ' + type + ' yet.</p>'; return; }
+        // Collect UIDs then fetch all profiles
+        var uids = [];
+        snap.forEach(function(d) { var uid = d.data()[returnField]; if(uid) uids.push(uid); });
+        var profileSnaps = await Promise.all(uids.map(function(uid){ return window._fbGetDoc(window._fbDoc(window._db,'profiles',uid)); }));
         var html = '';
-        var promises = [];
-        snap.forEach(function(d) {
-          var uid = d.data()[returnField];
-          promises.push(window._fbGetDoc(window._fbDoc(window._db, 'profiles', uid)).then(function(profileSnap) {
-            if (!profileSnap.exists()) return;
-            var p = profileSnap.data();
-            html += '<div onclick="closeFollowList();viewProfile(\'' + uid + '\')" style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid #f0f0f0;cursor:pointer">' + (p.photo ? '<img src="' + p.photo + '" style="width:40px;height:40px;border-radius:50%;object-fit:cover"/>' : '<div style="width:40px;height:40px;border-radius:50%;background:#1a6b3c;display:flex;align-items:center;justify-content:center;font-size:16px;color:#fff;font-weight:700">' + (p.name ? p.name[0].toUpperCase() : '?') + '</div>') + '<div><div style="font-size:14px;font-weight:600;color:#1a1a1a">' + (p.name || 'Unknown') + '</div><div style="font-size:12px;color:#888">' + (p.skill || '') + '</div></div></div>';
-          }));
+        profileSnaps.forEach(function(profileSnap, idx) {
+          if (!profileSnap.exists()) return;
+          var p = profileSnap.data();
+          var uid = uids[idx];
+          html += '<div onclick="closeFollowList();viewProfile(\'' + uid + '\')" style="display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid #f0f0f0;cursor:pointer">'
+            + (p.photo ? '<img src="' + p.photo + '" style="width:44px;height:44px;border-radius:50%;object-fit:cover;flex-shrink:0"/>'
+              : '<div style="width:44px;height:44px;border-radius:50%;background:#1a6b3c;display:flex;align-items:center;justify-content:center;font-size:18px;color:#fff;font-weight:700;flex-shrink:0">' + (p.name ? p.name[0].toUpperCase() : '?') + '</div>')
+            + '<div style="flex:1"><div style="font-size:14px;font-weight:700;color:#1a1a1a">' + (p.name || 'Unknown') + '</div>'
+            + '<div style="font-size:12px;color:#888">' + (p.skill || 'No skill set') + '</div></div>'
+            + '<div style="font-size:12px;color:#1a6b3c;font-weight:600">View →</div>'
+            + '</div>';
         });
-        await Promise.all(promises);
-        content.innerHTML = html || '<p style="color:#aaa;font-size:13px">No ' + type + ' yet.</p>';
-      } catch (err) { console.log('Follow list error:', err); content.innerHTML = '<p style="color:#e74c3c;font-size:13px">Could not load.</p>'; }
+        listContent.innerHTML = html || '<p style="color:#aaa;font-size:13px">No ' + type + ' yet.</p>';
+      } catch (err) { console.log('Follow list error:', err); listContent.innerHTML = '<p style="color:#e74c3c;font-size:13px">Could not load. Try again.</p>'; }
     };
     window.closeFollowList = function() { document.getElementById('followListModal').style.display = 'none'; };
     window.showMyFollowList = async function(type) {
