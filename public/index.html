@@ -829,11 +829,17 @@
     // ── SESSIONS ──
     window.postSession = async function(placeId) {
       if (!window._currentUser) { alert('Please sign in first to post a session!'); handleAuthClick(); return; }
-      var name = window._currentUser.displayName || document.getElementById('sessionName').value.trim();
-      var date = document.getElementById('sessionDate').value;
-      var time = document.getElementById('sessionTime').value;
-      var skill = document.getElementById('sessionSkill').value;
-      var type = document.getElementById('sessionType').value;
+      var _sn = document.getElementById('sessionName');
+      var _sd = document.getElementById('sessionDate');
+      var _st = document.getElementById('sessionTime');
+      var _ss = document.getElementById('sessionSkill');
+      var _sy = document.getElementById('sessionType');
+      if (!_sd || !_st || !_ss || !_sy) { alert('Session form not found. Please open a court modal first.'); return; }
+      var name = (window._currentUser.displayName || (_sn ? _sn.value.trim() : '')) || 'Player';
+      var date = _sd.value;
+      var time = _st.value;
+      var skill = _ss.value;
+      var type = _sy.value;
       var note = document.getElementById('sessionNote') ? document.getElementById('sessionNote').value.trim() : '';
       if (!date || !time) { alert('Please fill in date and time.'); return; }
       var btn = document.getElementById('postSessionBtn');
