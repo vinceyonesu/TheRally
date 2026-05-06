@@ -30,7 +30,6 @@
       <a href="#" id="navNearby" onclick="showNearby()">🎾 Players Near You</a>
       <a href="#" id="navFeed" onclick="showActivityFeed()">📰 Feed</a>
       <a href="#" id="navCalendar" onclick="showCalendar()">📅 Calendar</a>
-      <a href="#" id="navSkills" onclick="showSkills()">🎾 Improve Game</a>
       <div id="authBtn" onclick="handleAuthClick()" style="display:flex;align-items:center;gap:8px;cursor:pointer;background:#f0f0f0;border-radius:50px;padding:6px 14px 6px 6px;transition:all 0.2s" onmouseover="this.style.background='#e6f9ee'" onmouseout="this.style.background=window._currentUser?'#e6f9ee':'#f0f0f0'">
         <div id="authAvatar" style="width:28px;height:28px;border-radius:50%;background:#1a6b3c;display:flex;align-items:center;justify-content:center;font-size:12px;color:#fff;font-weight:700;overflow:hidden">
           <span id="authAvatarText">?</span>
@@ -50,7 +49,6 @@
     <a href="#" onclick="handleAuthClick();closeMobileMenu()">👤 My Profile</a>
     <a href="#" onclick="showActivityFeed();closeMobileMenu()">📰 Feed</a>
     <a href="#" onclick="showCalendar();closeMobileMenu()">📅 Calendar</a>
-    <a href="#" onclick="showSkills();closeMobileMenu()">🎾 Improve Game</a>
   </div>
 
   <!-- HERO -->
@@ -553,135 +551,6 @@
   </div>
 
 
-  <!-- SKILLS PAGE -->
-  <div id="skillsPage" style="display:none;max-width:900px;margin:40px auto;padding:0 24px 80px;position:relative;z-index:1">
-
-    <div style="margin-bottom:28px">
-      <div style="font-family:Syne,sans-serif;font-size:26px;font-weight:800;color:var(--slam-text-1);margin-bottom:6px">🎾 Improve Your Game</div>
-      <div style="font-size:14px;color:var(--slam-text-3)">Handpicked lessons from the world's best tennis coaches — sorted by skill</div>
-    </div>
-
-    <!-- FOREHAND -->
-    <div style="margin-bottom:32px">
-      <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">
-        <div style="width:4px;height:24px;background:var(--slam-primary);border-radius:2px"></div>
-        <div style="font-family:Syne,sans-serif;font-size:17px;font-weight:800;color:var(--slam-text-1)">Forehand</div>
-      </div>
-      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px">
-        <div onclick="window.open('https://www.youtube.com/watch?v=aZj7DIEftPg','_blank')" style="background:var(--slam-surface);border:1px solid var(--slam-border);border-radius:14px;overflow:hidden;cursor:pointer;transition:box-shadow .2s" onmouseover="this.style.boxShadow='0 6px 24px rgba(0,0,0,0.1)'" onmouseout="this.style.boxShadow='none'">
-          <div style="position:relative"><img src="https://img.youtube.com/vi/aZj7DIEftPg/mqdefault.jpg" style="width:100%;height:140px;object-fit:cover;display:block"><div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center"><div style="width:44px;height:44px;background:rgba(255,0,0,0.85);border-radius:50%;display:flex;align-items:center;justify-content:center"><div style="width:0;height:0;border-style:solid;border-width:8px 0 8px 16px;border-color:transparent transparent transparent #fff;margin-left:3px"></div></div></div></div>
-          <div style="padding:12px 14px"><div style="font-size:13px;font-weight:700;color:var(--slam-text-1);margin-bottom:4px;line-height:1.3">Perfect Forehand in 5 Steps</div><div style="font-size:11px;color:var(--slam-text-3)">Top Tennis Training · 8M+ views</div></div>
-        </div>
-        <div onclick="window.open('https://www.youtube.com/watch?v=5arVdubK9Pg','_blank')" style="background:var(--slam-surface);border:1px solid var(--slam-border);border-radius:14px;overflow:hidden;cursor:pointer;transition:box-shadow .2s" onmouseover="this.style.boxShadow='0 6px 24px rgba(0,0,0,0.1)'" onmouseout="this.style.boxShadow='none'">
-          <div style="position:relative"><img src="https://img.youtube.com/vi/5arVdubK9Pg/mqdefault.jpg" style="width:100%;height:140px;object-fit:cover;display:block"><div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center"><div style="width:44px;height:44px;background:rgba(255,0,0,0.85);border-radius:50%;display:flex;align-items:center;justify-content:center"><div style="width:0;height:0;border-style:solid;border-width:8px 0 8px 16px;border-color:transparent transparent transparent #fff;margin-left:3px"></div></div></div></div>
-          <div style="padding:12px 14px"><div style="font-size:13px;font-weight:700;color:var(--slam-text-1);margin-bottom:4px;line-height:1.3">Perfect Forehand in 3 Easy Steps</div><div style="font-size:11px;color:var(--slam-text-3)">Top Tennis Training · 5M+ views</div></div>
-        </div>
-      </div>
-    </div>
-
-    <!-- BACKHAND -->
-    <div style="margin-bottom:32px">
-      <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">
-        <div style="width:4px;height:24px;background:#2563eb;border-radius:2px"></div>
-        <div style="font-family:Syne,sans-serif;font-size:17px;font-weight:800;color:var(--slam-text-1)">Backhand</div>
-      </div>
-      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px">
-        <div onclick="window.open('https://www.youtube.com/watch?v=PBguk3yRPgI','_blank')" style="background:var(--slam-surface);border:1px solid var(--slam-border);border-radius:14px;overflow:hidden;cursor:pointer;transition:box-shadow .2s" onmouseover="this.style.boxShadow='0 6px 24px rgba(0,0,0,0.1)'" onmouseout="this.style.boxShadow='none'">
-          <div style="position:relative"><img src="https://img.youtube.com/vi/PBguk3yRPgI/mqdefault.jpg" style="width:100%;height:140px;object-fit:cover;display:block"><div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center"><div style="width:44px;height:44px;background:rgba(255,0,0,0.85);border-radius:50%;display:flex;align-items:center;justify-content:center"><div style="width:0;height:0;border-style:solid;border-width:8px 0 8px 16px;border-color:transparent transparent transparent #fff;margin-left:3px"></div></div></div></div>
-          <div style="padding:12px 14px"><div style="font-size:13px;font-weight:700;color:var(--slam-text-1);margin-bottom:4px;line-height:1.3">Two-Handed Backhand — 3 Steps</div><div style="font-size:11px;color:var(--slam-text-3)">Top Tennis Training · 6M+ views</div></div>
-        </div>
-        <div onclick="window.open('https://www.youtube.com/watch?v=hf5U3I7Z5YQ','_blank')" style="background:var(--slam-surface);border:1px solid var(--slam-border);border-radius:14px;overflow:hidden;cursor:pointer;transition:box-shadow .2s" onmouseover="this.style.boxShadow='0 6px 24px rgba(0,0,0,0.1)'" onmouseout="this.style.boxShadow='none'">
-          <div style="position:relative"><img src="https://img.youtube.com/vi/hf5U3I7Z5YQ/mqdefault.jpg" style="width:100%;height:140px;object-fit:cover;display:block"><div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center"><div style="width:44px;height:44px;background:rgba(255,0,0,0.85);border-radius:50%;display:flex;align-items:center;justify-content:center"><div style="width:0;height:0;border-style:solid;border-width:8px 0 8px 16px;border-color:transparent transparent transparent #fff;margin-left:3px"></div></div></div></div>
-          <div style="padding:12px 14px"><div style="font-size:13px;font-weight:700;color:var(--slam-text-1);margin-bottom:4px;line-height:1.3">One-Handed Backhand — 3 Steps</div><div style="font-size:11px;color:var(--slam-text-3)">Top Tennis Training · 4M+ views</div></div>
-        </div>
-        <div onclick="window.open('https://www.youtube.com/watch?v=esufEYZUI2Y','_blank')" style="background:var(--slam-surface);border:1px solid var(--slam-border);border-radius:14px;overflow:hidden;cursor:pointer;transition:box-shadow .2s" onmouseover="this.style.boxShadow='0 6px 24px rgba(0,0,0,0.1)'" onmouseout="this.style.boxShadow='none'">
-          <div style="position:relative"><img src="https://img.youtube.com/vi/esufEYZUI2Y/mqdefault.jpg" style="width:100%;height:140px;object-fit:cover;display:block"><div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center"><div style="width:44px;height:44px;background:rgba(255,0,0,0.85);border-radius:50%;display:flex;align-items:center;justify-content:center"><div style="width:0;height:0;border-style:solid;border-width:8px 0 8px 16px;border-color:transparent transparent transparent #fff;margin-left:3px"></div></div></div></div>
-          <div style="padding:12px 14px"><div style="font-size:13px;font-weight:700;color:var(--slam-text-1);margin-bottom:4px;line-height:1.3">Backhand for Topspin + Control</div><div style="font-size:11px;color:var(--slam-text-3)">Essential Tennis · 3M+ views</div></div>
-        </div>
-      </div>
-    </div>
-
-    <!-- SERVE -->
-    <div style="margin-bottom:32px">
-      <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">
-        <div style="width:4px;height:24px;background:#d97706;border-radius:2px"></div>
-        <div style="font-family:Syne,sans-serif;font-size:17px;font-weight:800;color:var(--slam-text-1)">Serve</div>
-      </div>
-      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px">
-        <div onclick="window.open('https://www.youtube.com/watch?v=ael71EkjvHw','_blank')" style="background:var(--slam-surface);border:1px solid var(--slam-border);border-radius:14px;overflow:hidden;cursor:pointer;transition:box-shadow .2s" onmouseover="this.style.boxShadow='0 6px 24px rgba(0,0,0,0.1)'" onmouseout="this.style.boxShadow='none'">
-          <div style="position:relative"><img src="https://img.youtube.com/vi/ael71EkjvHw/mqdefault.jpg" style="width:100%;height:140px;object-fit:cover;display:block"><div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center"><div style="width:44px;height:44px;background:rgba(255,0,0,0.85);border-radius:50%;display:flex;align-items:center;justify-content:center"><div style="width:0;height:0;border-style:solid;border-width:8px 0 8px 16px;border-color:transparent transparent transparent #fff;margin-left:3px"></div></div></div></div>
-          <div style="padding:12px 14px"><div style="font-size:13px;font-weight:700;color:var(--slam-text-1);margin-bottom:4px;line-height:1.3">Ultimate Tennis Serve Lesson</div><div style="font-size:11px;color:var(--slam-text-3)">Top Tennis Training · 7M+ views</div></div>
-        </div>
-        <div onclick="window.open('https://www.youtube.com/watch?v=w03NVg7YtNo','_blank')" style="background:var(--slam-surface);border:1px solid var(--slam-border);border-radius:14px;overflow:hidden;cursor:pointer;transition:box-shadow .2s" onmouseover="this.style.boxShadow='0 6px 24px rgba(0,0,0,0.1)'" onmouseout="this.style.boxShadow='none'">
-          <div style="position:relative"><img src="https://img.youtube.com/vi/w03NVg7YtNo/mqdefault.jpg" style="width:100%;height:140px;object-fit:cover;display:block"><div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center"><div style="width:44px;height:44px;background:rgba(255,0,0,0.85);border-radius:50%;display:flex;align-items:center;justify-content:center"><div style="width:0;height:0;border-style:solid;border-width:8px 0 8px 16px;border-color:transparent transparent transparent #fff;margin-left:3px"></div></div></div></div>
-          <div style="padding:12px 14px"><div style="font-size:13px;font-weight:700;color:var(--slam-text-1);margin-bottom:4px;line-height:1.3">Perfect Serve in 5 Simple Steps</div><div style="font-size:11px;color:var(--slam-text-3)">Top Tennis Training · 5M+ views</div></div>
-        </div>
-        <div onclick="window.open('https://www.youtube.com/watch?v=IiRGdagtOKE','_blank')" style="background:var(--slam-surface);border:1px solid var(--slam-border);border-radius:14px;overflow:hidden;cursor:pointer;transition:box-shadow .2s" onmouseover="this.style.boxShadow='0 6px 24px rgba(0,0,0,0.1)'" onmouseout="this.style.boxShadow='none'">
-          <div style="position:relative"><img src="https://img.youtube.com/vi/IiRGdagtOKE/mqdefault.jpg" style="width:100%;height:140px;object-fit:cover;display:block"><div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center"><div style="width:44px;height:44px;background:rgba(255,0,0,0.85);border-radius:50%;display:flex;align-items:center;justify-content:center"><div style="width:0;height:0;border-style:solid;border-width:8px 0 8px 16px;border-color:transparent transparent transparent #fff;margin-left:3px"></div></div></div></div>
-          <div style="padding:12px 14px"><div style="font-size:13px;font-weight:700;color:var(--slam-text-1);margin-bottom:4px;line-height:1.3">Serve Masterclass for Beginners</div><div style="font-size:11px;color:var(--slam-text-3)">Top Tennis Training · 2024</div></div>
-        </div>
-      </div>
-    </div>
-
-    <!-- FOOTWORK -->
-    <div style="margin-bottom:32px">
-      <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">
-        <div style="width:4px;height:24px;background:#7c3aed;border-radius:2px"></div>
-        <div style="font-family:Syne,sans-serif;font-size:17px;font-weight:800;color:var(--slam-text-1)">Footwork & Movement</div>
-      </div>
-      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px">
-        <div onclick="window.open('https://www.youtube.com/watch?v=y6IBn6hxDZ4','_blank')" style="background:var(--slam-surface);border:1px solid var(--slam-border);border-radius:14px;overflow:hidden;cursor:pointer;transition:box-shadow .2s" onmouseover="this.style.boxShadow='0 6px 24px rgba(0,0,0,0.1)'" onmouseout="this.style.boxShadow='none'">
-          <div style="position:relative"><img src="https://img.youtube.com/vi/y6IBn6hxDZ4/mqdefault.jpg" style="width:100%;height:140px;object-fit:cover;display:block"><div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center"><div style="width:44px;height:44px;background:rgba(255,0,0,0.85);border-radius:50%;display:flex;align-items:center;justify-content:center"><div style="width:0;height:0;border-style:solid;border-width:8px 0 8px 16px;border-color:transparent transparent transparent #fff;margin-left:3px"></div></div></div></div>
-          <div style="padding:12px 14px"><div style="font-size:13px;font-weight:700;color:var(--slam-text-1);margin-bottom:4px;line-height:1.3">Most Important Footwork Lesson</div><div style="font-size:11px;color:var(--slam-text-3)">Top Tennis Training · 2023</div></div>
-        </div>
-        <div onclick="window.open('https://www.youtube.com/watch?v=eGWhONP7558','_blank')" style="background:var(--slam-surface);border:1px solid var(--slam-border);border-radius:14px;overflow:hidden;cursor:pointer;transition:box-shadow .2s" onmouseover="this.style.boxShadow='0 6px 24px rgba(0,0,0,0.1)'" onmouseout="this.style.boxShadow='none'">
-          <div style="position:relative"><img src="https://img.youtube.com/vi/eGWhONP7558/mqdefault.jpg" style="width:100%;height:140px;object-fit:cover;display:block"><div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center"><div style="width:44px;height:44px;background:rgba(255,0,0,0.85);border-radius:50%;display:flex;align-items:center;justify-content:center"><div style="width:0;height:0;border-style:solid;border-width:8px 0 8px 16px;border-color:transparent transparent transparent #fff;margin-left:3px"></div></div></div></div>
-          <div style="padding:12px 14px"><div style="font-size:13px;font-weight:700;color:var(--slam-text-1);margin-bottom:4px;line-height:1.3">5 Footwork Drills to Improve Movement</div><div style="font-size:11px;color:var(--slam-text-3)">Top Tennis Training · 4M+ views</div></div>
-        </div>
-        <div onclick="window.open('https://www.youtube.com/watch?v=lb1pW5nCPtw','_blank')" style="background:var(--slam-surface);border:1px solid var(--slam-border);border-radius:14px;overflow:hidden;cursor:pointer;transition:box-shadow .2s" onmouseover="this.style.boxShadow='0 6px 24px rgba(0,0,0,0.1)'" onmouseout="this.style.boxShadow='none'">
-          <div style="position:relative"><img src="https://img.youtube.com/vi/lb1pW5nCPtw/mqdefault.jpg" style="width:100%;height:140px;object-fit:cover;display:block"><div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center"><div style="width:44px;height:44px;background:rgba(255,0,0,0.85);border-radius:50%;display:flex;align-items:center;justify-content:center"><div style="width:0;height:0;border-style:solid;border-width:8px 0 8px 16px;border-color:transparent transparent transparent #fff;margin-left:3px"></div></div></div></div>
-          <div style="padding:12px 14px"><div style="font-size:13px;font-weight:700;color:var(--slam-text-1);margin-bottom:4px;line-height:1.3">Transform Your Footwork in 10 Minutes</div><div style="font-size:11px;color:var(--slam-text-3)">Top Tennis Training · 3M+ views</div></div>
-        </div>
-      </div>
-    </div>
-
-    <!-- CONSISTENCY -->
-    <div style="margin-bottom:32px">
-      <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">
-        <div style="width:4px;height:24px;background:#059669;border-radius:2px"></div>
-        <div style="font-family:Syne,sans-serif;font-size:17px;font-weight:800;color:var(--slam-text-1)">Consistency & Rally</div>
-      </div>
-      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px">
-        <div onclick="window.open('https://www.youtube.com/watch?v=teZlZP_0gEg','_blank')" style="background:var(--slam-surface);border:1px solid var(--slam-border);border-radius:14px;overflow:hidden;cursor:pointer;transition:box-shadow .2s" onmouseover="this.style.boxShadow='0 6px 24px rgba(0,0,0,0.1)'" onmouseout="this.style.boxShadow='none'">
-          <div style="position:relative"><img src="https://img.youtube.com/vi/teZlZP_0gEg/mqdefault.jpg" style="width:100%;height:140px;object-fit:cover;display:block"><div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center"><div style="width:44px;height:44px;background:rgba(255,0,0,0.85);border-radius:50%;display:flex;align-items:center;justify-content:center"><div style="width:0;height:0;border-style:solid;border-width:8px 0 8px 16px;border-color:transparent transparent transparent #fff;margin-left:3px"></div></div></div></div>
-          <div style="padding:12px 14px"><div style="font-size:13px;font-weight:700;color:var(--slam-text-1);margin-bottom:4px;line-height:1.3">Play Your Best Tennis Under Pressure</div><div style="font-size:11px;color:var(--slam-text-3)">Essential Tennis · Mental Toughness</div></div>
-        </div>
-        <div onclick="window.open('https://www.youtube.com/watch?v=ixAA_8GikaY','_blank')" style="background:var(--slam-surface);border:1px solid var(--slam-border);border-radius:14px;overflow:hidden;cursor:pointer;transition:box-shadow .2s" onmouseover="this.style.boxShadow='0 6px 24px rgba(0,0,0,0.1)'" onmouseout="this.style.boxShadow='none'">
-          <div style="position:relative"><img src="https://img.youtube.com/vi/ixAA_8GikaY/mqdefault.jpg" style="width:100%;height:140px;object-fit:cover;display:block"><div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center"><div style="width:44px;height:44px;background:rgba(255,0,0,0.85);border-radius:50%;display:flex;align-items:center;justify-content:center"><div style="width:0;height:0;border-style:solid;border-width:8px 0 8px 16px;border-color:transparent transparent transparent #fff;margin-left:3px"></div></div></div></div>
-          <div style="padding:12px 14px"><div style="font-size:13px;font-weight:700;color:var(--slam-text-1);margin-bottom:4px;line-height:1.3">How to Rally with Direction — USTA</div><div style="font-size:11px;color:var(--slam-text-3)">USTA Coaching · Official</div></div>
-        </div>
-      </div>
-    </div>
-
-    <!-- VOLLEYS -->
-    <div style="margin-bottom:32px">
-      <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">
-        <div style="width:4px;height:24px;background:#dc2626;border-radius:2px"></div>
-        <div style="font-family:Syne,sans-serif;font-size:17px;font-weight:800;color:var(--slam-text-1)">Volleys & Net Play</div>
-      </div>
-      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px">
-        <div onclick="window.open('https://www.youtube.com/watch?v=5MznrgnSleI','_blank')" style="background:var(--slam-surface);border:1px solid var(--slam-border);border-radius:14px;overflow:hidden;cursor:pointer;transition:box-shadow .2s" onmouseover="this.style.boxShadow='0 6px 24px rgba(0,0,0,0.1)'" onmouseout="this.style.boxShadow='none'">
-          <div style="position:relative"><img src="https://img.youtube.com/vi/5MznrgnSleI/mqdefault.jpg" style="width:100%;height:140px;object-fit:cover;display:block"><div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center"><div style="width:44px;height:44px;background:rgba(255,0,0,0.85);border-radius:50%;display:flex;align-items:center;justify-content:center"><div style="width:0;height:0;border-style:solid;border-width:8px 0 8px 16px;border-color:transparent transparent transparent #fff;margin-left:3px"></div></div></div></div>
-          <div style="padding:12px 14px"><div style="font-size:13px;font-weight:700;color:var(--slam-text-1);margin-bottom:4px;line-height:1.3">Serve Power vs Consistency</div><div style="font-size:11px;color:var(--slam-text-3)">Top Tennis Training · Strategy</div></div>
-        </div>
-        <div onclick="window.open('https://www.youtube.com/watch?v=Bcqi_M9aPmg','_blank')" style="background:var(--slam-surface);border:1px solid var(--slam-border);border-radius:14px;overflow:hidden;cursor:pointer;transition:box-shadow .2s" onmouseover="this.style.boxShadow='0 6px 24px rgba(0,0,0,0.1)'" onmouseout="this.style.boxShadow='none'">
-          <div style="position:relative"><img src="https://img.youtube.com/vi/Bcqi_M9aPmg/mqdefault.jpg" style="width:100%;height:140px;object-fit:cover;display:block"><div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center"><div style="width:44px;height:44px;background:rgba(255,0,0,0.85);border-radius:50%;display:flex;align-items:center;justify-content:center"><div style="width:0;height:0;border-style:solid;border-width:8px 0 8px 16px;border-color:transparent transparent transparent #fff;margin-left:3px"></div></div></div></div>
-          <div style="padding:12px 14px"><div style="font-size:13px;font-weight:700;color:var(--slam-text-1);margin-bottom:4px;line-height:1.3">Serve Drills for Ultra Fast Improvement</div><div style="font-size:11px;color:var(--slam-text-3)">Top Tennis Training · 2023</div></div>
-        </div>
-      </div>
-    </div>
-
-  </div>
 
   <!-- MAP -->
   <div class="map-section">
@@ -1181,7 +1050,7 @@
     // ── HIDE ALL PAGES HELPER ──
     function hideAllPages() {
       var ids = ['heroSection','savedSection','nearbyPage','profilePage','myProfilePage',
-                 'viewProfilePage','feedPage','playerCardPage','leaderboardPage','aiCoachPage','calendarPage','skillsPage'];
+                 'viewProfilePage','feedPage','playerCardPage','leaderboardPage','aiCoachPage','calendarPage'];
       ids.forEach(function(id){ var el=document.getElementById(id); if(el) el.style.display='none'; });
       var ms = document.getElementById('map'); if(ms) ms.closest('.map-section').style.display='none';
       var rg = document.getElementById('resultsGrid'); if(rg) rg.parentElement.style.display='none';
@@ -2234,15 +2103,7 @@
       if (sessionMins >= closeMins - 60) return "Session starts close to closing time (" + closeStr + ")";
       return null;
     };
-
-        window.showSkills = function() {
-      hideAllPages();
-      document.getElementById('skillsPage').style.display = 'block';
-      var ns = document.getElementById('navSkills');
-      if (ns) ns.style.color = 'var(--slam-primary)';
-    };
-
-        window.signOutUser = async function() {
+    window.signOutUser = async function() {
       try {
         await window._signOut(window._auth);
         window._currentUser = null;
@@ -2258,7 +2119,6 @@
       document.getElementById('navSearch').style.color = 'rgba(255,255,255,0.72)';
       var nf=document.getElementById('navFeed');if(nf)nf.style.color='rgba(255,255,255,0.72)';
       var nc2=document.getElementById('navCalendar');if(nc2)nc2.style.color='rgba(255,255,255,0.72)';
-      var ns2=document.getElementById('navSkills');if(ns2)ns2.style.color='rgba(255,255,255,0.72)';
       var user = window._currentUser;
       document.getElementById('mpName').textContent = user.displayName || 'No name';
       document.getElementById('mpEmail').textContent = user.email || '';
