@@ -1008,10 +1008,8 @@
         .then(async function(result){
           if(btn){btn.textContent=authMode==='signup'?'Create Account':'Log in';btn.disabled=false;}
           // Set display name from first + last name
-          if(authMode==='signup') {
-            var fn2 = document.getElementById('authFirstName') ? document.getElementById('authFirstName').value.trim() : '';
-            var ln2 = document.getElementById('authLastName')  ? document.getElementById('authLastName').value.trim()  : '';
-            var fullN2 = (fn2+' '+ln2).trim();
+          if(_isSignup) {
+            var fn2 = _fn, ln2 = _ln, fullN2 = _fullName;
             if (fullN2 && result && result.user) {
               try {
                 await window._updateProfile(result.user, { displayName: fullN2 });
@@ -1981,7 +1979,11 @@
           facebook: document.getElementById('profileFacebook').value, whatsapp: document.getElementById('profileWhatsapp').value,
           phone: document.getElementById('profilePhone').value, updatedAt: window._fbTimestamp.now()
         }, { merge: true });
+        window._myProfileName = fullName;
+        var _nb=document.getElementById('authBtnText');if(_nb&&fullName)_nb.textContent=fullName.split(' ')[0];
+        var _mpN=document.getElementById('mpName');if(_mpN&&fullName)_mpN.textContent=fullName;
         alert('Profile saved!');
+        showMyProfile();
       } catch (err) { console.log('Save profile error:', err); alert('Could not save profile. Try again.'); }
     };
 
@@ -2123,11 +2125,15 @@
       var nf=document.getElementById('navFeed');if(nf)nf.style.color='rgba(255,255,255,0.72)';
       var nc2=document.getElementById('navCalendar');if(nc2)nc2.style.color='rgba(255,255,255,0.72)';
       var user = window._currentUser;
-      document.getElementById('mpName').textContent = user.displayName || 'No name';
+      document.getElementById('mpName').textContent = 'Loading...';
       document.getElementById('mpEmail').textContent = user.email || '';
       var profileRef = window._fbDoc(window._db, 'profiles', user.uid);
       var profileSnap = await window._fbGetDoc(profileRef);
       var p = profileSnap.exists() ? profileSnap.data() : {};
+      var _dName = p.name || user.displayName || 'No name';
+      document.getElementById('mpName').textContent = _dName;
+      var _mpI = document.getElementById('mpInitials');
+      if (_mpI) _mpI.textContent = _dName ? _dName[0].toUpperCase() : '?';
       if (p.photo || user.photoURL) { document.getElementById('mpPhoto').src = p.photo || user.photoURL; document.getElementById('mpPhoto').style.display = 'block'; document.getElementById('mpInitials').style.display = 'none'; }
       else { document.getElementById('mpInitials').textContent = user.displayName ? user.displayName[0].toUpperCase() : '?'; }
       document.getElementById('mpVerifiedBadge').style.display = p.phoneVerified ? 'inline-block' : 'none';
@@ -2150,8 +2156,14 @@
         var followingSnap = await window._fbGetDocs(followingQ);
         var fEl = document.getElementById('mpFollowerCount');
         var fgEl = document.getElementById('mpFollowingCount');
-        if (fEl) fEl.textContent = followersSnap.size;
-        if (fgEl) fgEl.textContent = followingSnap.size;
+        var _fc=[], _fgc=[];
+        followersSnap.forEach(function(d){ var id=d.data().followerId; if(id) _fc.push(window._fbGetDoc(window._fbDoc(window._db,'profiles',id))); });
+        followingSnap.forEach(function(d){ var id=d.data().followingId; if(id) _fgc.push(window._fbGetDoc(window._fbDoc(window._db,'profiles',id))); });
+        var _fcR=await Promise.all(_fc), _fgcR=await Promise.all(_fgc);
+        var _vf=_fcR.filter(function(s){return s.exists();}).length;
+        var _vfg=_fgcR.filter(function(s){return s.exists();}).length;
+        if (fEl) fEl.textContent = _vf;
+        if (fgEl) fgEl.textContent = _vfg;
         var followerIds = []; followersSnap.forEach(function(d) { followerIds.push(d.data().followerId); });
         var followingIds = []; followingSnap.forEach(function(d) { followingIds.push(d.data().followingId); });
       } catch(followErr) {
@@ -2279,15 +2291,19 @@
         window._nearbyCheckedInUids = [];
         var snapshot = await window._fbGetDocs(q);
         if (snapshot.empty) { list.innerHTML = '<div style="text-align:center;padding:60px 20px"><div style="font-size:48px;margin-bottom:16px">🎾</div><div style="font-size:16px;font-weight:600;color:#1a1a1a;margin-bottom:8px">No sessions yet</div><div style="font-size:14px;color:#888">Be the first to post a session!</div></div>'; return; }
-        var sessions = [];
+        var rawSessions = [];
         snapshot.forEach(function(docSnap) {
           var s = docSnap.data();
           if (s.deleted) return;
           if (s.date && s.time) { var dt = new Date(s.date + 'T' + s.time); dt.setMinutes(dt.getMinutes() + 5); if (dt < now) return; }
           if (skillFilter !== 'all' && s.skill !== skillFilter) return;
           if (typeFilter !== 'all' && s.type !== typeFilter) return;
-          sessions.push(Object.assign({ id: docSnap.id }, s));
+          rawSessions.push(Object.assign({ id: docSnap.id }, s));
         });
+        // Filter out sessions from deleted accounts
+        var _pChecks = rawSessions.map(function(s){ return s.uid ? window._fbGetDoc(window._fbDoc(window._db,'profiles',s.uid)) : Promise.resolve({exists:function(){return false;}}); });
+        var _pResults = await Promise.all(_pChecks);
+        var sessions = rawSessions.filter(function(s,i){ return _pResults[i].exists(); });
         if (sessions.length === 0) { list.innerHTML = '<div style="text-align:center;padding:60px 20px"><div style="font-size:48px;margin-bottom:16px">🎾</div><div style="font-size:16px;font-weight:600;color:#1a1a1a;margin-bottom:8px">No matching sessions</div><div style="font-size:14px;color:#888">Try changing the filters above</div></div>'; return; }
         list.innerHTML = '';
         for (var si = 0; si < sessions.length; si++) { var s = sessions[si];
@@ -2510,8 +2526,12 @@
       try {
         var followersSnap = await window._fbGetDocs(window._fbQuery(window._fbCollection(window._db, 'follows'), window._fbWhere('followingId', '==', uid)));
         var followingSnap = await window._fbGetDocs(window._fbQuery(window._fbCollection(window._db, 'follows'), window._fbWhere('followerId', '==', uid)));
-        document.getElementById('vpFollowerCount').textContent = followersSnap.size;
-        document.getElementById('vpFollowingCount').textContent = followingSnap.size;
+        var _vc=[], _vgc=[];
+        followersSnap.forEach(function(d){ var id=d.data().followerId; if(id) _vc.push(window._fbGetDoc(window._fbDoc(window._db,'profiles',id))); });
+        followingSnap.forEach(function(d){ var id=d.data().followingId; if(id) _vgc.push(window._fbGetDoc(window._fbDoc(window._db,'profiles',id))); });
+        var _vcR=await Promise.all(_vc), _vgcR=await Promise.all(_vgc);
+        document.getElementById('vpFollowerCount').textContent = _vcR.filter(function(s){return s.exists();}).length;
+        document.getElementById('vpFollowingCount').textContent = _vgcR.filter(function(s){return s.exists();}).length;
         if (window._currentUser) {
           var followerIds = []; followersSnap.forEach(function(d) { followerIds.push(d.data().followerId); });
           var followingIds = []; followingSnap.forEach(function(d) { followingIds.push(d.data().followingId); });
@@ -3826,6 +3846,8 @@ document.addEventListener('DOMContentLoaded',function(){
     window._createUserWithEmailAndPassword = createUserWithEmailAndPassword;
     window._signInWithEmailAndPassword = signInWithEmailAndPassword;
     window._sendPasswordResetEmail = sendPasswordResetEmail;
+    window._updateProfile = updateProfile;
+    window._onAuthStateChanged = onAuthStateChanged;
 
     onAuthStateChanged(auth, async function(user) {
       window._currentUser = user;
@@ -3853,6 +3875,12 @@ document.addEventListener('DOMContentLoaded',function(){
         }
         if (profileSnap.exists()) {
           var pd = profileSnap.data();
+          window._myProfileName = pd.name || user.displayName || '';
+          if (pd.name) {
+            document.getElementById('authBtnText').textContent = pd.name.split(' ')[0];
+            var _at = document.getElementById('authAvatarText');
+            if (_at) _at.textContent = pd.name[0] ? pd.name[0].toUpperCase() : '?';
+          }
           if (document.getElementById('profileFirstName')) document.getElementById('profileFirstName').value = pd.firstName || (pd.name ? pd.name.split(' ')[0] : '');
           if (document.getElementById('profileLastName')) document.getElementById('profileLastName').value = pd.lastName || (pd.name && pd.name.indexOf(' ')>-1 ? pd.name.split(' ').slice(1).join(' ') : '');
           if (document.getElementById('profileFirstName')) document.getElementById('profileFirstName').value = pd.firstName || (pd.name ? pd.name.split(' ')[0] : '');
@@ -3884,5 +3912,6 @@ document.addEventListener('DOMContentLoaded',function(){
 
     console.log('✅ Firebase ready!');
   </script>
+  <div id="_toast" style="position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:#1a1a1a;color:#fff;padding:10px 20px;border-radius:999px;font-size:13px;font-weight:600;z-index:9999;opacity:0;transition:opacity .3s;pointer-events:none"></div>
 </body>
 </html>
