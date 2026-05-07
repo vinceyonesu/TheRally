@@ -2328,6 +2328,7 @@
           }
           var playersCount = s.players ? s.players.length : 1;
           var isOwner = window._currentUser && window._currentUser.uid === s.uid;
+          var hasJoined = window._currentUser && s.players && s.players.some(function(p){ return p.uid === window._currentUser.uid; });
           var avatarHtml = '<div style="position:relative;flex-shrink:0;display:inline-block">' + (s.photo ? '<img src="' + s.photo + '" style="width:44px;height:44px;border-radius:50%;object-fit:cover;border:2px solid #e8e8e8"/>' : '<div style="width:44px;height:44px;border-radius:50%;background:#1a6b3c;display:flex;align-items:center;justify-content:center;font-size:16px;color:#fff;font-weight:700">' + (s.name ? s.name[0].toUpperCase() : '?') + '</div>')    + '</div>';
           var verifiedBadge = s.phoneVerified ? '<span style="background:#e6f9ee;color:#1a6b3c;font-size:10px;font-weight:600;padding:2px 8px;border-radius:999px;margin-left:6px">✅ Verified</span>' : '';
           var socialLinks = '';
@@ -2347,7 +2348,7 @@
               playerAvatars += '<div onclick="' + (pUid2 ? 'viewProfile(\'' + pUid2 + '\')' : '') + '" title="' + pName + '" style="width:26px;height:26px;border-radius:50%;background:var(--slam-primary);display:flex;align-items:center;justify-content:center;font-size:10px;color:#fff;font-weight:700;border:2px solid #fff;margin-right:-5px;cursor:' + (pUid2?'pointer':'default') + '">' + pName[0].toUpperCase() + '</div>';
             }
           });
-          list.innerHTML += '<div style="background:#ffffff;border:1px solid #ebebeb;border-radius:16px;padding:16px 18px;margin-bottom:12px;transition:box-shadow 0.2s" onmouseover="this.style.boxShadow=\'0 4px 20px rgba(0,0,0,0.08)\'" onmouseout="this.style.boxShadow=\'none\'"><div style="display:flex;align-items:flex-start;gap:12px">' + avatarHtml + '<div style="flex:1;min-width:0"><div style="display:flex;align-items:center;flex-wrap:wrap;gap:4px;margin-bottom:4px"><span style="font-size:14px;font-weight:700;color:#1a1a1a;cursor:pointer;text-decoration:underline" onclick="viewProfile(\'' + s.uid + '\')">' + s.name + '</span>' + verifiedBadge + '</div><div style="font-size:12px;color:#888;margin-bottom:6px"><span style="background:' + (isToday ? '#e6f9ee' : '#f0f0f0') + ';color:' + (isToday ? '#1a6b3c' : '#555') + ';font-weight:600;padding:2px 8px;border-radius:999px;font-size:11px">' + (isToday ? 'Today' : dateStr) + '</span> at <strong>' + timeStr + '</strong>' + distanceBadge + '</div><div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px"><span style="background:#f0f0f0;color:#555;font-size:11px;font-weight:500;padding:3px 10px;border-radius:999px">' + s.type + '</span><span style="background:#f0f0f0;color:#555;font-size:11px;font-weight:500;padding:3px 10px;border-radius:999px">' + s.skill + '</span>' + (s.courtName ? '<span style="background:#e6f9ee;color:#1a6b3c;font-size:11px;font-weight:500;padding:3px 10px;border-radius:999px">📍 ' + s.courtName + '</span>' : '') + '</div>' + (s.gallery && s.gallery.length > 0 ? '<div style="display:flex;gap:6px;margin-bottom:8px">' + s.gallery.map(function(url) { return '<img src="' + url + '" style="width:60px;height:60px;border-radius:8px;object-fit:cover;border:1px solid #e8e8e8;cursor:pointer" onclick="showPhotoModal(\'' + url + '\')">'; }).join('') + '</div>' : '') + (socialLinks ? '<div style="margin-bottom:8px">' + socialLinks + '</div>' : '') + '<div style="display:flex;align-items:center;justify-content:space-between"><div style="display:flex;align-items:center;gap:4px">' + playerAvatars + '<span style="font-size:11px;color:#888;margin-left:10px">' + playersCount + ' player' + (playersCount !== 1 ? 's' : '') + ' going</span></div>' + (isOwner ? '<div style="display:flex;gap:6px"><span style="font-size:11px;color:#1a6b3c;font-weight:600;align-self:center">Your session</span><button onclick="deleteSession(\'' + s.id + '\', null)" style="background:#fdecea;color:#c0392b;border:1px solid #f5c6c6;border-radius:8px;padding:7px 12px;font-size:11px;font-weight:600;font-family:\'Plus Jakarta Sans\',sans-serif;cursor:pointer">Cancel</button></div>' : '<button onclick="joinSessionFromNearby(\'' + s.id + '\')" style="background:#e6f9ee;color:#1a6b3c;border:1px solid #1a6b3c;border-radius:8px;padding:5px 14px;font-size:12px;font-weight:600;font-family:\'Plus Jakarta Sans\',sans-serif;cursor:pointer">I\'m In!</button>') + '</div>'
+          list.innerHTML += '<div style="background:#ffffff;border:1px solid #ebebeb;border-radius:16px;padding:16px 18px;margin-bottom:12px;transition:box-shadow 0.2s" onmouseover="this.style.boxShadow=\'0 4px 20px rgba(0,0,0,0.08)\'" onmouseout="this.style.boxShadow=\'none\'"><div style="display:flex;align-items:flex-start;gap:12px">' + avatarHtml + '<div style="flex:1;min-width:0"><div style="display:flex;align-items:center;flex-wrap:wrap;gap:4px;margin-bottom:4px"><span style="font-size:14px;font-weight:700;color:#1a1a1a;cursor:pointer;text-decoration:underline" onclick="viewProfile(\'' + s.uid + '\')">' + s.name + '</span>' + verifiedBadge + '</div><div style="font-size:12px;color:#888;margin-bottom:6px"><span style="background:' + (isToday ? '#e6f9ee' : '#f0f0f0') + ';color:' + (isToday ? '#1a6b3c' : '#555') + ';font-weight:600;padding:2px 8px;border-radius:999px;font-size:11px">' + (isToday ? 'Today' : dateStr) + '</span> at <strong>' + timeStr + '</strong>' + distanceBadge + '</div><div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px"><span style="background:#f0f0f0;color:#555;font-size:11px;font-weight:500;padding:3px 10px;border-radius:999px">' + s.type + '</span><span style="background:#f0f0f0;color:#555;font-size:11px;font-weight:500;padding:3px 10px;border-radius:999px">' + s.skill + '</span>' + (s.courtName ? '<span style="background:#e6f9ee;color:#1a6b3c;font-size:11px;font-weight:500;padding:3px 10px;border-radius:999px">📍 ' + s.courtName + '</span>' : '') + '</div>' + (s.gallery && s.gallery.length > 0 ? '<div style="display:flex;gap:6px;margin-bottom:8px">' + s.gallery.map(function(url) { return '<img src="' + url + '" style="width:60px;height:60px;border-radius:8px;object-fit:cover;border:1px solid #e8e8e8;cursor:pointer" onclick="showPhotoModal(\'' + url + '\')">'; }).join('') + '</div>' : '') + (socialLinks ? '<div style="margin-bottom:8px">' + socialLinks + '</div>' : '') + '<div style="display:flex;align-items:center;justify-content:space-between"><div style="display:flex;align-items:center;gap:4px">' + playerAvatars + '<span style="font-size:11px;color:#888;margin-left:10px">' + playersCount + ' player' + (playersCount !== 1 ? 's' : '') + ' going</span></div>' + (isOwner ? '<div style="display:flex;gap:6px"><span style="font-size:11px;color:#1a6b3c;font-weight:600;align-self:center">Your session</span><button onclick="deleteSession(\'' + s.id + '\', null)" style="background:#fdecea;color:#c0392b;border:1px solid #f5c6c6;border-radius:8px;padding:7px 12px;font-size:11px;font-weight:600;font-family:\'Plus Jakarta Sans\',sans-serif;cursor:pointer">Cancel</button></div>' : (hasJoined ? '<button onclick="leaveSessionFromNearby(\'' + s.id + '\')" style="background:#fdecea;color:#c0392b;border:1px solid #f5c6c6;border-radius:8px;padding:5px 14px;font-size:12px;font-weight:600;font-family:\'Plus Jakarta Sans\',sans-serif;cursor:pointer">✓ Leave</button>' : '<button onclick="joinSessionFromNearby(\'' + s.id + '\')" style="background:#e6f9ee;color:#1a6b3c;border:1px solid #1a6b3c;border-radius:8px;padding:5px 14px;font-size:12px;font-weight:600;font-family:\'Plus Jakarta Sans\',sans-serif;cursor:pointer">I\'m In!</button>')) + '</div>'
             + (s.note ? '<div style="margin-top:8px;padding:8px 12px;background:rgba(0,0,0,0.03);border-radius:8px;font-size:12px;color:#555;border-left:3px solid #1a6b3c">' + s.note + '</div>' : '')
             + (s.courtLat ? '<a href="https://www.google.com/maps/dir/?api=1&destination=' + s.courtLat + ',' + s.courtLng + '" target="_blank" style="margin-top:8px;display:flex;align-items:center;justify-content:center;gap:6px;font-size:12px;font-weight:600;color:#1a6b3c;text-decoration:none;background:#e6f9ee;padding:9px;border-radius:8px;border:1px solid #1a6b3c">📍 Get Directions to Court</a>' : '')
             + '</div></div></div>';
@@ -2451,15 +2452,37 @@
     window.joinSessionFromNearby = async function(sessionId) {
       if (!window._currentUser) { alert('Please sign in to join a session!'); handleAuthClick(); return; }
       try {
-        var sRef2 = window._fbDoc(window._db,'sessions',sessionId);
-        var sSnap2 = await window._fbGetDoc(sRef2);
-        var sOwner2 = sSnap2.exists() ? sSnap2.data().uid : null;
-        var sCourt2 = sSnap2.exists() ? (sSnap2.data().courtName||'a court') : 'a court';
-              } catch(e){}
-      try {
-        await window._fbUpdateDoc(window._fbDoc(window._db, 'sessions', sessionId), { players: window._fbArrayUnion({ name: window._currentUser.displayName || 'Player', uid: window._currentUser.uid, photo: window._currentUser.photoURL || '' }) });
+        var _pName = window._myProfileName || window._currentUser.displayName || 'Player';
+        await window._fbUpdateDoc(window._fbDoc(window._db, 'sessions', sessionId), {
+          players: window._fbArrayUnion({ name: _pName, uid: window._currentUser.uid, photo: window._currentUser.photoURL || '' })
+        });
         loadNearbySessions();
-      } catch (err) { console.log('Error joining session:', err); alert('Could not join session. Try again.'); }
+        // Refresh calendar if open
+        if (document.getElementById('calendarPage') && document.getElementById('calendarPage').style.display !== 'none') {
+          loadCalendarSessions();
+        }
+        // Show toast
+        var t=document.getElementById('_toast');
+        if(t){t.textContent="✅ You're in! Added to your calendar";t.style.opacity='1';setTimeout(function(){t.style.opacity='0';},2500);}
+      } catch (err) { console.log('Error joining session:', err); alert('Could not join. Check Firebase rules allow update on sessions.'); }
+    };
+
+    window.leaveSessionFromNearby = async function(sessionId) {
+      if (!window._currentUser) return;
+      if (!confirm('Leave this session?')) return;
+      try {
+        var _pName = window._myProfileName || window._currentUser.displayName || 'Player';
+        await window._fbUpdateDoc(window._fbDoc(window._db, 'sessions', sessionId), {
+          players: window._fbArrayRemove({ name: _pName, uid: window._currentUser.uid, photo: window._currentUser.photoURL || '' })
+        });
+        loadNearbySessions();
+        // Refresh calendar if open
+        if (document.getElementById('calendarPage') && document.getElementById('calendarPage').style.display !== 'none') {
+          loadCalendarSessions();
+        }
+        var t=document.getElementById('_toast');
+        if(t){t.textContent="You've left the session";t.style.opacity='1';setTimeout(function(){t.style.opacity='0';},2500);}
+      } catch (err) { console.log('Error leaving session:', err); alert('Could not leave session. Try again.'); }
     };
 
     // ── PLAYER SEARCH ──
